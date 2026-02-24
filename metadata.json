@@ -1,0 +1,5 @@
+{
+  "name": "Meu Controle Financeiro",
+  "description": "Um aplicativo completo de controle financeiro pessoal com análise de IA, relatórios em PDF e integração com Firebase.",
+  "requestFramePermissions": []
+}
