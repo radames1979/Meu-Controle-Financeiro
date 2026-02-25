@@ -1432,6 +1432,58 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile }: any)
     };
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+    useEffect(() => {
+        if ('Notification' in window) {
+            setNotificationsEnabled(Notification.permission === 'granted');
+        }
+    }, []);
+
+    const requestNotificationPermission = async () => {
+        if (!('Notification' in window)) return;
+        const permission = await Notification.requestPermission();
+        setNotificationsEnabled(permission === 'granted');
+        if (permission === 'granted') {
+            toast.success('Notificações ativadas!');
+        }
+    };
+
+    const checkUpcomingBillsNotifications = (bills: any[]) => {
+        if (Notification.permission !== 'granted') return;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const threeDaysFromNow = new Date();
+        threeDaysFromNow.setDate(today.getDate() + 3);
+
+        bills.forEach(bill => {
+            const billDate = new Date(bill.date + 'T00:00:00');
+            if (billDate >= today && billDate <= threeDaysFromNow && bill.status !== STATUSES.PAID) {
+                const daysLeft = Math.ceil((billDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                const title = daysLeft === 0 ? 'Conta vence HOJE!' : `Conta vence em ${daysLeft} dias`;
+                
+                new Notification(title, {
+                    body: `${bill.description}: ${bill.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+                    icon: '/favicon.ico' // Assumindo que existe
+                });
+            }
+        });
+    };
+
+    useEffect(() => {
+        if (upcomingBills.length > 0 && notificationsEnabled) {
+            // Evitar múltiplas notificações na mesma sessão
+            const lastCheck = sessionStorage.getItem('last_bill_check');
+            const todayStr = new Date().toDateString();
+            
+            if (lastCheck !== todayStr) {
+                checkUpcomingBillsNotifications(upcomingBills);
+                sessionStorage.setItem('last_bill_check', todayStr);
+            }
+        }
+    }, [upcomingBills, notificationsEnabled]);
 
     const filteredMonthlyTransactions = useMemo(() => {
         return monthlyData.filtered.filter(t => 
@@ -1465,6 +1517,15 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile }: any)
             <header className="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-10">
                 <h1 className="text-xl font-bold flex items-center"><DollarSign className="text-cyan-500 mr-2" /> Meu Controle Financeiro</h1>
                 <div className="flex gap-2">
+                    {!notificationsEnabled && 'Notification' in window && (
+                        <button 
+                            onClick={requestNotificationPermission} 
+                            className="p-2 text-amber-500 hover:bg-amber-50 rounded-lg animate-pulse" 
+                            title="Ativar Notificações"
+                        >
+                            <Bell size={20} />
+                        </button>
+                    )}
                     <button onClick={() => ui.setIsReportModalOpen(true)} className="p-2 hover:bg-slate-100 rounded-lg" title="Gerar PDF"><Printer size={20} /></button>
                     <button onClick={() => ui.setIsBatchModalOpen(true)} className="bg-teal-500 text-white px-4 py-2 rounded-lg hidden sm:flex items-center gap-2"><Layers size={18} /> Lote</button>
                     <button onClick={() => ui.handleOpenModal()} className="bg-cyan-500 text-white px-4 py-2 rounded-lg flex items-center gap-2"><PlusCircle size={18} /> Nova</button>
