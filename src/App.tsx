@@ -14,7 +14,7 @@ import {
     signInWithEmailAndPassword,
     signOut
 } from 'firebase/auth';
-import { getFirestore, doc, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, collection, writeBatch, getDocs, query, where } from 'firebase/firestore';
+import { getFirestore, doc, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, collection, writeBatch, getDocs, getDoc, query, where } from 'firebase/firestore';
 
 // --- Configurações Iniciais ---
 const YOUR_CONTACT_EMAIL = "messi@bol.com.br"; 
@@ -22,6 +22,22 @@ const YOUR_CONTACT_EMAIL = "messi@bol.com.br";
 const INITIAL_CATEGORIES = {
     expense: ['Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Compras', 'Impostos', 'Empréstimos', 'Taxas bancárias', 'Outros'],
     income: ['Salário', 'Freelance', 'Investimentos', 'Presente', 'Outros']
+};
+
+const MOCK_TRANSACTIONS = [
+    { id: 'demo-1', type: 'income', description: 'Salário Mensal (Demo)', amount: 5000, category: 'Salário', date: new Date().toISOString().split('T')[0], status: 'paid' },
+    { id: 'demo-2', type: 'expense', description: 'Aluguel (Demo)', amount: 1200, category: 'Moradia', date: new Date().toISOString().split('T')[0], status: 'paid' },
+    { id: 'demo-3', type: 'expense', description: 'Supermercado (Demo)', amount: 450, category: 'Alimentação', date: new Date().toISOString().split('T')[0], status: 'waiting' },
+    { id: 'demo-4', type: 'expense', description: 'Internet (Demo)', amount: 100, category: 'Outros', date: new Date().toISOString().split('T')[0], status: 'confirmed' },
+    { id: 'demo-5', type: 'income', description: 'Freelance (Demo)', amount: 800, category: 'Freelance', date: new Date().toISOString().split('T')[0], status: 'paid' },
+];
+
+const APP_CONFIG = {
+    adminEmail: 'messi@bol.com.br',
+    supportEmail: 'messi@bol.com.br',
+    supportWhatsapp: '47992126402',
+    pixKey: 'messi@bol.com.br',
+    defaultPrice: 9.99
 };
 const ACCOUNT_TYPES = ['Carteira', 'Conta Corrente', 'Cartão de Crédito', 'Poupança'];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4560', '#775DD0', '#546E7A', '#26a69a'];
@@ -41,7 +57,7 @@ const DENSITY_CLASSES = {
 };
 
 // --- Componente da Landing Page ---
-const LandingPage = ({ onLogin, onRegister }: { onLogin: any, onRegister: any }) => {
+const LandingPage = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: any, onDemo: any }) => {
     const authSectionRef = useRef<HTMLDivElement>(null);
 
     const scrollToAuth = () => {
@@ -57,12 +73,20 @@ const LandingPage = ({ onLogin, onRegister }: { onLogin: any, onRegister: any })
                 <p className="mt-4 text-lg md:text-xl text-slate-600 max-w-2xl">
                     Organize suas despesas, planeje seus orçamentos e alcance suas metas com uma ferramenta simples e poderosa.
                 </p>
-                <button 
-                    onClick={scrollToAuth}
-                    className="mt-8 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-lg"
-                >
-                    Comece Agora
-                </button>
+                <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                    <button 
+                        onClick={scrollToAuth}
+                        className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-lg"
+                    >
+                        Comece Agora
+                    </button>
+                    <button 
+                        onClick={onDemo}
+                        className="bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-md flex items-center gap-2"
+                    >
+                        <EyeOff size={20} /> Experimentar Demo
+                    </button>
+                </div>
             </section>
 
             {/* Sponsors Section */}
@@ -87,7 +111,7 @@ const LandingPage = ({ onLogin, onRegister }: { onLogin: any, onRegister: any })
                          <h2 className="text-3xl font-bold text-slate-700 mb-2">Segurança em Primeiro Lugar</h2>
                          <p className="text-slate-600">Seus dados são criptografados e jamais compartilhados. Sua privacidade é nossa prioridade.</p>
                     </div>
-                    <AuthForm onLogin={onLogin} onRegister={onRegister} />
+                    <AuthForm onLogin={onLogin} onRegister={onRegister} onDemo={onDemo} />
                 </div>
             </section>
 
@@ -107,7 +131,7 @@ const LandingPage = ({ onLogin, onRegister }: { onLogin: any, onRegister: any })
 
 
 // --- Componente do Formulário de Autenticação ---
-const AuthForm = ({ onLogin, onRegister }: { onLogin: any, onRegister: any }) => {
+const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: any, onDemo: any }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -173,6 +197,16 @@ const AuthForm = ({ onLogin, onRegister }: { onLogin: any, onRegister: any }) =>
                         {isLogin ? 'Entrar' : 'Cadastrar'}
                     </button>
                 </form>
+
+                <div className="relative py-6">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-slate-400">Ou experimente</span></div>
+                </div>
+
+                <button onClick={onDemo} className="w-full bg-slate-50 text-slate-600 py-3 rounded-lg font-bold hover:bg-slate-100 transition flex items-center justify-center gap-2 border border-slate-200">
+                    <EyeOff size={18} /> Modo Demo (Visitante)
+                </button>
+
                 <p className="text-center text-sm text-slate-500 mt-6">
                     {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}
                     <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="font-semibold text-cyan-500 hover:text-cyan-600 ml-1">
@@ -185,7 +219,7 @@ const AuthForm = ({ onLogin, onRegister }: { onLogin: any, onRegister: any }) =>
 };
 
 // --- Componente da Página de Assinatura ---
-const SubscriptionPage = ({ user, onSubscribe, onLogout }: { user: any, onSubscribe: any, onLogout: any }) => {
+const SubscriptionPage = ({ user, onSubscribe, onLogout, config }: { user: any, onSubscribe: any, onLogout: any, config: any }) => {
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col items-center p-4">
             <header className="w-full max-w-5xl mx-auto py-4 flex justify-between items-center">
@@ -195,30 +229,404 @@ const SubscriptionPage = ({ user, onSubscribe, onLogout }: { user: any, onSubscr
                  </button>
             </header>
             <main className="flex-grow flex flex-col justify-center items-center text-center">
-                <div className="bg-white rounded-lg shadow-2xl p-8 md:p-12 max-w-2xl">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 max-w-2xl border border-slate-200">
                     <Star className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                    <h2 className="text-3xl font-bold text-slate-800">Desbloqueie o Acesso Total</h2>
+                    <h2 className="text-3xl font-bold text-slate-800">Ative seu Acesso</h2>
                     <p className="mt-4 text-slate-600">
-                        Sua conta foi criada com sucesso! Para ter acesso vitalício ao painel, faça um pagamento único e seguro.
+                        Para liberar seu painel financeiro vitalício, realize o pagamento único via PIX. A liberação é processada pelo administrador.
                     </p>
-                    <div className="mt-8 border-2 border-cyan-500 rounded-lg p-6">
-                        <h3 className="text-xl font-bold text-cyan-600">Acesso Vitalício</h3>
-                        <p className="text-4xl font-extrabold text-slate-800 my-2">R$ 9,90<span className="text-base font-medium text-slate-500"> (pagamento único)</span></p>
-                        <ul className="text-left space-y-2 text-slate-600 my-6">
-                            <li className="flex items-center"><CheckCircle size={16} className="text-green-500 mr-2" /> Acesso para sempre, sem mensalidades</li>
-                            <li className="flex items-center"><CheckCircle size={16} className="text-green-500 mr-2" /> Lançamentos ilimitados</li>
-                            <li className="flex items-center"><CheckCircle size={16} className="text-green-500 mr-2" /> Relatórios anuais e mensais</li>
-                            <li className="flex items-center"><CheckCircle size={16} className="text-green-500 mr-2" /> Todas as futuras atualizações</li>
+                    
+                    <div className="mt-8 bg-cyan-50 border-2 border-cyan-500 rounded-2xl p-6">
+                        <h3 className="text-xl font-bold text-cyan-600 uppercase tracking-wider text-sm">Acesso Vitalício</h3>
+                        <p className="text-5xl font-extrabold text-slate-800 my-4">R$ {config.defaultPrice.toFixed(2).replace('.', ',')}</p>
+                        
+                        <div className="bg-white p-4 rounded-xl border border-cyan-100 mb-6 flex flex-col items-center">
+                            <p className="text-xs text-slate-400 uppercase font-bold mb-2">Chave PIX (E-mail)</p>
+                            <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 w-full justify-between">
+                                <code className="text-cyan-700 font-mono">{config.pixKey}</code>
+                                <button onClick={() => { navigator.clipboard.writeText(config.pixKey); toast.success('Chave copiada!'); }} className="text-cyan-500 hover:text-cyan-600"><Copy size={18} /></button>
+                            </div>
+                        </div>
+
+                        <ul className="text-left space-y-3 text-slate-600 mb-8">
+                            <li className="flex items-center gap-2 text-sm"><CheckCircle size={18} className="text-emerald-500" /> Sem mensalidades, pagamento único</li>
+                            <li className="flex items-center gap-2 text-sm"><CheckCircle size={18} className="text-emerald-500" /> Acesso total a gráficos e relatórios</li>
                         </ul>
-                        <button 
-                            onClick={onSubscribe}
-                            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition-transform duration-200 hover:scale-105"
-                        >
-                            Liberar Acesso (Simulação)
-                        </button>
+
+                        <div className="grid grid-cols-1 gap-4">
+                            <button onClick={onLogout} className="flex items-center justify-center gap-2 bg-white text-slate-600 border border-slate-200 py-3 rounded-xl font-bold hover:bg-slate-50 transition">
+                                <LogOut size={20} /> Sair e aguardar liberação
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex flex-col items-center gap-2">
+                        <p className="text-xs text-slate-400">Dúvidas? Suporte rápido:</p>
+                        <div className="flex gap-4">
+                            <a href={`https://wa.me/${config.supportWhatsapp}`} target="_blank" rel="noreferrer" className="text-emerald-500 hover:underline text-sm flex items-center gap-1 font-bold"><Check size={14} /> WhatsApp {config.supportWhatsapp}</a>
+                        </div>
                     </div>
                 </div>
             </main>
+        </div>
+    );
+};
+
+const UserManual = ({ onClose }: { onClose: () => void }) => {
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-cyan-500 text-white">
+                    <h2 className="text-xl font-bold flex items-center gap-2"><HelpCircle /> Manual do Usuário</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition"><X /></button>
+                </div>
+                <div className="p-8 overflow-y-auto space-y-8">
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><PlusCircle className="text-cyan-500" /> 1. Primeiros Passos</h3>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                            Para começar, use o botão <strong>"Nova Transação"</strong> no topo da tela. Você pode registrar tanto Receitas (dinheiro que entra) quanto Despesas (dinheiro que sai). 
+                            Escolha uma categoria e defina se o pagamento já foi realizado ou se está pendente.
+                        </p>
+                    </section>
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><Calendar className="text-cyan-500" /> 2. Calendário e Vencimentos</h3>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                            O widget de <strong>"Próximas Contas"</strong> mostra tudo o que vence nos próximos dias. Ative as notificações no ícone de sino para receber alertas automáticos e evitar multas.
+                        </p>
+                    </section>
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><PieChartIcon className="text-cyan-500" /> 3. Gráficos e Saúde Financeira</h3>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                            Acompanhe sua <strong>Saúde Financeira</strong> no widget lateral. Ele calcula sua taxa de poupança mensal. Se estiver acima de 20%, você está em uma excelente posição!
+                        </p>
+                    </section>
+                    <section>
+                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><Settings className="text-cyan-500" /> 4. Personalização</h3>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                            Nas <strong>Configurações</strong>, você pode ajustar a densidade do layout (mais compacto ou mais espaçoso), gerenciar categorias e definir orçamentos mensais para cada categoria.
+                        </p>
+                    </section>
+                </div>
+                <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
+                    <button onClick={onClose} className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-cyan-600 transition">Entendi!</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
+    const [users, setUsers] = useState<any[]>([]);
+    const [whitelist, setWhitelist] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [appStats, setAppStats] = useState({ totalUsers: 0, activeLicenses: 0 });
+    const [config, setConfig] = useState(APP_CONFIG);
+    const [activeTab, setActiveTab] = useState<'users' | 'settings' | 'whitelist'>('users');
+    const [newWhitelistEmail, setNewWhitelistEmail] = useState('');
+    const appId = 'meu-controle-financeiro';
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Tenta buscar usuários da coleção padrão de artefatos
+                const usersCol = collection(db, `artifacts/${appId}/users`);
+                const snapshot = await getDocs(usersCol);
+                
+                const usersList: any[] = [];
+                for (const userDoc of snapshot.docs) {
+                    try {
+                        const profileRef = doc(db, `artifacts/${appId}/users/${userDoc.id}/profile/userProfile`);
+                        const profileSnap = await getDoc(profileRef);
+                        if (profileSnap.exists()) {
+                            usersList.push({ id: userDoc.id, ...profileSnap.data() });
+                        }
+                    } catch (e) {
+                        // Ignora usuários que não temos permissão de ler o perfil individual
+                    }
+                }
+
+                setUsers(usersList);
+                setAppStats({
+                    totalUsers: usersList.length,
+                    activeLicenses: usersList.filter((u: any) => u.licenseStatus === 'active').length
+                });
+
+                // Fetch Config from Server API
+                const configRes = await fetch('/api/admin/config');
+                if (configRes.ok) {
+                    const configData = await configRes.json();
+                    setConfig(configData);
+                }
+
+                // Fetch Whitelist from Server API
+                const whitelistRes = await fetch('/api/admin/whitelist');
+                if (whitelistRes.ok) {
+                    const whitelistData = await whitelistRes.json();
+                    setWhitelist(whitelistData.emails || []);
+                }
+            } catch (err) {
+                console.error("Erro ao buscar dados do admin:", err);
+                toast.error("Erro ao acessar dados. Verifique o servidor.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [db]);
+
+    const handleToggleLicense = async (user: any) => {
+        const newStatus = user.licenseStatus === 'active' ? 'pending' : 'active';
+        try {
+            const userProfileRef = doc(db, `artifacts/${appId}/users/${user.uid || user.id}/profile/userProfile`);
+            await updateDoc(userProfileRef, { licenseStatus: newStatus });
+            
+            setUsers(users.map(u => u.id === user.id ? { ...u, licenseStatus: newStatus } : u));
+            toast.success(`Usuário ${newStatus === 'active' ? 'ativado' : 'desativado'}`);
+        } catch (err) {
+            console.error("Erro ao atualizar licença:", err);
+            toast.error("Erro ao atualizar licença");
+        }
+    };
+
+    const handleUpdateConfig = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/admin/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config)
+            });
+            if (res.ok) {
+                toast.success("Configurações globais salvas no servidor!");
+            } else {
+                throw new Error();
+            }
+        } catch (err) {
+            console.error("Erro ao salvar config:", err);
+            toast.error("Erro ao salvar configurações no servidor.");
+        }
+    };
+
+    const handleAddToWhitelist = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newWhitelistEmail) return;
+        const updatedWhitelist = [...whitelist, newWhitelistEmail.toLowerCase()];
+        try {
+            const res = await fetch('/api/admin/whitelist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emails: updatedWhitelist })
+            });
+            if (res.ok) {
+                setWhitelist(updatedWhitelist);
+                setNewWhitelistEmail('');
+                toast.success("E-mail aprovado antecipadamente!");
+            } else {
+                throw new Error();
+            }
+        } catch (err) {
+            console.error("Erro ao salvar whitelist:", err);
+            toast.error("Erro ao atualizar lista branca no servidor.");
+        }
+    };
+
+    const handleRemoveFromWhitelist = async (email: string) => {
+        const updatedWhitelist = whitelist.filter(e => e !== email);
+        try {
+            const res = await fetch('/api/admin/whitelist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emails: updatedWhitelist })
+            });
+            if (res.ok) {
+                setWhitelist(updatedWhitelist);
+                toast.success("E-mail removido da aprovação prévia");
+            } else {
+                throw new Error();
+            }
+        } catch (err) {
+            console.error("Erro ao remover da whitelist:", err);
+            toast.error("Erro ao atualizar lista branca.");
+        }
+    };
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!confirm("Tem certeza que deseja excluir este usuário? Todos os dados serão perdidos.")) return;
+        try {
+            // No ambiente de artefatos, deletamos o perfil
+            const profileRef = doc(db, `artifacts/${appId}/users/${userId}/profile/userProfile`);
+            await deleteDoc(profileRef);
+            setUsers(users.filter(u => u.id !== userId));
+            toast.success("Usuário removido da lista");
+        } catch (err) {
+            console.error("Erro ao excluir usuário:", err);
+            toast.error("Erro ao excluir usuário");
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-800 text-white">
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-xl font-bold flex items-center gap-2"><ShieldCheck /> Admin</h2>
+                        <div className="flex bg-slate-700 p-1 rounded-lg">
+                            <button onClick={() => setActiveTab('users')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'users' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Usuários</button>
+                            <button onClick={() => setActiveTab('whitelist')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'whitelist' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Pré-Aprovar</button>
+                            <button onClick={() => setActiveTab('settings')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'settings' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Configurações</button>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition"><X /></button>
+                </div>
+                
+                <div className="p-8 overflow-y-auto">
+                    {activeTab === 'users' ? (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                                    <p className="text-slate-500 text-xs uppercase font-bold mb-1">Total de Usuários</p>
+                                    <p className="text-3xl font-black text-slate-800">{appStats.totalUsers}</p>
+                                </div>
+                                <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
+                                    <p className="text-emerald-600 text-xs uppercase font-bold mb-1">Licenças Ativas</p>
+                                    <p className="text-3xl font-black text-emerald-700">{appStats.activeLicenses}</p>
+                                </div>
+                                <div className="bg-cyan-50 p-6 rounded-2xl border border-cyan-100">
+                                    <p className="text-cyan-600 text-xs uppercase font-bold mb-1">Receita Potencial</p>
+                                    <p className="text-3xl font-black text-cyan-700">R$ {(appStats.activeLicenses * config.defaultPrice).toFixed(2)}</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+                                <table className="min-w-full divide-y divide-slate-200">
+                                    <thead className="bg-slate-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Usuário</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
+                                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-200">
+                                        {loading ? (
+                                            <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-400">Carregando...</td></tr>
+                                        ) : users.map(user => (
+                                            <tr key={user.id} className="hover:bg-slate-50 transition">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-slate-700">{user.email}</span>
+                                                        <span className="text-[10px] text-slate-400">ID: {user.id}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${user.licenseStatus === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                                                        {user.licenseStatus === 'active' ? 'Ativo' : 'Pendente'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right space-x-2">
+                                                    <button onClick={() => handleToggleLicense(user)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${user.licenseStatus === 'active' ? 'text-rose-500 hover:bg-rose-50' : 'text-emerald-500 hover:bg-emerald-50'}`}>
+                                                        {user.licenseStatus === 'active' ? 'Desativar' : 'Ativar'}
+                                                    </button>
+                                                    <button onClick={() => handleDeleteUser(user.id)} className="text-slate-400 hover:text-rose-500 p-1.5 transition"><Trash2 size={16} /></button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    ) : activeTab === 'whitelist' ? (
+                        <div className="max-w-2xl space-y-8">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-800 mb-4">Pré-Aprovar E-mails</h3>
+                                <p className="text-sm text-slate-500 mb-6">E-mails cadastrados aqui terão acesso liberado automaticamente assim que criarem a conta.</p>
+                                <form onSubmit={handleAddToWhitelist} className="flex gap-2">
+                                    <input 
+                                        type="email" 
+                                        required
+                                        value={newWhitelistEmail}
+                                        onChange={e => setNewWhitelistEmail(e.target.value)}
+                                        placeholder="email@cliente.com"
+                                        className="flex-1 rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                    />
+                                    <button type="submit" className="bg-emerald-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center gap-2">
+                                        <Plus size={20} /> Aprovar
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+                                <table className="min-w-full divide-y divide-slate-200">
+                                    <thead className="bg-slate-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">E-mail Pré-Aprovado</th>
+                                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-200">
+                                        {whitelist.length === 0 ? (
+                                            <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-400">Nenhum e-mail na lista branca.</td></tr>
+                                        ) : whitelist.map(email => (
+                                            <tr key={email} className="hover:bg-slate-50 transition">
+                                                <td className="px-6 py-4 text-sm font-medium text-slate-700">{email}</td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <button onClick={() => handleRemoveFromWhitelist(email)} className="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleUpdateConfig} className="max-w-2xl space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Preço da Licença (R$)</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01"
+                                        value={config.defaultPrice} 
+                                        onChange={e => setConfig({ ...config, defaultPrice: parseFloat(e.target.value) })}
+                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Chave PIX</label>
+                                    <input 
+                                        type="text" 
+                                        value={config.pixKey} 
+                                        onChange={e => setConfig({ ...config, pixKey: e.target.value })}
+                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">E-mail de Suporte</label>
+                                    <input 
+                                        type="email" 
+                                        value={config.supportEmail} 
+                                        onChange={e => setConfig({ ...config, supportEmail: e.target.value })}
+                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">WhatsApp de Suporte</label>
+                                    <input 
+                                        type="text" 
+                                        value={config.supportWhatsapp} 
+                                        onChange={e => setConfig({ ...config, supportWhatsapp: e.target.value })}
+                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                    />
+                                </div>
+                            </div>
+                            <div className="pt-6 border-t border-slate-100 flex justify-end">
+                                <button type="submit" className="bg-cyan-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-cyan-600 transition shadow-lg shadow-cyan-100">Salvar Alterações</button>
+                            </div>
+                        </form>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };
@@ -451,12 +859,12 @@ const Charts = ({ data, annualData, year }: any) => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[380px]">
                 <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                     <TrendingUp size={20} className="text-cyan-500" /> Fluxo de Caixa Anual ({year})
                 </h3>
-                <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={2}>
                         <AreaChart data={cashFlowData}>
                             <defs>
                                 <linearGradient id="colorReceitas" x1="0" y1="0" x2="0" y2="1">
@@ -483,12 +891,12 @@ const Charts = ({ data, annualData, year }: any) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[380px]">
                     <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                         <PieChartIcon size={20} className="text-cyan-500" /> Distribuição de Gastos
                     </h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={1}>
                             <PieChart>
                                 <Pie 
                                     data={data} 
@@ -515,12 +923,12 @@ const Charts = ({ data, annualData, year }: any) => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[380px]">
                     <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                         <Table size={20} className="text-cyan-500" /> Ranking de Categorias
                     </h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={1.5}>
                             <BarChart data={data.slice(0, 5)} layout="vertical" margin={{ left: 20 }}>
                                 <XAxis type="number" hide />
                                 <YAxis type="category" dataKey="name" width={100} stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
@@ -674,12 +1082,13 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange }: an
 
 // --- Custom Hooks (Lógica Refatorada) ---
 
-const useDataManagement = (db: any, userId: string) => {
-    const [transactions, setTransactions] = useState<any[]>([]);
+const useDataManagement = (db: any, userId: string, isDemo: boolean = false) => {
+    const [transactions, setTransactions] = useState<any[]>(isDemo ? MOCK_TRANSACTIONS : []);
     const [budgets, setBudgets] = useState<any>({});
     const [categories, setCategories] = useState(INITIAL_CATEGORIES);
 
     useEffect(() => {
+        if (isDemo) return;
         if (!db || !userId) return;
         const appId = 'meu-controle-financeiro';
         const settingsDocRef = doc(db, `artifacts/${appId}/users/${userId}/settings/userSettings`);
@@ -710,6 +1119,8 @@ const useDataManagement = (db: any, userId: string) => {
 
 const useUIManager = () => {
     const [view, setView] = useState('dashboard');
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [isAdminOpen, setIsAdminOpen] = useState(false);
     const [widgetOrder, setWidgetOrder] = useState(INITIAL_WIDGET_ORDER);
     const [layoutDensity, setLayoutDensity] = useState('normal');
     const [hideZeroRows, setHideZeroRows] = useState(false);
@@ -732,7 +1143,8 @@ const useUIManager = () => {
         collapsedWidgets, setCollapsedWidgets, isModalOpen, setIsModalOpen, isBatchModalOpen, setIsBatchModalOpen,
         isBudgetModalOpen, setIsBudgetModalOpen, isReportModalOpen, setIsReportModalOpen, isSettingsModalOpen,
         setIsSettingsModalOpen, editingTransaction, setEditingTransaction, drillDown, setDrillDown, deleteConfirmation,
-        setDeleteConfirmation, handleOpenModal, expenseGrouping, setExpenseGrouping, incomeGrouping, setIncomeGrouping
+        setDeleteConfirmation, handleOpenModal, expenseGrouping, setExpenseGrouping, incomeGrouping, setIncomeGrouping,
+        isHelpOpen, setIsHelpOpen, isAdminOpen, setIsAdminOpen
     };
 };
 
@@ -1297,8 +1709,8 @@ const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensi
     );
 };
 
-const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile }: any) => {
-    const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid);
+const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
+    const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid, isDemo);
     const ui = useUIManager();
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -1514,9 +1926,13 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile }: any)
 
     return (
         <div className="bg-slate-100 min-h-screen">
-            <header className="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-10">
+            <header className="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-50">
                 <h1 className="text-xl font-bold flex items-center"><DollarSign className="text-cyan-500 mr-2" /> Meu Controle Financeiro</h1>
                 <div className="flex gap-2">
+                    {user.email === APP_CONFIG.adminEmail && (
+                        <button onClick={() => ui.setIsAdminOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg" title="Painel Admin"><ShieldCheck size={20} /></button>
+                    )}
+                    <button onClick={() => ui.setIsHelpOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg" title="Manual do Usuário"><HelpCircle size={20} /></button>
                     {!notificationsEnabled && 'Notification' in window && (
                         <button 
                             onClick={requestNotificationPermission} 
@@ -1534,6 +1950,18 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile }: any)
                 </div>
             </header>
             <main className="container mx-auto p-4 space-y-6">
+                {isDemo && (
+                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-amber-100 p-2 rounded-lg text-amber-600"><EyeOff size={20} /></div>
+                            <div>
+                                <p className="text-amber-800 font-bold text-sm">Você está no Modo Demo</p>
+                                <p className="text-amber-700 text-xs">Os dados são fictícios e não serão salvos permanentemente.</p>
+                            </div>
+                        </div>
+                        <button onClick={onLogout} className="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition">Criar Minha Conta</button>
+                    </div>
+                )}
                 <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-lg shadow gap-4">
                     <div className="flex items-center gap-4">
                         <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 hover:bg-slate-100 rounded-full"><ArrowLeft /></button>
@@ -1623,6 +2051,8 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile }: any)
             {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} />}
             {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} />}
             {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} />}
+            {ui.isAdminOpen && <AdminPanel db={db} onClose={() => ui.setIsAdminOpen(false)} />}
+            {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
             <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} date={ui.drillDown.date} onStatusChange={handleStatusChange} />
             <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
         </div>
@@ -1635,6 +2065,23 @@ export default function App() {
     const [db, setDb] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [userProfile, setUserProfile] = useState<any>(null);
+    const [isDemo, setIsDemo] = useState(false);
+    const [appConfig, setAppConfig] = useState(APP_CONFIG);
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const res = await fetch('/api/admin/config');
+                if (res.ok) {
+                    const data = await res.json();
+                    setAppConfig(data);
+                }
+            } catch (e) {
+                console.log("Servidor offline ou erro ao buscar config.");
+            }
+        };
+        fetchConfig();
+    }, []);
 
     useEffect(() => {
         const firebaseConfig = {
@@ -1654,15 +2101,20 @@ export default function App() {
         setDb(dbInstance);
 
         const unsubscribe = onAuthStateChanged(authInstance, (user) => {
-            setUser(user);
-            if (!user) {
-                setUserProfile(null);
-                setIsLoading(false);
+            if (user) {
+                setUser(user);
+                setIsDemo(false);
+            } else {
+                setUser(null);
+                if (!isDemo) {
+                    setUserProfile(null);
+                    setIsLoading(false);
+                }
             }
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [isDemo]);
 
     useEffect(() => {
         if (user && db) {
@@ -1672,7 +2124,13 @@ export default function App() {
                 if (docSnap.exists()) {
                     setUserProfile(docSnap.data());
                 } else {
-                    setUserProfile({ subscriptionStatus: 'inactive', tutorialCompleted: false });
+                    const initialProfile = { 
+                        licenseStatus: user.email === APP_CONFIG.adminEmail ? 'active' : 'pending', 
+                        tutorialCompleted: false,
+                        email: user.email 
+                    };
+                    setUserProfile(initialProfile);
+                    setDoc(profileDocRef, initialProfile);
                 }
                 setIsLoading(false);
             });
@@ -1687,23 +2145,54 @@ export default function App() {
         const user = userCredential.user;
         const appId = 'meu-controle-financeiro';
         const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
-        await setDoc(profileDocRef, {
+        
+        // Check Whitelist from Server API
+        let isPreApproved = false;
+        try {
+            const res = await fetch('/api/admin/whitelist');
+            if (res.ok) {
+                const data = await res.json();
+                const whitelist = data.emails || [];
+                isPreApproved = whitelist.includes(email.toLowerCase());
+            }
+        } catch (e) {
+            console.log("Whitelist não disponível no servidor.");
+        }
+
+        const initialProfile = {
             email: user.email,
+            uid: user.uid,
             createdAt: new Date().toISOString(),
-            subscriptionStatus: 'inactive',
+            licenseStatus: (user.email === APP_CONFIG.adminEmail || isPreApproved) ? 'active' : 'pending',
             tutorialCompleted: false
-        });
+        };
+
+        await setDoc(profileDocRef, initialProfile);
         return userCredential;
     };
 
     const handleLogout = () => {
+        if (isDemo) {
+            setIsDemo(false);
+            setUserProfile(null);
+            return;
+        }
         signOut(auth).then(() => {
             setUserProfile(null);
             toast.success('Você saiu com sucesso!');
         });
     };
 
+    const handleDemoMode = () => {
+        setIsDemo(true);
+        setUser({ email: 'visitante@demo.com', uid: 'demo-user' });
+        setUserProfile({ licenseStatus: 'active', tutorialCompleted: true, isDemo: true });
+        setIsLoading(false);
+        toast.success('Entrando no Modo Demo...');
+    };
+
     const handleUpdateProfile = async (dataToUpdate: any) => {
+        if (isDemo) return;
         if (user && db) {
             const appId = 'meu-controle-financeiro';
             const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
@@ -1717,12 +2206,11 @@ export default function App() {
     };
 
     const handleSubscribe = async () => {
-        if (user && db) {
-            const appId = 'meu-controle-financeiro';
-            const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
-            await setDoc(profileDocRef, { subscriptionStatus: 'active' }, { merge: true });
-            toast.success('Assinatura ativada com sucesso!');
+        if (isDemo) {
+            toast.error("Você está no modo demo. Crie uma conta para assinar.");
+            return;
         }
+        toast.success('Solicitação enviada! Fale com o suporte para ativar.');
     };
 
     if (isLoading || (user && !userProfile)) {
@@ -1735,14 +2223,14 @@ export default function App() {
         );
     }
 
-    if (!user) {
-        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} />;
+    if (!user && !isDemo) {
+        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} />;
     }
 
-    if (userProfile.subscriptionStatus === 'active') {
+    if (userProfile.licenseStatus === 'active' || user.email === APP_CONFIG.adminEmail) {
         return (
             <>
-                <DashboardApp user={user} db={db} onLogout={handleLogout} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} />
+                <DashboardApp user={user} db={db} onLogout={handleLogout} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} isDemo={isDemo} />
                 <Toaster position="bottom-right" />
             </>
         );
@@ -1750,7 +2238,7 @@ export default function App() {
     
     return (
         <>
-            <SubscriptionPage user={user} onSubscribe={handleSubscribe} onLogout={handleLogout} />
+            <SubscriptionPage user={user} onSubscribe={handleSubscribe} onLogout={handleLogout} config={appConfig} />
             <Toaster position="bottom-right" />
         </>
     );
