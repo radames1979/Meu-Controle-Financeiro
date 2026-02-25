@@ -328,21 +328,11 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Tenta buscar usuários da coleção padrão de artefatos
-                const usersCol = collection(db, `artifacts/${appId}/users`);
-                const snapshot = await getDocs(usersCol);
-                
-                const usersList: any[] = [];
-                for (const userDoc of snapshot.docs) {
-                    try {
-                        const profileRef = doc(db, `artifacts/${appId}/users/${userDoc.id}/profile/userProfile`);
-                        const profileSnap = await getDoc(profileRef);
-                        if (profileSnap.exists()) {
-                            usersList.push({ id: userDoc.id, ...profileSnap.data() });
-                        }
-                    } catch (e) {
-                        // Ignora usuários que não temos permissão de ler o perfil individual
-                    }
+                // Fetch Users from Server API (bypassing Firestore listing restrictions)
+                const usersRes = await fetch('/api/admin/users');
+                let usersList = [];
+                if (usersRes.ok) {
+                    usersList = await usersRes.json();
                 }
 
                 setUsers(usersList);
@@ -366,21 +356,29 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                 }
             } catch (err) {
                 console.error("Erro ao buscar dados do admin:", err);
-                toast.error("Erro ao acessar dados. Verifique o servidor.");
+                toast.error("Erro ao acessar dados do servidor.");
             } finally {
                 setLoading(false);
             }
         };
         fetchData();
-    }, [db]);
+    }, []);
 
     const handleToggleLicense = async (user: any) => {
         const newStatus = user.licenseStatus === 'active' ? 'pending' : 'active';
         try {
+            // Update Firestore
             const userProfileRef = doc(db, `artifacts/${appId}/users/${user.uid || user.id}/profile/userProfile`);
             await updateDoc(userProfileRef, { licenseStatus: newStatus });
             
-            setUsers(users.map(u => u.id === user.id ? { ...u, licenseStatus: newStatus } : u));
+            // Update Server
+            await fetch('/api/admin/users/update-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uid: user.uid || user.id, licenseStatus: newStatus })
+            });
+            
+            setUsers(users.map(u => (u.uid === user.uid || u.id === user.id) ? { ...u, licenseStatus: newStatus } : u));
             toast.success(`Usuário ${newStatus === 'active' ? 'ativado' : 'desativado'}`);
         } catch (err) {
             console.error("Erro ao atualizar licença:", err);
@@ -410,7 +408,8 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
     const handleAddToWhitelist = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newWhitelistEmail) return;
-        const updatedWhitelist = [...whitelist, newWhitelistEmail.toLowerCase()];
+        const emailLower = newWhitelistEmail.toLowerCase();
+        const updatedWhitelist = [...whitelist, emailLower];
         try {
             const res = await fetch('/api/admin/whitelist', {
                 method: 'POST',
@@ -420,7 +419,23 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
             if (res.ok) {
                 setWhitelist(updatedWhitelist);
                 setNewWhitelistEmail('');
-                toast.success("E-mail aprovado antecipadamente!");
+                
+                // Se o usuário já existir na lista, ativa ele no Firestore também
+                const existingUser = users.find(u => u.email?.toLowerCase() === emailLower);
+                if (existingUser && existingUser.licenseStatus !== 'active') {
+                    const userProfileRef = doc(db, `artifacts/${appId}/users/${existingUser.uid || existingUser.id}/profile/userProfile`);
+                    await updateDoc(userProfileRef, { licenseStatus: 'active' });
+                    
+                    await fetch('/api/admin/users/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ uid: existingUser.uid || existingUser.id, licenseStatus: 'active' })
+                    });
+                    
+                    setUsers(users.map(u => u.email?.toLowerCase() === emailLower ? { ...u, licenseStatus: 'active' } : u));
+                }
+                
+                toast.success("E-mail aprovado e liberado!");
             } else {
                 throw new Error();
             }
@@ -2120,23 +2135,42 @@ export default function App() {
         if (user && db) {
             const appId = 'meu-controle-financeiro';
             const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
-            const unsubscribe = onSnapshot(profileDocRef, (docSnap) => {
+            const unsubscribe = onSnapshot(profileDocRef, async (docSnap) => {
                 if (docSnap.exists()) {
                     setUserProfile(docSnap.data());
                 } else {
+                    // Check whitelist even if profile doesn't exist yet
+                    let isPreApproved = false;
+                    try {
+                        const res = await fetch('/api/admin/whitelist');
+                        if (res.ok) {
+                            const data = await res.json();
+                            const whitelist = data.emails || [];
+                            isPreApproved = whitelist.includes(user.email?.toLowerCase() || '');
+                        }
+                    } catch (e) {}
+
                     const initialProfile = { 
-                        licenseStatus: user.email === APP_CONFIG.adminEmail ? 'active' : 'pending', 
+                        licenseStatus: (user.email === appConfig.adminEmail || isPreApproved) ? 'active' : 'pending', 
                         tutorialCompleted: false,
-                        email: user.email 
+                        email: user.email,
+                        uid: user.uid
                     };
                     setUserProfile(initialProfile);
-                    setDoc(profileDocRef, initialProfile);
+                    await setDoc(profileDocRef, initialProfile);
+                    
+                    // Sync with server
+                    fetch('/api/admin/users/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(initialProfile)
+                    }).catch(() => {});
                 }
                 setIsLoading(false);
             });
             return () => unsubscribe();
         }
-    }, [user, db]);
+    }, [user, db, appConfig.adminEmail]);
 
     const handleLogin = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);
 
@@ -2163,11 +2197,23 @@ export default function App() {
             email: user.email,
             uid: user.uid,
             createdAt: new Date().toISOString(),
-            licenseStatus: (user.email === APP_CONFIG.adminEmail || isPreApproved) ? 'active' : 'pending',
+            licenseStatus: (user.email === appConfig.adminEmail || isPreApproved) ? 'active' : 'pending',
             tutorialCompleted: false
         };
 
         await setDoc(profileDocRef, initialProfile);
+
+        // Register user on server for admin tracking
+        try {
+            await fetch('/api/admin/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(initialProfile)
+            });
+        } catch (e) {
+            console.log("Erro ao registrar usuário no servidor.");
+        }
+
         return userCredential;
     };
 
@@ -2227,7 +2273,7 @@ export default function App() {
         return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} />;
     }
 
-    if (userProfile.licenseStatus === 'active' || user.email === APP_CONFIG.adminEmail) {
+    if (userProfile.licenseStatus === 'active' || user.email === appConfig.adminEmail) {
         return (
             <>
                 <DashboardApp user={user} db={db} onLogout={handleLogout} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} isDemo={isDemo} />

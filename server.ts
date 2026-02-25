@@ -10,6 +10,7 @@ const PORT = 3000;
 const DATA_DIR = path.join(process.cwd(), 'data');
 const CONFIG_FILE = path.join(DATA_DIR, 'admin_config.json');
 const WHITELIST_FILE = path.join(DATA_DIR, 'whitelist.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
@@ -18,6 +19,18 @@ if (!fs.existsSync(DATA_DIR)) {
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Helper to read/write users
+const getUsers = () => {
+    if (fs.existsSync(USERS_FILE)) {
+        return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+    }
+    return [];
+};
+
+const saveUsers = (users: any[]) => {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+};
 
 // Default config
 const DEFAULT_CONFIG = {
@@ -55,6 +68,39 @@ app.get('/api/admin/whitelist', (req, res) => {
 app.post('/api/admin/whitelist', (req, res) => {
     fs.writeFileSync(WHITELIST_FILE, JSON.stringify(req.body, null, 2));
     res.json({ success: true });
+});
+
+// User Management API
+app.get('/api/admin/users', (req, res) => {
+    res.json(getUsers());
+});
+
+app.post('/api/admin/users/register', (req, res) => {
+    const newUser = req.body;
+    const users = getUsers();
+    const existingIndex = users.findIndex((u: any) => u.uid === newUser.uid);
+    
+    if (existingIndex > -1) {
+        users[existingIndex] = { ...users[existingIndex], ...newUser };
+    } else {
+        users.push(newUser);
+    }
+    
+    saveUsers(users);
+    res.json({ success: true });
+});
+
+app.post('/api/admin/users/update-status', (req, res) => {
+    const { uid, licenseStatus } = req.body;
+    const users = getUsers();
+    const user = users.find((u: any) => u.uid === uid);
+    if (user) {
+        user.licenseStatus = licenseStatus;
+        saveUsers(users);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
 });
 
 // Vite middleware for development
