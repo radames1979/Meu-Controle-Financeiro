@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { createServer as createViteServer } from 'vite';
 import fs from 'fs';
 import path from 'path';
 
@@ -134,16 +133,27 @@ app.post('/api/admin/users/update-status', (req, res) => {
 
 // Vite middleware for development
 async function setupVite() {
-    if (process.env.NODE_ENV !== 'production') {
+    const isProd = process.env.NODE_ENV === 'production' || fs.existsSync(path.join(process.cwd(), 'dist'));
+    
+    if (!isProd) {
+        console.log('Starting in DEVELOPMENT mode');
+        const { createServer: createViteServer } = await import('vite');
         const vite = await createViteServer({
             server: { middlewareMode: true },
             appType: 'spa',
         });
         app.use(vite.middlewares);
     } else {
-        app.use(express.static('dist'));
+        console.log('Starting in PRODUCTION mode');
+        const distPath = path.join(process.cwd(), 'dist');
+        app.use(express.static(distPath));
         app.get('*', (req, res) => {
-            res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+            // Se não for uma rota de API (que já foram definidas acima), serve o index.html
+            if (!req.path.startsWith('/api/')) {
+                res.sendFile(path.join(distPath, 'index.html'));
+            } else {
+                res.status(404).json({ error: 'API route not found' });
+            }
         });
     }
 
