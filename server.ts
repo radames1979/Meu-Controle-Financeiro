@@ -41,7 +41,7 @@ const DEFAULT_CONFIG = {
 };
 
 // API Routes
-app.get('/api/admin/config', (req, res) => {
+app.get(['/api/admin/config', '/api/admin/config/'], (req, res) => {
     if (fs.existsSync(CONFIG_FILE)) {
         const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
         res.json(config);
@@ -50,7 +50,7 @@ app.get('/api/admin/config', (req, res) => {
     }
 });
 
-app.post('/api/admin/config', (req, res) => {
+app.post(['/api/admin/config', '/api/admin/config/'], (req, res) => {
     try {
         fs.writeFileSync(CONFIG_FILE, JSON.stringify(req.body, null, 2));
         console.log('Config saved successfully');
@@ -61,7 +61,7 @@ app.post('/api/admin/config', (req, res) => {
     }
 });
 
-app.get('/api/admin/whitelist', (req, res) => {
+app.get(['/api/admin/whitelist', '/api/admin/whitelist/'], (req, res) => {
     try {
         if (fs.existsSync(WHITELIST_FILE)) {
             const whitelist = JSON.parse(fs.readFileSync(WHITELIST_FILE, 'utf-8'));
@@ -75,7 +75,7 @@ app.get('/api/admin/whitelist', (req, res) => {
     }
 });
 
-app.post('/api/admin/whitelist', (req, res) => {
+app.post(['/api/admin/whitelist', '/api/admin/whitelist/'], (req, res) => {
     try {
         fs.writeFileSync(WHITELIST_FILE, JSON.stringify(req.body, null, 2));
         console.log('Whitelist saved successfully');
@@ -87,11 +87,11 @@ app.post('/api/admin/whitelist', (req, res) => {
 });
 
 // User Management API
-app.get('/api/admin/users', (req, res) => {
+app.get(['/api/admin/users', '/api/admin/users/'], (req, res) => {
     res.json(getUsers());
 });
 
-app.post('/api/admin/users/register', (req, res) => {
+app.post(['/api/admin/users/register', '/api/admin/users/register/'], (req, res) => {
     try {
         const newUser = req.body;
         const users = getUsers();
@@ -112,7 +112,7 @@ app.post('/api/admin/users/register', (req, res) => {
     }
 });
 
-app.post('/api/admin/users/update-status', (req, res) => {
+app.post(['/api/admin/users/update-status', '/api/admin/users/update-status/'], (req, res) => {
     try {
         const { uid, licenseStatus } = req.body;
         const users = getUsers();
