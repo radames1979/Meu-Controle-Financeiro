@@ -328,22 +328,14 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch Users from Firestore
-                const usersCol = collection(db, `artifacts/${appId}/users`);
+                // Fetch Users from the Admin Registry (this collection is listable by admin)
+                const usersCol = collection(db, `artifacts/${appId}/users_registry`);
                 const snapshot = await getDocs(usersCol);
                 
-                const usersList: any[] = [];
-                for (const userDoc of snapshot.docs) {
-                    try {
-                        const profileRef = doc(db, `artifacts/${appId}/users/${userDoc.id}/profile/userProfile`);
-                        const profileSnap = await getDoc(profileRef);
-                        if (profileSnap.exists()) {
-                            usersList.push({ id: userDoc.id, ...profileSnap.data() });
-                        }
-                    } catch (e) {
-                        // Ignore users without permission
-                    }
-                }
+                const usersList = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
 
                 setUsers(usersList);
                 setAppStats({
@@ -366,7 +358,7 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                 }
             } catch (err) {
                 console.error("Erro ao buscar dados do admin no Firestore:", err);
-                toast.error("Erro de permissão no Firebase. Verifique as regras de segurança.");
+                toast.error("Erro ao carregar usuários. Verifique as regras de segurança do Firebase.");
             } finally {
                 setLoading(false);
             }
@@ -377,14 +369,39 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
     const handleToggleLicense = async (user: any) => {
         const newStatus = user.licenseStatus === 'active' ? 'pending' : 'active';
         try {
-            const userProfileRef = doc(db, `artifacts/${appId}/users/${user.uid || user.id}/profile/userProfile`);
+            const userId = user.uid || user.id;
+            // Update User's Real Profile
+            const userProfileRef = doc(db, `artifacts/${appId}/users/${userId}/profile/userProfile`);
             await updateDoc(userProfileRef, { licenseStatus: newStatus });
             
-            setUsers(users.map(u => (u.uid === user.uid || u.id === user.id) ? { ...u, licenseStatus: newStatus } : u));
+            // Update Admin Registry Summary
+            const registryRef = doc(db, `artifacts/${appId}/users_registry/${userId}`);
+            await updateDoc(registryRef, { licenseStatus: newStatus });
+            
+            setUsers(users.map(u => (u.uid === userId || u.id === userId) ? { ...u, licenseStatus: newStatus } : u));
             toast.success(`Usuário ${newStatus === 'active' ? 'ativado' : 'desativado'}`);
         } catch (err) {
             console.error("Erro ao atualizar licença:", err);
             toast.error("Erro ao atualizar licença no Firebase");
+        }
+    };
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!confirm("Tem certeza que deseja excluir este usuário da lista de administração?")) return;
+        try {
+            // Remove from Admin Registry
+            const registryRef = doc(db, `artifacts/${appId}/users_registry/${userId}`);
+            await deleteDoc(registryRef);
+            
+            // Revoke access in their profile (optional, but safer)
+            const profileRef = doc(db, `artifacts/${appId}/users/${userId}/profile/userProfile`);
+            await updateDoc(profileRef, { licenseStatus: 'revoked' }).catch(() => {});
+            
+            setUsers(users.filter(u => (u.uid || u.id) !== userId));
+            toast.success("Usuário removido da gestão");
+        } catch (err) {
+            console.error("Erro ao excluir usuário:", err);
+            toast.error("Erro ao excluir usuário");
         }
     };
 
@@ -444,20 +461,6 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
         }
     };
 
-    const handleDeleteUser = async (userId: string) => {
-        if (!confirm("Tem certeza que deseja excluir este usuário? Todos os dados serão perdidos.")) return;
-        try {
-            // No ambiente de artefatos, deletamos o perfil
-            const profileRef = doc(db, `artifacts/${appId}/users/${userId}/profile/userProfile`);
-            await deleteDoc(profileRef);
-            setUsers(users.filter(u => u.id !== userId));
-            toast.success("Usuário removido da lista");
-        } catch (err) {
-            console.error("Erro ao excluir usuário:", err);
-            toast.error("Erro ao excluir usuário");
-        }
-    };
-
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -508,7 +511,10 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-slate-700">{user.email}</span>
-                                                        <span className="text-[10px] text-slate-400">ID: {user.uid || user.id}</span>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-mono">ID: {(user.uid || user.id || '').substring(0, 8)}...</span>
+                                                            {user.lastSeen && <span className="text-[9px] text-slate-400">Visto em: {new Date(user.lastSeen).toLocaleDateString()}</span>}
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -2146,9 +2152,7 @@ export default function App() {
                             const whitelist = whitelistSnap.data().emails || [];
                             isPreApproved = whitelist.includes(user.email?.toLowerCase() || '');
                         }
-                    } catch (e) {
-                        // Whitelist read failed, likely permissions
-                    }
+                    } catch (e) {}
 
                     const isAdmin = user.email === appConfig.adminEmail;
                     const shouldBeActive = isAdmin || isPreApproved;
@@ -2173,10 +2177,22 @@ export default function App() {
                         setUserProfile(initialProfile);
                         try {
                             await setDoc(profileDocRef, initialProfile);
-                        } catch (e) {
-                            console.error("Erro ao criar perfil inicial:", e);
-                        }
+                        } catch (e) {}
                     }
+
+                    // SYNC WITH ADMIN REGISTRY (This makes the user appear in the Admin Panel)
+                    try {
+                        const registryRef = doc(db, `artifacts/${appId}/users_registry/${user.uid}`);
+                        await setDoc(registryRef, {
+                            email: user.email,
+                            uid: user.uid,
+                            licenseStatus: currentProfile?.licenseStatus || (shouldBeActive ? 'active' : 'pending'),
+                            lastSeen: new Date().toISOString()
+                        }, { merge: true });
+                    } catch (e) {
+                        console.warn("Registry sync failed. Check Firestore rules for /users_registry");
+                    }
+
                     setIsLoading(false);
                 },
                 (error) => {
