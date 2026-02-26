@@ -52,22 +52,39 @@ app.get('/api/admin/config', (req, res) => {
 });
 
 app.post('/api/admin/config', (req, res) => {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(req.body, null, 2));
-    res.json({ success: true });
+    try {
+        fs.writeFileSync(CONFIG_FILE, JSON.stringify(req.body, null, 2));
+        console.log('Config saved successfully');
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Error saving config:', e);
+        res.status(500).json({ error: 'Failed to save config' });
+    }
 });
 
 app.get('/api/admin/whitelist', (req, res) => {
-    if (fs.existsSync(WHITELIST_FILE)) {
-        const whitelist = JSON.parse(fs.readFileSync(WHITELIST_FILE, 'utf-8'));
-        res.json(whitelist);
-    } else {
-        res.json({ emails: [] });
+    try {
+        if (fs.existsSync(WHITELIST_FILE)) {
+            const whitelist = JSON.parse(fs.readFileSync(WHITELIST_FILE, 'utf-8'));
+            res.json(whitelist);
+        } else {
+            res.json({ emails: [] });
+        }
+    } catch (e) {
+        console.error('Error reading whitelist:', e);
+        res.status(500).json({ error: 'Failed to read whitelist' });
     }
 });
 
 app.post('/api/admin/whitelist', (req, res) => {
-    fs.writeFileSync(WHITELIST_FILE, JSON.stringify(req.body, null, 2));
-    res.json({ success: true });
+    try {
+        fs.writeFileSync(WHITELIST_FILE, JSON.stringify(req.body, null, 2));
+        console.log('Whitelist saved successfully');
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Error saving whitelist:', e);
+        res.status(500).json({ error: 'Failed to save whitelist' });
+    }
 });
 
 // User Management API
@@ -76,30 +93,42 @@ app.get('/api/admin/users', (req, res) => {
 });
 
 app.post('/api/admin/users/register', (req, res) => {
-    const newUser = req.body;
-    const users = getUsers();
-    const existingIndex = users.findIndex((u: any) => u.uid === newUser.uid);
-    
-    if (existingIndex > -1) {
-        users[existingIndex] = { ...users[existingIndex], ...newUser };
-    } else {
-        users.push(newUser);
+    try {
+        const newUser = req.body;
+        const users = getUsers();
+        const existingIndex = users.findIndex((u: any) => u.uid === newUser.uid);
+        
+        if (existingIndex > -1) {
+            users[existingIndex] = { ...users[existingIndex], ...newUser };
+        } else {
+            users.push(newUser);
+        }
+        
+        saveUsers(users);
+        console.log(`User registered/synced: ${newUser.email}`);
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Error registering user:', e);
+        res.status(500).json({ error: 'Failed to register user' });
     }
-    
-    saveUsers(users);
-    res.json({ success: true });
 });
 
 app.post('/api/admin/users/update-status', (req, res) => {
-    const { uid, licenseStatus } = req.body;
-    const users = getUsers();
-    const user = users.find((u: any) => u.uid === uid);
-    if (user) {
-        user.licenseStatus = licenseStatus;
-        saveUsers(users);
-        res.json({ success: true });
-    } else {
-        res.status(404).json({ error: 'User not found' });
+    try {
+        const { uid, licenseStatus } = req.body;
+        const users = getUsers();
+        const user = users.find((u: any) => u.uid === uid);
+        if (user) {
+            user.licenseStatus = licenseStatus;
+            saveUsers(users);
+            console.log(`User status updated: ${user.email} -> ${licenseStatus}`);
+            res.json({ success: true });
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    } catch (e) {
+        console.error('Error updating user status:', e);
+        res.status(500).json({ error: 'Failed to update status' });
     }
 });
 

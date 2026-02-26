@@ -396,6 +396,10 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
             });
             if (res.ok) {
                 toast.success("Configurações globais salvas no servidor!");
+                // Update parent state if possible
+                if (typeof (window as any).setAppConfig === 'function') {
+                    (window as any).setAppConfig(config);
+                }
             } else {
                 throw new Error();
             }
@@ -874,12 +878,12 @@ const Charts = ({ data, annualData, year }: any) => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[380px]">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px]">
                 <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                     <TrendingUp size={20} className="text-cyan-500" /> Fluxo de Caixa Anual ({year})
                 </h3>
-                <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={2}>
+                <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: '300px' }}>
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
                         <AreaChart data={cashFlowData}>
                             <defs>
                                 <linearGradient id="colorReceitas" x1="0" y1="0" x2="0" y2="1">
@@ -906,12 +910,12 @@ const Charts = ({ data, annualData, year }: any) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[380px]">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px]">
                     <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                         <PieChartIcon size={20} className="text-cyan-500" /> Distribuição de Gastos
                     </h3>
-                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={1}>
+                    <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: '300px' }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
                             <PieChart>
                                 <Pie 
                                     data={data} 
@@ -938,12 +942,12 @@ const Charts = ({ data, annualData, year }: any) => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[380px]">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px]">
                     <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                         <Table size={20} className="text-cyan-500" /> Ranking de Categorias
                     </h3>
-                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={1.5}>
+                    <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: '300px' }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
                             <BarChart data={data.slice(0, 5)} layout="vertical" margin={{ left: 20 }}>
                                 <XAxis type="number" hide />
                                 <YAxis type="category" dataKey="name" width={100} stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
@@ -2096,6 +2100,8 @@ export default function App() {
             }
         };
         fetchConfig();
+        // Expose setAppConfig to window so AdminPanel can update it
+        (window as any).setAppConfig = setAppConfig;
     }, []);
 
     useEffect(() => {
@@ -2136,25 +2142,43 @@ export default function App() {
             const appId = 'meu-controle-financeiro';
             const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
             const unsubscribe = onSnapshot(profileDocRef, async (docSnap) => {
-                if (docSnap.exists()) {
-                    setUserProfile(docSnap.data());
-                } else {
-                    // Check whitelist even if profile doesn't exist yet
-                    let isPreApproved = false;
-                    try {
-                        const res = await fetch('/api/admin/whitelist');
-                        if (res.ok) {
-                            const data = await res.json();
-                            const whitelist = data.emails || [];
-                            isPreApproved = whitelist.includes(user.email?.toLowerCase() || '');
-                        }
-                    } catch (e) {}
+                let currentProfile = docSnap.exists() ? docSnap.data() : null;
+                
+                // Check whitelist and admin status to allow live promotion even if Firestore is stale
+                let isPreApproved = false;
+                try {
+                    const res = await fetch('/api/admin/whitelist');
+                    if (res.ok) {
+                        const data = await res.json();
+                        const whitelist = data.emails || [];
+                        isPreApproved = whitelist.includes(user.email?.toLowerCase() || '');
+                    }
+                } catch (e) {}
 
+                const isAdmin = user.email === appConfig.adminEmail;
+                const shouldBeActive = isAdmin || isPreApproved;
+
+                if (currentProfile) {
+                    // If Firestore says pending but they should be active, update Firestore
+                    if (currentProfile.licenseStatus !== 'active' && shouldBeActive) {
+                        currentProfile.licenseStatus = 'active';
+                        await setDoc(profileDocRef, { licenseStatus: 'active' }, { merge: true });
+                    }
+                    setUserProfile(currentProfile);
+                    
+                    // Sync with server on every change to ensure admin has latest data
+                    fetch('/api/admin/users/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...currentProfile, email: user.email, uid: user.uid })
+                    }).catch(() => {});
+                } else {
                     const initialProfile = { 
-                        licenseStatus: (user.email === appConfig.adminEmail || isPreApproved) ? 'active' : 'pending', 
+                        licenseStatus: shouldBeActive ? 'active' : 'pending', 
                         tutorialCompleted: false,
                         email: user.email,
-                        uid: user.uid
+                        uid: user.uid,
+                        createdAt: new Date().toISOString()
                     };
                     setUserProfile(initialProfile);
                     await setDoc(profileDocRef, initialProfile);
