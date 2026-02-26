@@ -886,8 +886,8 @@ const Charts = ({ data, annualData, year }: any) => {
                 <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                     <TrendingUp size={20} className="text-cyan-500" /> Fluxo de Caixa Anual ({year})
                 </h3>
-                <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: '300px' }}>
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
+                <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
+                    <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} aspect={2}>
                         <AreaChart data={cashFlowData}>
                             <defs>
                                 <linearGradient id="colorReceitas" x1="0" y1="0" x2="0" y2="1">
@@ -918,8 +918,8 @@ const Charts = ({ data, annualData, year }: any) => {
                     <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                         <PieChartIcon size={20} className="text-cyan-500" /> Distribuição de Gastos
                     </h3>
-                    <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: '300px' }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
+                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} aspect={1}>
                             <PieChart>
                                 <Pie 
                                     data={data} 
@@ -950,8 +950,8 @@ const Charts = ({ data, annualData, year }: any) => {
                     <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                         <Table size={20} className="text-cyan-500" /> Ranking de Categorias
                     </h3>
-                    <div className="h-[300px] w-full" style={{ minWidth: 0, minHeight: '300px' }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
+                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} aspect={1.5}>
                             <BarChart data={data.slice(0, 5)} layout="vertical" margin={{ left: 20 }}>
                                 <XAxis type="number" hide />
                                 <YAxis type="category" dataKey="name" width={100} stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
