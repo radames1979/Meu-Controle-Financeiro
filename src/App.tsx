@@ -328,11 +328,21 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch Users from Server API (bypassing Firestore listing restrictions)
-                const usersRes = await fetch('/api/admin/users');
-                let usersList = [];
-                if (usersRes.ok) {
-                    usersList = await usersRes.json();
+                // Fetch Users from Firestore
+                const usersCol = collection(db, `artifacts/${appId}/users`);
+                const snapshot = await getDocs(usersCol);
+                
+                const usersList: any[] = [];
+                for (const userDoc of snapshot.docs) {
+                    try {
+                        const profileRef = doc(db, `artifacts/${appId}/users/${userDoc.id}/profile/userProfile`);
+                        const profileSnap = await getDoc(profileRef);
+                        if (profileSnap.exists()) {
+                            usersList.push({ id: userDoc.id, ...profileSnap.data() });
+                        }
+                    } catch (e) {
+                        // Ignore users without permission
+                    }
                 }
 
                 setUsers(usersList);
@@ -341,71 +351,52 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                     activeLicenses: usersList.filter((u: any) => u.licenseStatus === 'active').length
                 });
 
-                // Fetch Config from Server API
-                const configRes = await fetch('/api/admin/config');
-                if (configRes.ok) {
-                    const configData = await configRes.json();
-                    setConfig(configData);
+                // Fetch Config from Firestore
+                const configRef = doc(db, `artifacts/${appId}/admin/config`);
+                const configSnap = await getDoc(configRef);
+                if (configSnap.exists()) {
+                    setConfig(prev => ({ ...prev, ...configSnap.data() }));
                 }
 
-                // Fetch Whitelist from Server API
-                const whitelistRes = await fetch('/api/admin/whitelist');
-                if (whitelistRes.ok) {
-                    const whitelistData = await whitelistRes.json();
-                    setWhitelist(whitelistData.emails || []);
+                // Fetch Whitelist from Firestore
+                const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
+                const whitelistSnap = await getDoc(whitelistRef);
+                if (whitelistSnap.exists()) {
+                    setWhitelist(whitelistSnap.data().emails || []);
                 }
             } catch (err) {
-                console.error("Erro ao buscar dados do admin:", err);
-                toast.error("Erro ao acessar dados do servidor.");
+                console.error("Erro ao buscar dados do admin no Firestore:", err);
+                toast.error("Erro de permissão no Firebase. Verifique as regras de segurança.");
             } finally {
                 setLoading(false);
             }
         };
         fetchData();
-    }, []);
+    }, [db]);
 
     const handleToggleLicense = async (user: any) => {
         const newStatus = user.licenseStatus === 'active' ? 'pending' : 'active';
         try {
-            // Update Firestore
             const userProfileRef = doc(db, `artifacts/${appId}/users/${user.uid || user.id}/profile/userProfile`);
             await updateDoc(userProfileRef, { licenseStatus: newStatus });
-            
-            // Update Server
-            await fetch('/api/admin/users/update-status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uid: user.uid || user.id, licenseStatus: newStatus })
-            });
             
             setUsers(users.map(u => (u.uid === user.uid || u.id === user.id) ? { ...u, licenseStatus: newStatus } : u));
             toast.success(`Usuário ${newStatus === 'active' ? 'ativado' : 'desativado'}`);
         } catch (err) {
             console.error("Erro ao atualizar licença:", err);
-            toast.error("Erro ao atualizar licença");
+            toast.error("Erro ao atualizar licença no Firebase");
         }
     };
 
     const handleUpdateConfig = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch('/api/admin/config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(config)
-            });
-            if (res.ok) {
-                toast.success("Configurações globais salvas no servidor!");
-                // Update parent state if possible
-                if (typeof (window as any).setAppConfig === 'function') {
-                    (window as any).setAppConfig(config);
-                }
-            } else {
-                throw new Error();
-            }
+            const configRef = doc(db, `artifacts/${appId}/admin/config`);
+            await setDoc(configRef, config, { merge: true });
+            toast.success("Configurações salvas no Firebase!");
         } catch (err) {
             console.error("Erro ao salvar config:", err);
-            toast.error("Erro ao salvar configurações no servidor.");
+            toast.error("Erro de permissão ao salvar no Firebase.");
         }
     };
 
@@ -419,54 +410,34 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
         }
         const updatedWhitelist = [...whitelist, emailLower];
         try {
-            const res = await fetch('/api/admin/whitelist', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ emails: updatedWhitelist })
-            });
-            if (res.ok) {
-                setWhitelist(updatedWhitelist);
-                setNewWhitelistEmail('');
-                
-                // Se o usuário já existir na lista, ativa ele no Firestore também
-                const existingUser = users.find(u => u.email?.toLowerCase() === emailLower);
-                if (existingUser && existingUser.licenseStatus !== 'active') {
-                    const userProfileRef = doc(db, `artifacts/${appId}/users/${existingUser.uid || existingUser.id}/profile/userProfile`);
-                    await updateDoc(userProfileRef, { licenseStatus: 'active' });
-                    
-                    await fetch('/api/admin/users/update-status', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ uid: existingUser.uid || existingUser.id, licenseStatus: 'active' })
-                    });
-                    
-                    setUsers(users.map(u => u.email?.toLowerCase() === emailLower ? { ...u, licenseStatus: 'active' } : u));
-                }
-                
-                toast.success("E-mail aprovado e liberado!");
-            } else {
-                throw new Error();
+            const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
+            await setDoc(whitelistRef, { emails: updatedWhitelist });
+            
+            setWhitelist(updatedWhitelist);
+            setNewWhitelistEmail('');
+            
+            // Se o usuário já existir na lista, ativa ele no Firestore também
+            const existingUser = users.find(u => u.email?.toLowerCase() === emailLower);
+            if (existingUser && existingUser.licenseStatus !== 'active') {
+                const userProfileRef = doc(db, `artifacts/${appId}/users/${existingUser.uid || existingUser.id}/profile/userProfile`);
+                await updateDoc(userProfileRef, { licenseStatus: 'active' });
+                setUsers(users.map(u => u.email?.toLowerCase() === emailLower ? { ...u, licenseStatus: 'active' } : u));
             }
+            
+            toast.success("E-mail aprovado e liberado!");
         } catch (err) {
             console.error("Erro ao salvar whitelist:", err);
-            toast.error("Erro ao atualizar lista branca no servidor.");
+            toast.error("Erro de permissão ao salvar lista branca.");
         }
     };
 
     const handleRemoveFromWhitelist = async (email: string) => {
         const updatedWhitelist = whitelist.filter(e => e !== email);
         try {
-            const res = await fetch('/api/admin/whitelist', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ emails: updatedWhitelist })
-            });
-            if (res.ok) {
-                setWhitelist(updatedWhitelist);
-                toast.success("E-mail removido da aprovação prévia");
-            } else {
-                throw new Error();
-            }
+            const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
+            await setDoc(whitelistRef, { emails: updatedWhitelist });
+            setWhitelist(updatedWhitelist);
+            toast.success("E-mail removido da lista");
         } catch (err) {
             console.error("Erro ao remover da whitelist:", err);
             toast.error("Erro ao atualizar lista branca.");
@@ -2093,20 +2064,37 @@ export default function App() {
 
     useEffect(() => {
         const fetchConfig = async () => {
+            if (!db) return;
             try {
-                const res = await fetch('/api/admin/config');
-                if (res.ok) {
-                    const data = await res.json();
-                    setAppConfig(data);
+                const appId = 'meu-controle-financeiro';
+                const configRef = doc(db, `artifacts/${appId}/admin/config`);
+                const docSnap = await getDoc(configRef);
+                if (docSnap.exists()) {
+                    setAppConfig(prev => ({ ...prev, ...docSnap.data() }));
                 }
             } catch (e) {
-                console.log("Servidor offline ou erro ao buscar config.");
+                console.warn("Aviso: Usando configurações padrão (verifique as regras do Firestore).");
             }
         };
         fetchConfig();
-        // Expose setAppConfig to window so AdminPanel can update it
-        (window as any).setAppConfig = setAppConfig;
-    }, []);
+        
+        // Real-time updates for config with error handling
+        if (db) {
+            const appId = 'meu-controle-financeiro';
+            const configRef = doc(db, `artifacts/${appId}/admin/config`);
+            const unsubscribe = onSnapshot(configRef, 
+                (snap) => {
+                    if (snap.exists()) {
+                        setAppConfig(prev => ({ ...prev, ...snap.data() }));
+                    }
+                },
+                (error) => {
+                    console.warn("Firestore: Sem permissão para ouvir atualizações de config em tempo real.");
+                }
+            );
+            return () => unsubscribe();
+        }
+    }, [db]);
 
     useEffect(() => {
         const firebaseConfig = {
@@ -2145,57 +2133,57 @@ export default function App() {
         if (user && db) {
             const appId = 'meu-controle-financeiro';
             const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
-            const unsubscribe = onSnapshot(profileDocRef, async (docSnap) => {
-                let currentProfile = docSnap.exists() ? docSnap.data() : null;
-                
-                // Check whitelist and admin status to allow live promotion even if Firestore is stale
-                let isPreApproved = false;
-                try {
-                    const res = await fetch('/api/admin/whitelist');
-                    if (res.ok) {
-                        const data = await res.json();
-                        const whitelist = data.emails || [];
-                        isPreApproved = whitelist.includes(user.email?.toLowerCase() || '');
-                    }
-                } catch (e) {}
-
-                const isAdmin = user.email === appConfig.adminEmail;
-                const shouldBeActive = isAdmin || isPreApproved;
-
-                if (currentProfile) {
-                    // If Firestore says pending but they should be active, update Firestore
-                    if (currentProfile.licenseStatus !== 'active' && shouldBeActive) {
-                        currentProfile.licenseStatus = 'active';
-                        await setDoc(profileDocRef, { licenseStatus: 'active' }, { merge: true });
-                    }
-                    setUserProfile(currentProfile);
+            const unsubscribe = onSnapshot(profileDocRef, 
+                async (docSnap) => {
+                    let currentProfile = docSnap.exists() ? docSnap.data() : null;
                     
-                    // Sync with server on every change to ensure admin has latest data
-                    fetch('/api/admin/users/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ...currentProfile, email: user.email, uid: user.uid })
-                    }).catch(() => {});
-                } else {
-                    const initialProfile = { 
-                        licenseStatus: shouldBeActive ? 'active' : 'pending', 
-                        tutorialCompleted: false,
-                        email: user.email,
-                        uid: user.uid,
-                        createdAt: new Date().toISOString()
-                    };
-                    setUserProfile(initialProfile);
-                    await setDoc(profileDocRef, initialProfile);
-                    
-                    // Sync with server
-                    fetch('/api/admin/users/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(initialProfile)
-                    }).catch(() => {});
+                    // Check whitelist and admin status from Firestore
+                    let isPreApproved = false;
+                    try {
+                        const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
+                        const whitelistSnap = await getDoc(whitelistRef);
+                        if (whitelistSnap.exists()) {
+                            const whitelist = whitelistSnap.data().emails || [];
+                            isPreApproved = whitelist.includes(user.email?.toLowerCase() || '');
+                        }
+                    } catch (e) {
+                        // Whitelist read failed, likely permissions
+                    }
+
+                    const isAdmin = user.email === appConfig.adminEmail;
+                    const shouldBeActive = isAdmin || isPreApproved;
+
+                    if (currentProfile) {
+                        // If Firestore says pending but they should be active, update Firestore
+                        if (currentProfile.licenseStatus !== 'active' && shouldBeActive) {
+                            currentProfile.licenseStatus = 'active';
+                            try {
+                                await setDoc(profileDocRef, { licenseStatus: 'active' }, { merge: true });
+                            } catch (e) {}
+                        }
+                        setUserProfile(currentProfile);
+                    } else {
+                        const initialProfile = { 
+                            licenseStatus: shouldBeActive ? 'active' : 'pending', 
+                            tutorialCompleted: false,
+                            email: user.email,
+                            uid: user.uid,
+                            createdAt: new Date().toISOString()
+                        };
+                        setUserProfile(initialProfile);
+                        try {
+                            await setDoc(profileDocRef, initialProfile);
+                        } catch (e) {
+                            console.error("Erro ao criar perfil inicial:", e);
+                        }
+                    }
+                    setIsLoading(false);
+                },
+                (error) => {
+                    console.warn("Firestore: Sem permissão para ouvir perfil do usuário.");
+                    setIsLoading(false);
                 }
-                setIsLoading(false);
-            });
+            );
             return () => unsubscribe();
         }
     }, [user, db, appConfig.adminEmail]);
@@ -2208,17 +2196,17 @@ export default function App() {
         const appId = 'meu-controle-financeiro';
         const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
         
-        // Check Whitelist from Server API
+        // Check Whitelist from Firestore
         let isPreApproved = false;
         try {
-            const res = await fetch('/api/admin/whitelist');
-            if (res.ok) {
-                const data = await res.json();
-                const whitelist = data.emails || [];
+            const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
+            const whitelistSnap = await getDoc(whitelistRef);
+            if (whitelistSnap.exists()) {
+                const whitelist = whitelistSnap.data().emails || [];
                 isPreApproved = whitelist.includes(email.toLowerCase());
             }
         } catch (e) {
-            console.log("Whitelist não disponível no servidor.");
+            console.log("Whitelist não disponível no Firestore.");
         }
 
         const initialProfile = {
@@ -2230,18 +2218,6 @@ export default function App() {
         };
 
         await setDoc(profileDocRef, initialProfile);
-
-        // Register user on server for admin tracking
-        try {
-            await fetch('/api/admin/users/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(initialProfile)
-            });
-        } catch (e) {
-            console.log("Erro ao registrar usuário no servidor.");
-        }
-
         return userCredential;
     };
 
