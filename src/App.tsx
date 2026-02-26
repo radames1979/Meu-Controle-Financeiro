@@ -25,11 +25,24 @@ const INITIAL_CATEGORIES = {
 };
 
 const MOCK_TRANSACTIONS = [
-    { id: 'demo-1', type: 'income', description: 'Salário Mensal (Demo)', amount: 5000, category: 'Salário', date: new Date().toISOString().split('T')[0], status: 'paid' },
-    { id: 'demo-2', type: 'expense', description: 'Aluguel (Demo)', amount: 1200, category: 'Moradia', date: new Date().toISOString().split('T')[0], status: 'paid' },
-    { id: 'demo-3', type: 'expense', description: 'Supermercado (Demo)', amount: 450, category: 'Alimentação', date: new Date().toISOString().split('T')[0], status: 'waiting' },
-    { id: 'demo-4', type: 'expense', description: 'Internet (Demo)', amount: 100, category: 'Outros', date: new Date().toISOString().split('T')[0], status: 'confirmed' },
-    { id: 'demo-5', type: 'income', description: 'Freelance (Demo)', amount: 800, category: 'Freelance', date: new Date().toISOString().split('T')[0], status: 'paid' },
+    { id: 'demo-1', type: 'income', description: 'Salário Mensal', amount: 5500, category: 'Salário', date: new Date(new Date().getFullYear(), new Date().getMonth(), 5).toISOString().split('T')[0], status: 'paid', account: 'Conta Corrente' },
+    { id: 'demo-2', type: 'expense', description: 'Aluguel Apartamento', amount: 1500, category: 'Moradia', date: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0], status: 'paid', account: 'Conta Corrente' },
+    { id: 'demo-3', type: 'expense', description: 'Supermercado Mensal', amount: 850, category: 'Alimentação', date: new Date(new Date().getFullYear(), new Date().getMonth(), 10).toISOString().split('T')[0], status: 'waiting', account: 'Cartão de Crédito' },
+    { id: 'demo-4', type: 'expense', description: 'Conta de Luz', amount: 220, category: 'Moradia', date: new Date(new Date().getFullYear(), new Date().getMonth(), 15).toISOString().split('T')[0], status: 'confirmed', account: 'Conta Corrente' },
+    { id: 'demo-5', type: 'income', description: 'Projeto Freelance UX', amount: 1200, category: 'Freelance', date: new Date(new Date().getFullYear(), new Date().getMonth(), 20).toISOString().split('T')[0], status: 'paid', account: 'Carteira' },
+    { id: 'demo-6', type: 'expense', description: 'Academia', amount: 120, category: 'Saúde', date: new Date(new Date().getFullYear(), new Date().getMonth(), 2).toISOString().split('T')[0], status: 'paid', account: 'Cartão de Crédito' },
+    { id: 'demo-7', type: 'expense', description: 'Assinatura Streaming', amount: 55.90, category: 'Lazer', date: new Date(new Date().getFullYear(), new Date().getMonth(), 8).toISOString().split('T')[0], status: 'paid', account: 'Cartão de Crédito' },
+    { id: 'demo-8', type: 'expense', description: 'Jantar Fora', amount: 180, category: 'Lazer', date: new Date(new Date().getFullYear(), new Date().getMonth(), 12).toISOString().split('T')[0], status: 'paid', account: 'Carteira' },
+    { id: 'demo-9', type: 'income', description: 'Dividendos Ações', amount: 350, category: 'Investimentos', date: new Date(new Date().getFullYear(), new Date().getMonth(), 25).toISOString().split('T')[0], status: 'paid', account: 'Poupança' },
+    { id: 'demo-10', type: 'expense', description: 'Combustível', amount: 250, category: 'Transporte', date: new Date(new Date().getFullYear(), new Date().getMonth(), 18).toISOString().split('T')[0], status: 'paid', account: 'Cartão de Crédito' },
+    { id: 'demo-11', type: 'expense', description: 'Farmácia', amount: 85, category: 'Saúde', date: new Date(new Date().getFullYear(), new Date().getMonth(), 22).toISOString().split('T')[0], status: 'paid', account: 'Carteira' },
+    // Previous Month
+    { id: 'demo-12', type: 'income', description: 'Salário Mensal', amount: 5500, category: 'Salário', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 5).toISOString().split('T')[0], status: 'paid', account: 'Conta Corrente' },
+    { id: 'demo-13', type: 'expense', description: 'Aluguel Apartamento', amount: 1500, category: 'Moradia', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString().split('T')[0], status: 'paid', account: 'Conta Corrente' },
+    { id: 'demo-14', type: 'expense', description: 'Supermercado Mensal', amount: 920, category: 'Alimentação', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 10).toISOString().split('T')[0], status: 'paid', account: 'Cartão de Crédito' },
+    { id: 'demo-15', type: 'expense', description: 'Manutenção Carro', amount: 450, category: 'Transporte', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15).toISOString().split('T')[0], status: 'paid', account: 'Conta Corrente' },
+    { id: 'demo-16', type: 'expense', description: 'Cinema e Pipoca', amount: 85, category: 'Lazer', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 20).toISOString().split('T')[0], status: 'paid', account: 'Carteira' },
+    { id: 'demo-17', type: 'income', description: 'Venda de Itens Usados', amount: 200, category: 'Outros', date: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 25).toISOString().split('T')[0], status: 'paid', account: 'Carteira' },
 ];
 
 const APP_CONFIG = {
@@ -37,7 +50,13 @@ const APP_CONFIG = {
     supportEmail: 'messi@bol.com.br',
     supportWhatsapp: '47992126402',
     pixKey: 'messi@bol.com.br',
-    defaultPrice: 9.99
+    defaultPrice: 9.99,
+    sponsors: [
+        { name: 'Patrocinador 1', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador1' },
+        { name: 'Patrocinador 2', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador2' },
+        { name: 'Patrocinador 3', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador3' },
+        { name: 'Patrocinador 4', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador4' }
+    ]
 };
 const ACCOUNT_TYPES = ['Carteira', 'Conta Corrente', 'Cartão de Crédito', 'Poupança'];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4560', '#775DD0', '#546E7A', '#26a69a'];
@@ -57,7 +76,7 @@ const DENSITY_CLASSES = {
 };
 
 // --- Componente da Landing Page ---
-const LandingPage = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: any, onDemo: any }) => {
+const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: any, onRegister: any, onDemo: any, config: any }) => {
     const authSectionRef = useRef<HTMLDivElement>(null);
 
     const scrollToAuth = () => {
@@ -95,10 +114,14 @@ const LandingPage = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister
                     <h2 className="text-3xl font-bold text-slate-700 mb-2">Nossos Patrocinadores</h2>
                     <p className="text-slate-500 mb-10">Apoiando a educação financeira para todos.</p>
                     <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-                        <img src="https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador1" alt="Logo do Patrocinador 1" className="h-12" />
-                        <img src="https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador2" alt="Logo do Patrocinador 2" className="h-12" />
-                        <img src="https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador3" alt="Logo do Patrocinador 3" className="h-12" />
-                        <img src="https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador4" alt="Logo do Patrocinador 4" className="h-12" />
+                        {config.sponsors && config.sponsors.map((sponsor: any, idx: number) => (
+                            <img 
+                                key={idx} 
+                                src={sponsor.logo} 
+                                alt={sponsor.name} 
+                                className="h-12 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100" 
+                            />
+                        ))}
                     </div>
                 </div>
             </section>
@@ -629,6 +652,65 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                     />
                                 </div>
                             </div>
+
+                            <div className="pt-8 border-t border-slate-100">
+                                <h3 className="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                                    <Tags size={18} className="text-cyan-500" /> Gerenciar Patrocinadores
+                                </h3>
+                                <div className="space-y-4">
+                                    {config.sponsors && config.sponsors.map((sponsor: any, idx: number) => (
+                                        <div key={idx} className="flex flex-col sm:flex-row gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                            <div className="flex-1">
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nome do Patrocinador</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={sponsor.name} 
+                                                    onChange={e => {
+                                                        const newSponsors = [...config.sponsors];
+                                                        newSponsors[idx].name = e.target.value;
+                                                        setConfig({ ...config, sponsors: newSponsors });
+                                                    }}
+                                                    className="w-full text-sm rounded-lg border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                                />
+                                            </div>
+                                            <div className="flex-[2]">
+                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">URL da Logo (PNG/SVG)</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={sponsor.logo} 
+                                                    onChange={e => {
+                                                        const newSponsors = [...config.sponsors];
+                                                        newSponsors[idx].logo = e.target.value;
+                                                        setConfig({ ...config, sponsors: newSponsors });
+                                                    }}
+                                                    className="w-full text-sm rounded-lg border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                                />
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    const newSponsors = config.sponsors.filter((_: any, i: number) => i !== idx);
+                                                    setConfig({ ...config, sponsors: newSponsors });
+                                                }}
+                                                className="self-end p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button 
+                                        type="button"
+                                        onClick={() => {
+                                            const newSponsors = [...(config.sponsors || []), { name: '', logo: '' }];
+                                            setConfig({ ...config, sponsors: newSponsors });
+                                        }}
+                                        className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-cyan-500 hover:text-cyan-500 transition-all font-medium text-sm flex items-center justify-center gap-2"
+                                    >
+                                        <Plus size={18} /> Adicionar Patrocinador
+                                    </button>
+                                </div>
+                            </div>
+
                             <div className="pt-6 border-t border-slate-100 flex justify-end">
                                 <button type="submit" className="bg-cyan-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-cyan-600 transition shadow-lg shadow-cyan-100">Salvar Alterações</button>
                             </div>
@@ -1093,7 +1175,7 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange }: an
 
 const useDataManagement = (db: any, userId: string, isDemo: boolean = false) => {
     const [transactions, setTransactions] = useState<any[]>(isDemo ? MOCK_TRANSACTIONS : []);
-    const [budgets, setBudgets] = useState<any>({});
+    const [budgets, setBudgets] = useState<any>(isDemo ? { 'Alimentação': 1000, 'Moradia': 1500, 'Transporte': 300, 'Lazer': 500 } : {});
     const [categories, setCategories] = useState(INITIAL_CATEGORIES);
 
     useEffect(() => {
@@ -1719,6 +1801,7 @@ const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensi
 };
 
 const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
+    if (!user) return null;
     const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid, isDemo);
     const ui = useUIManager();
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -1755,6 +1838,17 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
     }, [transactions]);
 
     const handleSaveTransaction = async (data: any) => {
+        if (isDemo) {
+            if (data.id) {
+                setTransactions(transactions.map(t => t.id === data.id ? { ...data } : t));
+                toast.success('Transação atualizada (Demo)!');
+            } else {
+                setTransactions([...transactions, { ...data, id: `demo-${Date.now()}` }]);
+                toast.success('Transação adicionada (Demo)!');
+            }
+            ui.setIsModalOpen(false);
+            return;
+        }
         const appId = 'meu-controle-financeiro';
         const colRef = collection(db, `artifacts/${appId}/users/${user.uid}/transactions`);
         if (data.id) {
@@ -1768,6 +1862,17 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
     };
 
     const handleSaveBatchTransactions = async (batchData: any[]) => {
+        if (isDemo) {
+            const newTransactions = batchData.map(item => ({ 
+                ...item, 
+                id: `demo-${Math.random().toString(36).substr(2, 9)}`,
+                status: item.type === 'expense' ? STATUSES.WAITING : null 
+            }));
+            setTransactions([...transactions, ...newTransactions]);
+            ui.setIsBatchModalOpen(false);
+            toast.success(`${batchData.length} transações salvas (Demo)!`);
+            return;
+        }
         const appId = 'meu-controle-financeiro';
         const batch = writeBatch(db);
         batchData.forEach(item => {
@@ -1780,6 +1885,12 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
     };
 
     const handleDeleteTransaction = async (transaction: any) => {
+        if (isDemo) {
+            setTransactions(transactions.filter(t => t.id !== transaction.id));
+            ui.setDeleteConfirmation({ isOpen: false, transaction: null });
+            toast.success('Transação removida (Demo).');
+            return;
+        }
         const appId = 'meu-controle-financeiro';
         await deleteDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, transaction.id));
         ui.setDeleteConfirmation({ isOpen: false, transaction: null });
@@ -1787,14 +1898,25 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
     };
 
     const handleStatusChange = async (id: string) => {
-        const appId = 'meu-controle-financeiro';
         const t = transactions.find(t => t.id === id);
         if (!t) return;
         const nextStatus = t.status === STATUSES.WAITING ? STATUSES.CONFIRMED : t.status === STATUSES.CONFIRMED ? STATUSES.PAID : STATUSES.WAITING;
+        
+        if (isDemo) {
+            setTransactions(transactions.map(item => item.id === id ? { ...item, status: nextStatus } : item));
+            return;
+        }
+        const appId = 'meu-controle-financeiro';
         await updateDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, id), { status: nextStatus });
     };
 
     const handleSaveBudgets = async (newBudgets: any) => {
+        if (isDemo) {
+            setBudgets(newBudgets);
+            ui.setIsBudgetModalOpen(false);
+            toast.success('Orçamentos salvos (Demo)!');
+            return;
+        }
         const appId = 'meu-controle-financeiro';
         const settingsDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/settings/userSettings`);
         await setDoc(settingsDocRef, { budgets: newBudgets }, { merge: true });
@@ -1803,6 +1925,11 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
     };
 
     const handleSaveSettings = async (newCategories: any) => {
+        if (isDemo) {
+            setCategories(newCategories);
+            toast.success('Configurações salvas (Demo)!');
+            return;
+        }
         const appId = 'meu-controle-financeiro';
         const settingsDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/settings/userSettings`);
         await setDoc(settingsDocRef, { categories: newCategories }, { merge: true });
@@ -2299,10 +2426,13 @@ export default function App() {
     }
 
     if (!user && !isDemo) {
-        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} />;
+        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} config={appConfig} />;
     }
 
-    if (userProfile.licenseStatus === 'active' || user.email === appConfig.adminEmail) {
+    const isAdmin = user?.email === appConfig.adminEmail;
+    const isApproved = userProfile?.licenseStatus === 'active' || isAdmin;
+
+    if (isApproved) {
         return (
             <>
                 <DashboardApp user={user} db={db} onLogout={handleLogout} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} isDemo={isDemo} />
