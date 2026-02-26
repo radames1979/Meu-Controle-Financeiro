@@ -148,17 +148,26 @@ const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: a
             }
         } catch (err: any) {
             console.error("Erro de autenticação:", err.code, err.message);
+            let errorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
+            
             if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-                setError('E-mail ou senha inválidos.');
+                errorMessage = 'E-mail ou senha incorretos. Verifique seus dados e tente novamente.';
             } else if (err.code === 'auth/email-already-in-use') {
-                setError('Este e-mail já está em uso.');
+                errorMessage = 'Este e-mail já está cadastrado em outra conta.';
             } else if (err.code === 'auth/weak-password') {
-                setError('A senha deve ter pelo menos 6 caracteres.');
+                errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
+            } else if (err.code === 'auth/invalid-email') {
+                errorMessage = 'O formato do e-mail é inválido.';
             } else if (err.code === 'auth/operation-not-allowed') {
-                setError('Erro de configuração: O login por E-mail/Senha não está ativado no Firebase.');
-            } else {
-                setError('Ocorreu um erro inesperado. Tente novamente.');
+                errorMessage = 'O login por E-mail/Senha não está ativado no Console do Firebase.';
+            } else if (err.code === 'auth/too-many-requests') {
+                errorMessage = 'Muitas tentativas falhas. Sua conta foi temporariamente bloqueada. Tente mais tarde.';
+            } else if (err.code === 'auth/user-disabled') {
+                errorMessage = 'Esta conta de usuário foi desativada pelo administrador.';
             }
+            
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
