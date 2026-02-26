@@ -2255,24 +2255,31 @@ export default function App() {
         setAuth(authInstance);
         setDb(dbInstance);
 
-        const unsubscribe = onAuthStateChanged(authInstance, (user) => {
-            if (user) {
-                setUser(user);
+        const unsubscribe = onAuthStateChanged(authInstance, (firebaseUser) => {
+            if (firebaseUser) {
+                setUser(firebaseUser);
                 setIsDemo(false);
             } else {
-                setUser(null);
-                if (!isDemo) {
-                    setUserProfile(null);
-                    setIsLoading(false);
-                }
+                // Only clear user if NOT in demo mode
+                setUser(prev => {
+                    // We use a functional update to check the CURRENT isDemo state via a closure or ref
+                    // But since we want to avoid complex logic, we'll just check if the user is the demo user
+                    if (prev?.uid === 'demo-user') return prev;
+                    return null;
+                });
+                setUserProfile(prev => {
+                    if (prev?.isDemo) return prev;
+                    return null;
+                });
+                setIsLoading(false);
             }
         });
 
         return () => unsubscribe();
-    }, [isDemo]);
+    }, []);
 
     useEffect(() => {
-        if (user && db) {
+        if (user && db && !isDemo) {
             const appId = 'meu-controle-financeiro';
             const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
             const unsubscribe = onSnapshot(profileDocRef, 
@@ -2338,7 +2345,7 @@ export default function App() {
             );
             return () => unsubscribe();
         }
-    }, [user, db, appConfig.adminEmail]);
+    }, [user, db, appConfig.adminEmail, isDemo]);
 
     const handleLogin = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);
 
@@ -2377,6 +2384,7 @@ export default function App() {
         if (isDemo) {
             setIsDemo(false);
             setUserProfile(null);
+            setUser(null);
             return;
         }
         signOut(auth).then(() => {
