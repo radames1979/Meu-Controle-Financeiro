@@ -413,6 +413,10 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
         e.preventDefault();
         if (!newWhitelistEmail) return;
         const emailLower = newWhitelistEmail.toLowerCase();
+        if (whitelist.includes(emailLower)) {
+            toast.error("Este e-mail já está na lista branca.");
+            return;
+        }
         const updatedWhitelist = [...whitelist, emailLower];
         try {
             const res = await fetch('/api/admin/whitelist', {
@@ -528,12 +532,12 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                     <tbody className="divide-y divide-slate-200">
                                         {loading ? (
                                             <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-400">Carregando...</td></tr>
-                                        ) : users.map(user => (
-                                            <tr key={user.id} className="hover:bg-slate-50 transition">
+                                        ) : users.map((user, idx) => (
+                                            <tr key={user.uid || user.id || idx} className="hover:bg-slate-50 transition">
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-slate-700">{user.email}</span>
-                                                        <span className="text-[10px] text-slate-400">ID: {user.id}</span>
+                                                        <span className="text-[10px] text-slate-400">ID: {user.uid || user.id}</span>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -545,7 +549,7 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                                     <button onClick={() => handleToggleLicense(user)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${user.licenseStatus === 'active' ? 'text-rose-500 hover:bg-rose-50' : 'text-emerald-500 hover:bg-emerald-50'}`}>
                                                         {user.licenseStatus === 'active' ? 'Desativar' : 'Ativar'}
                                                     </button>
-                                                    <button onClick={() => handleDeleteUser(user.id)} className="text-slate-400 hover:text-rose-500 p-1.5 transition"><Trash2 size={16} /></button>
+                                                    <button onClick={() => handleDeleteUser(user.uid || user.id)} className="text-slate-400 hover:text-rose-500 p-1.5 transition"><Trash2 size={16} /></button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -584,8 +588,8 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                     <tbody className="divide-y divide-slate-200">
                                         {whitelist.length === 0 ? (
                                             <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-400">Nenhum e-mail na lista branca.</td></tr>
-                                        ) : whitelist.map(email => (
-                                            <tr key={email} className="hover:bg-slate-50 transition">
+                                        ) : whitelist.map((email, idx) => (
+                                            <tr key={`${email}-${idx}`} className="hover:bg-slate-50 transition">
                                                 <td className="px-6 py-4 text-sm font-medium text-slate-700">{email}</td>
                                                 <td className="px-6 py-4 text-right">
                                                     <button onClick={() => handleRemoveFromWhitelist(email)} className="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition">
