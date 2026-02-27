@@ -71,8 +71,11 @@ const PAYMENT_CODE_TYPES = ['Nenhum', 'Código de Barras', 'Pix (Copia e Cola)',
 
 const DENSITY_CLASSES = {
     spacing: { 'super-compact': 'space-y-1', compact: 'space-y-2', normal: 'space-y-4', relaxed: 'space-y-6', 'super-relaxed': 'space-y-8' },
-    padding: { 'super-compact': 'p-2 sm:p-3', compact: 'p-3 sm:p-4', normal: 'p-4 sm:p-6', relaxed: 'p-5 sm:p-7', 'super-relaxed': 'p-6 sm:p-8' },
-    dashboardPadding: { 'super-compact': 'p-3', compact: 'p-4', normal: 'p-6', relaxed: 'p-7', 'super-relaxed': 'p-8' }
+    padding: { 'super-compact': 'p-2', compact: 'p-3', normal: 'p-4', relaxed: 'p-6', 'super-relaxed': 'p-8' },
+    heroPadding: { 'super-compact': 'p-4 md:p-6', compact: 'p-5 md:p-8', normal: 'p-6 md:p-10', relaxed: 'p-8 md:p-12', 'super-relaxed': 'p-10 md:p-16' },
+    itemPadding: { 'super-compact': 'p-1.5', compact: 'p-2', normal: 'p-3', relaxed: 'p-4', 'super-relaxed': 'p-5' },
+    cardPadding: { 'super-compact': 'p-3', compact: 'p-4', normal: 'p-6', relaxed: 'p-7', 'super-relaxed': 'p-8' },
+    dashboardPadding: { 'super-compact': 'p-4', compact: 'p-6', normal: 'p-8', relaxed: 'p-10', 'super-relaxed': 'p-12' }
 };
 
 // --- Componente da Landing Page ---
@@ -796,14 +799,16 @@ const CollapsibleWidget = ({ title, children, isCollapsed, onToggle, density, ac
 
 const Dashboard = ({ stats, density, userProfile }: any) => {
     const { income, balance, paid, confirmed, waiting, expense } = stats;
-    const paddingClass = DENSITY_CLASSES.dashboardPadding[density as keyof typeof DENSITY_CLASSES.dashboardPadding] || 'p-6';
+    const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
+    const heroPaddingClass = DENSITY_CLASSES.heroPadding[density as keyof typeof DENSITY_CLASSES.heroPadding] || 'p-6 md:p-10';
+    const dashboardPaddingClass = DENSITY_CLASSES.dashboardPadding[density as keyof typeof DENSITY_CLASSES.dashboardPadding] || 'p-8';
     const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
 
     return (
-        <div className={`space-y-6 ${paddingClass}`}>
+        <div className={`space-y-6 ${dashboardPaddingClass}`}>
             {/* Hero Summary Section */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-6 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-gradient-to-br from-slate-50 to-white">
+                <div className={`${heroPaddingClass} flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-gradient-to-br from-slate-50 to-white`}>
                     <div className="w-full md:w-auto">
                         <h2 className="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-widest mb-2">Balanço Total do Mês</h2>
                         <div className="flex items-baseline gap-2 overflow-hidden">
@@ -826,13 +831,13 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
-                        <div className="bg-emerald-500/10 p-4 md:p-6 rounded-2xl border border-emerald-500/20">
+                        <div className={`bg-emerald-500/10 ${paddingClass} rounded-2xl border border-emerald-500/20`}>
                             <p className="text-emerald-700 text-[10px] md:text-xs font-bold uppercase mb-1">Entradas</p>
                             <p className="text-xl md:text-2xl font-black text-emerald-700">
                                 {income.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </p>
                         </div>
-                        <div className="bg-rose-500/10 p-4 md:p-6 rounded-2xl border border-rose-500/20">
+                        <div className={`bg-rose-500/10 ${paddingClass} rounded-2xl border border-rose-500/20`}>
                             <p className="text-rose-700 text-[10px] md:text-xs font-bold uppercase mb-1">Saídas</p>
                             <p className="text-xl md:text-2xl font-black text-rose-700">
                                 {expense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
@@ -842,7 +847,7 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 border-t border-slate-100">
-                    <div className="p-4 md:p-6 flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0">
+                    <div className={`${paddingClass} flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0`}>
                         <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
                             <CheckCircle size={20} />
                         </div>
@@ -851,7 +856,7 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
                             <p className="text-sm md:text-lg font-bold text-slate-700">{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                     </div>
-                    <div className="p-4 md:p-6 flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0">
+                    <div className={`${paddingClass} flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0`}>
                         <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
                             <Clock size={20} />
                         </div>
@@ -860,7 +865,7 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
                             <p className="text-sm md:text-lg font-bold text-slate-700">{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                     </div>
-                    <div className="p-4 md:p-6 flex items-center gap-4 border-slate-100 last:border-r-0">
+                    <div className={`${paddingClass} flex items-center gap-4 border-slate-100 last:border-r-0`}>
                         <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
                             <AlertCircle size={20} />
                         </div>
@@ -904,8 +909,10 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
     );
 };
 
-const FinancialHealth = ({ stats }: any) => {
+const FinancialHealth = ({ stats, density }: any) => {
     const { income, expense } = stats;
+    const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
+    const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-2';
     const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
     
     let score = 0;
@@ -925,7 +932,7 @@ const FinancialHealth = ({ stats }: any) => {
     const status = getStatus();
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200`}>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-slate-700 flex items-center gap-2">
                     <Activity size={20} className="text-cyan-500" /> Saúde Financeira
@@ -954,7 +961,7 @@ const FinancialHealth = ({ stats }: any) => {
                         <text x="18" y="20.35" className="text-[8px] font-bold fill-current text-slate-700" textAnchor="middle">{score}%</text>
                     </svg>
                 </div>
-                <div className="flex-1 space-y-2">
+                <div className={`flex-1 ${spacingClass}`}>
                     <p className="text-sm text-slate-500 leading-tight">
                         Sua taxa de poupança está em <span className="font-bold text-slate-700">{savingsRate.toFixed(1)}%</span>. 
                         {score >= 85 ? " Você está no caminho certo!" : " Tente reduzir gastos supérfluos."}
@@ -968,8 +975,10 @@ const FinancialHealth = ({ stats }: any) => {
     );
 };
 
-const Charts = ({ data, annualData, year }: any) => {
-    if (data.length === 0) return (<div className="text-center text-slate-500 py-12 bg-white rounded-xl border border-dashed border-slate-300"><h3 className="text-lg font-semibold mb-2">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
+const Charts = ({ data, annualData, year, density }: any) => {
+    const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
+    const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6';
+    if (data.length === 0) return (<div className={`text-center text-slate-500 ${paddingClass} bg-white rounded-xl border border-dashed border-slate-300`}><h3 className="text-lg font-semibold mb-2">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
     
     const cashFlowData = useMemo(() => {
         return annualData.incomeTotals.map((income: number, i: number) => ({
@@ -981,8 +990,8 @@ const Charts = ({ data, annualData, year }: any) => {
     }, [annualData, year]);
 
     return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px]">
+        <div className={spacingClass}>
+            <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200 min-h-[400px]`}>
                 <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
                     <TrendingUp size={20} className="text-cyan-500" /> Fluxo de Caixa Anual ({year})
                 </h3>
@@ -1274,8 +1283,14 @@ const useUIManager = () => {
     };
 };
 
-const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange }: any) => {
+const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, density }: any) => {
     const { id, type, description, date, amount, status, paymentCodeType, recurringId, installmentNumber, totalInstallments } = transaction;
+    
+    const itemPadding = density === 'super-compact' ? 'p-1.5' : density === 'compact' ? 'p-2' : density === 'relaxed' ? 'p-4' : density === 'super-relaxed' ? 'p-5' : 'p-3';
+    const indicatorHeight = density === 'super-compact' ? 'h-6' : density === 'compact' ? 'h-8' : 'h-10';
+    const textSize = density === 'super-compact' ? 'text-xs' : 'text-sm';
+    const titleSize = density === 'super-compact' ? 'text-sm' : 'font-semibold text-slate-700';
+
     const getStatusIndicatorClass = (s: string) => {
         if (s === STATUSES.PAID) return 'bg-green-500';
         if (s === STATUSES.CONFIRMED) return 'bg-yellow-500';
@@ -1287,26 +1302,28 @@ const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange }: any)
         return null;
     };
     return (
-        <li className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 border-b last:border-b-0 group">
+        <li className={`flex items-center justify-between ${itemPadding} rounded-lg hover:bg-slate-50 border-b last:border-b-0 group transition-all`}>
             <div className="flex flex-grow items-center cursor-pointer" onClick={() => onEdit(transaction)}>
-                <div className="flex-shrink-0 w-2 h-10 rounded-full mr-4 bg-slate-300 relative">
+                <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-300 relative`}>
                     {type === 'expense' && <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)}`} />}
                     {type === 'income' && <div className="absolute w-full h-full rounded-full bg-green-500" />}
                 </div>
                 <div>
-                    <p className="font-semibold text-slate-700 flex items-center gap-1">
+                    <p className={`${titleSize} flex items-center gap-1`}>
                         {description}
-                        {installmentNumber && totalInstallments && <span className="text-xs text-slate-400 ml-1">[{installmentNumber}/{totalInstallments}]</span>}
+                        {installmentNumber && totalInstallments && <span className="text-[10px] text-slate-400 ml-1">[{installmentNumber}/{totalInstallments}]</span>}
                         <PaymentIcon type={paymentCodeType} />
-                        {recurringId && <Repeat size={14} className="text-slate-500" />}
+                        {recurringId && <Repeat size={12} className="text-slate-500" />}
                     </p>
-                    <p className="text-sm text-slate-500">
-                        Vencimento: {new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                    <p className={`${textSize} text-slate-500`}>
+                        {new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')}
                     </p>
                 </div>
             </div>
             <div className="flex items-center">
-                <p className={`font-bold text-right mr-4 ${type === 'income' ? 'text-green-600' : 'text-red-600'}`}>{type === 'income' ? '+' : '-'} {amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                <p className={`font-bold text-right mr-4 ${textSize} ${type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                    {type === 'income' ? '+' : '-'} {amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </p>
                 {type === 'expense' && (
                     <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 hover:text-cyan-500 p-2 rounded-full transition" title="Alterar status">
                         <ArrowUpDown size={16} />
@@ -1330,7 +1347,7 @@ const TransactionList = ({ transactions, onDelete, onEdit, onStatusChange, densi
             {transactions.length > 0 ? (
                 <ul className={spacingClass}>
                     {transactions.map((t: any) => (
-                        <TransactionItem key={t.id} transaction={t} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
+                        <TransactionItem key={t.id} transaction={t} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
                     ))}
                 </ul>
             ) : (
@@ -1549,17 +1566,18 @@ const BatchTransactionModal = ({ onClose, onSaveBatch, categories }: any) => {
     );
 };
 
-const DrillDownModal = ({ isOpen, onClose, title, transactions, onEdit, onDelete, date, onStatusChange }: any) => {
+const DrillDownModal = ({ isOpen, onClose, title, transactions, onEdit, onDelete, date, onStatusChange, density }: any) => {
     if (!isOpen) return null;
+    const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col">
+            <div className={`bg-white rounded-lg shadow-2xl ${paddingClass} w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col`}>
                 <div className="flex justify-between items-center mb-4 border-b pb-3">
                     <h2 className="text-xl font-bold text-slate-700">{title}</h2>
                     <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-200 transition"><X size={20} /></button>
                 </div>
                 <div className="flex-grow overflow-y-auto pr-2">
-                    <TransactionList transactions={transactions} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
+                    <TransactionList transactions={transactions} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
                 </div>
                 <div className="mt-6 flex justify-end border-t pt-4">
                     <button type="button" onClick={onClose} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition">Fechar</button>
@@ -1570,6 +1588,8 @@ const DrillDownModal = ({ isOpen, onClose, title, transactions, onEdit, onDelete
 };
 
 const CalendarView = ({ currentDate, transactions, onDayClick, density }: any) => {
+    const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-4';
+    const dayHeight = density === 'super-compact' ? 'h-20' : density === 'compact' ? 'h-24' : density === 'relaxed' ? 'h-40' : density === 'super-relaxed' ? 'h-48' : 'h-32';
     const calendarData = useMemo(() => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -1595,13 +1615,13 @@ const CalendarView = ({ currentDate, transactions, onDayClick, density }: any) =
     }, [currentDate, transactions]);
     const weekDays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     return (
-        <div className="bg-white p-4 rounded-lg shadow-md">
+        <div className={`bg-white ${paddingClass} rounded-lg shadow-md`}>
             <div className="grid grid-cols-7 gap-1 text-center font-bold text-slate-500 text-sm mb-2">
                 {weekDays.map(day => <div key={day}>{day}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-1">
                 {calendarData.map((day, index) => (
-                    <div key={index} className={`border rounded-md h-32 flex flex-col p-1 ${day.isPlaceholder ? 'bg-slate-50' : 'cursor-pointer hover:bg-cyan-50'}`} onClick={() => !day.isPlaceholder && onDayClick(day.date)} >
+                    <div key={index} className={`border rounded-md ${dayHeight} flex flex-col p-1 ${day.isPlaceholder ? 'bg-slate-50' : 'cursor-pointer hover:bg-cyan-50'}`} onClick={() => !day.isPlaceholder && onDayClick(day.date)} >
                         {!day.isPlaceholder && (
                             <>
                                 <span className="font-bold text-slate-600 text-sm">{day.date.getDate()}</span>
@@ -1619,7 +1639,8 @@ const CalendarView = ({ currentDate, transactions, onDayClick, density }: any) =
     );
 };
 
-const BudgetStatus = ({ budgets, monthlyExpenses, categories }: any) => {
+const BudgetStatus = ({ budgets, monthlyExpenses, categories, density }: any) => {
+    const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-5';
     const budgetData = useMemo(() => {
         return Object.keys(budgets)
             .filter(cat => budgets[cat] > 0 && categories.expense.includes(cat))
@@ -1636,7 +1657,7 @@ const BudgetStatus = ({ budgets, monthlyExpenses, categories }: any) => {
 
     if (budgetData.length === 0) return <p className="text-center text-slate-500 py-8">Nenhum orçamento definido.</p>;
     return (
-        <div className="space-y-5">
+        <div className={spacingClass}>
             {budgetData.map(item => (
                 <div key={item.category}>
                     <div className="flex justify-between items-center text-sm mb-2">
@@ -2236,18 +2257,18 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                 </div>
 
                 {ui.view === 'dashboard' && (
-                    <div className="space-y-6 animate-fade-in">
+                    <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in`}>
                         <Dashboard stats={monthlyData} density={ui.layoutDensity} userProfile={userProfile} />
                         
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="lg:col-span-2">
-                                <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} />
+                                <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
                             </div>
                             <div>
-                                <FinancialHealth stats={monthlyData} />
-                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-6">
+                                <FinancialHealth stats={monthlyData} density={ui.layoutDensity} />
+                                <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} mt-6`}>
                                     <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
-                                    <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} />
+                                    <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} density={ui.layoutDensity} />
                                     <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-cyan-500 hover:text-cyan-500 transition-all font-medium text-sm">Configurar Orçamentos</button>
                                 </div>
                             </div>
@@ -2256,7 +2277,7 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                 )}
 
                 {ui.view === 'transactions' && (
-                    <div className="space-y-6 animate-fade-in">
+                    <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in`}>
                         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <CollapsibleWidget 
                                 title={`Balanço Anual - ${currentDate.getFullYear()}`} 
@@ -2270,13 +2291,14 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                                     onEdit={ui.handleOpenModal} 
                                     onDelete={ui.setDeleteConfirmation}
                                     onStatusChange={handleStatusChange} 
+                                    density={ui.layoutDensity}
                                 />
                             </CollapsibleWidget>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 space-y-6">
-                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <div className={`lg:col-span-2 ${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}`}>
+                                <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                         <h3 className="text-lg font-bold flex items-center gap-2 text-slate-700"><Table className="text-cyan-500" /> Transações do Mês</h3>
                                         <div className="relative w-full sm:w-auto">
@@ -2293,13 +2315,13 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                                     <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onStatusChange={handleStatusChange} density={ui.layoutDensity} />
                                 </div>
                             </div>
-                            <div className="space-y-6">
-                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                            <div className={DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}>
+                                <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                     <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
-                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} />
+                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} density={ui.layoutDensity} />
                                 </div>
                                 
-                                <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                                <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} text-white`}>
                                     <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Star className="text-yellow-300" /> Dica do Dia</h3>
                                     <p className="text-sm text-cyan-50 opacity-90 leading-relaxed">
                                         {monthlyData.expense > monthlyData.income 
@@ -2326,7 +2348,7 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
             {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
             {ui.isAdminOpen && <AdminPanel db={db} onClose={() => ui.setIsAdminOpen(false)} />}
             {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
-            <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} date={ui.drillDown.date} onStatusChange={handleStatusChange} />
+            <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} date={ui.drillDown.date} onStatusChange={handleStatusChange} density={ui.layoutDensity} />
             <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
         </div>
     );
