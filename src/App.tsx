@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, AreaChart, Area } from 'recharts';
-import { PlusCircle, ArrowLeft, ArrowRight, TrendingUp, TrendingDown, DollarSign, Trash2, FileDown, FileUp, Edit, Table, CheckCircle, AlertTriangle, Clock, Layers, GripVertical, Plus, Minus, EyeOff, X, Calendar, LayoutDashboard, Barcode, Copy, QrCode, ArrowUpDown, PiggyBank, ChevronDown, Repeat, Bell, Printer, Settings, Check, ArrowUp, ArrowDown, CaseSensitive, LogOut, Mail, Lock, User, ShieldCheck, Star, HelpCircle, Menu, Gift, Search, Layout, Tags, PieChart as PieChartIcon, Activity } from 'lucide-react';
+import { PlusCircle, ArrowLeft, ArrowRight, TrendingUp, TrendingDown, DollarSign, Trash2, FileDown, FileUp, Edit, Table, CheckCircle, AlertTriangle, Clock, Layers, GripVertical, Plus, Minus, EyeOff, X, Calendar, LayoutDashboard, Barcode, Copy, QrCode, ArrowUpDown, PiggyBank, ChevronDown, Repeat, Bell, Printer, Settings, Check, ArrowUp, ArrowDown, CaseSensitive, LogOut, Mail, Lock, User, ShieldCheck, Star, HelpCircle, Menu, Gift, Search, Layout, Tags, PieChart as PieChartIcon, Activity, AlertCircle, Shield } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -794,77 +794,109 @@ const CollapsibleWidget = ({ title, children, isCollapsed, onToggle, density, ac
     );
 };
 
-const Dashboard = ({ stats, density }: any) => {
+const Dashboard = ({ stats, density, userProfile }: any) => {
     const { income, balance, paid, confirmed, waiting, expense } = stats;
-    const paddingClass = DENSITY_CLASSES.dashboardPadding[density as keyof typeof DENSITY_CLASSES.dashboardPadding];
+    const paddingClass = DENSITY_CLASSES.dashboardPadding[density as keyof typeof DENSITY_CLASSES.dashboardPadding] || 'p-6';
     const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200 flex items-center justify-between hover:shadow-md transition-shadow`}>
-                <div>
-                    <h3 className="text-slate-500 text-sm font-medium">Receitas</h3>
-                    <p className="text-2xl font-bold text-emerald-600">{income.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                </div>
-                <div className="bg-emerald-50 p-3 rounded-lg">
-                    <TrendingUp className="text-emerald-600 h-6 w-6" />
-                </div>
-            </div>
-            
-            <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200 flex items-center justify-between hover:shadow-md transition-shadow`}>
-                <div>
-                    <h3 className="text-slate-500 text-sm font-medium">Despesas</h3>
-                    <p className="text-2xl font-bold text-rose-600">{expense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
-                </div>
-                <div className="bg-rose-50 p-3 rounded-lg">
-                    <TrendingDown className="text-rose-600 h-6 w-6" />
-                </div>
-            </div>
-
-            <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200 flex items-center justify-between hover:shadow-md transition-shadow`}>
-                <div>
-                    <h3 className="text-slate-500 text-sm font-medium">Balanço Líquido</h3>
-                    <p className={`text-2xl font-bold ${balance >= 0 ? 'text-cyan-600' : 'text-orange-600'}`}>
-                        {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </p>
-                </div>
-                <div className={`p-3 rounded-lg ${balance >= 0 ? 'bg-cyan-50' : 'bg-orange-50'}`}>
-                    <DollarSign className={`h-6 w-6 ${balance >= 0 ? 'text-cyan-600' : 'text-orange-600'}`} />
-                </div>
-            </div>
-
-            <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200 flex items-center justify-between hover:shadow-md transition-shadow`}>
-                <div>
-                    <h3 className="text-slate-500 text-sm font-medium">Taxa de Poupança</h3>
-                    <p className={`text-2xl font-bold ${savingsRate >= 20 ? 'text-emerald-600' : savingsRate >= 0 ? 'text-cyan-600' : 'text-rose-600'}`}>
-                        {savingsRate.toFixed(1)}%
-                    </p>
-                </div>
-                <div className={`p-3 rounded-lg ${savingsRate >= 0 ? 'bg-emerald-50' : 'bg-rose-50'}`}>
-                    <PiggyBank className={`h-6 w-6 ${savingsRate >= 0 ? 'text-emerald-600' : 'text-rose-600'}`} />
-                </div>
-            </div>
-
-            <div className="lg:col-span-4 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center gap-3">
-                    <div className="w-2 h-8 rounded-full bg-emerald-500"></div>
-                    <div>
-                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Pago</p>
-                        <p className="text-lg font-bold text-slate-700">{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+        <div className={`space-y-6 ${paddingClass}`}>
+            {/* Hero Summary Section */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-6 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-gradient-to-br from-slate-50 to-white">
+                    <div className="w-full md:w-auto">
+                        <h2 className="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-widest mb-2">Balanço Total do Mês</h2>
+                        <div className="flex items-baseline gap-2 overflow-hidden">
+                            <span className="text-3xl md:text-6xl font-black text-slate-900 tracking-tighter truncate">
+                                {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
+                        </div>
+                        <p className="mt-4 text-slate-500 text-xs md:text-sm flex flex-wrap items-center gap-2">
+                            {balance >= 0 ? (
+                                <span className="flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded">
+                                    <TrendingUp size={14} /> Superávit
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1 text-rose-600 font-bold bg-rose-50 px-2 py-1 rounded">
+                                    <TrendingDown size={14} /> Déficit
+                                </span>
+                            )}
+                            em relação às suas finanças.
+                        </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
+                        <div className="bg-emerald-500/10 p-4 md:p-6 rounded-2xl border border-emerald-500/20">
+                            <p className="text-emerald-700 text-[10px] md:text-xs font-bold uppercase mb-1">Entradas</p>
+                            <p className="text-xl md:text-2xl font-black text-emerald-700">
+                                {income.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </p>
+                        </div>
+                        <div className="bg-rose-500/10 p-4 md:p-6 rounded-2xl border border-rose-500/20">
+                            <p className="text-rose-700 text-[10px] md:text-xs font-bold uppercase mb-1">Saídas</p>
+                            <p className="text-xl md:text-2xl font-black text-rose-700">
+                                {expense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center gap-3">
-                    <div className="w-2 h-8 rounded-full bg-amber-400"></div>
-                    <div>
-                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Confirmado</p>
-                        <p className="text-lg font-bold text-slate-700">{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 border-t border-slate-100">
+                    <div className="p-4 md:p-6 flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0">
+                        <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
+                            <CheckCircle size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Pago / Recebido</p>
+                            <p className="text-sm md:text-lg font-bold text-slate-700">{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        </div>
+                    </div>
+                    <div className="p-4 md:p-6 flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0">
+                        <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
+                            <Clock size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Confirmado</p>
+                            <p className="text-sm md:text-lg font-bold text-slate-700">{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        </div>
+                    </div>
+                    <div className="p-4 md:p-6 flex items-center gap-4 border-slate-100 last:border-r-0">
+                        <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
+                            <AlertCircle size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Aguardando</p>
+                            <p className="text-sm md:text-lg font-bold text-slate-700">{waiting.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        </div>
                     </div>
                 </div>
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-center gap-3">
-                    <div className="w-2 h-8 rounded-full bg-rose-400"></div>
+            </div>
+
+            {/* Secondary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
                     <div>
-                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Aguardando</p>
-                        <p className="text-lg font-bold text-slate-700">{waiting.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <h3 className="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-wider">Taxa de Poupança</h3>
+                        <p className={`text-2xl md:text-3xl font-black mt-1 ${savingsRate >= 20 ? 'text-emerald-600' : savingsRate >= 0 ? 'text-cyan-600' : 'text-rose-600'}`}>
+                            {savingsRate.toFixed(1)}%
+                        </p>
+                        <p className="text-[10px] md:text-xs text-slate-400 mt-2">Percentual da receita que sobra após despesas.</p>
+                    </div>
+                    <div className={`p-3 md:p-4 rounded-2xl ${savingsRate >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                        <PiggyBank size={28} />
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-wider">Status da Licença</h3>
+                        <p className="text-2xl md:text-3xl font-black mt-1 text-slate-800 capitalize">
+                            {userProfile?.licenseStatus === 'active' ? 'Ativa' : 'Pendente'}
+                        </p>
+                        <p className="text-[10px] md:text-xs text-slate-400 mt-2">Acesso vitalício ao sistema financeiro.</p>
+                    </div>
+                    <div className="bg-slate-50 p-3 md:p-4 rounded-2xl text-slate-400">
+                        <Shield size={28} />
                     </div>
                 </div>
             </div>
@@ -1037,11 +1069,14 @@ const Charts = ({ data, annualData, year }: any) => {
     );
 };
 
-const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange }: any) => {
+const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, density }: any) => {
     const { incomeTotals, expenseTotals, grandTotalIncome, grandTotalExpense, monthlyTransactions } = data;
     const [expandedMonth, setExpandedMonth] = useState<number | null>(null);
     const monthNames = Array.from({ length: 12 }, (_, i) => new Date(year, i, 1).toLocaleString('pt-BR', { month: 'short' }));
     const tableContainerRef = useRef<HTMLDivElement>(null);
+
+    const paddingClass = DENSITY_CLASSES.padding[density as keyof typeof DENSITY_CLASSES.padding] || 'px-3 py-3';
+    const cellPadding = density === 'super-compact' ? 'px-1 py-1' : density === 'compact' ? 'px-2 py-2' : 'px-3 py-3';
 
     useEffect(() => {
         if (tableContainerRef.current) {
@@ -1065,56 +1100,56 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange }: an
                 <table className="min-w-full divide-y divide-slate-200 text-sm">
                     <thead className="bg-slate-50">
                         <tr>
-                            <th className="px-3 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-50 z-10">Descrição</th>
+                            <th className={`${cellPadding} text-left text-xs font-medium text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-50 z-10`}>Descrição</th>
                             {monthNames.map((name, i) => (
                                 <th 
                                     key={name} 
                                     onClick={() => setExpandedMonth(expandedMonth === i ? null : i)}
-                                    className={`px-3 py-3 text-right text-xs font-medium uppercase tracking-wider capitalize cursor-pointer hover:bg-slate-100 transition-colors ${expandedMonth === i ? 'bg-cyan-50 text-cyan-600' : 'text-slate-500'}`}
+                                    className={`${cellPadding} text-right text-xs font-medium uppercase tracking-wider capitalize cursor-pointer hover:bg-slate-100 transition-colors ${expandedMonth === i ? 'bg-cyan-50 text-cyan-600' : 'text-slate-500'}`}
                                 >
                                     {name}
                                     <div className="text-[10px] font-normal lowercase">{expandedMonth === i ? 'ocultar' : 'ver detalhes'}</div>
                                 </th>
                             ))}
-                            <th className="px-3 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Total</th>
+                            <th className={`${cellPadding} text-right text-xs font-medium text-slate-500 uppercase tracking-wider`}>Total</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-200">
                         <tr>
-                            <td className="px-3 py-4 whitespace-nowrap font-medium text-slate-900 sticky left-0 bg-white z-10">Receitas</td>
+                            <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 sticky left-0 bg-white z-10`}>Receitas</td>
                             {incomeTotals.map((total: any, i: number) => (
-                                <td key={i} className={`px-3 py-4 text-right text-green-600 ${expandedMonth === i ? 'bg-cyan-50/30' : ''}`}>
+                                <td key={i} className={`${cellPadding} text-right text-green-600 ${expandedMonth === i ? 'bg-cyan-50/30' : ''}`}>
                                     {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </td>
                             ))}
-                            <td className="px-3 py-4 text-right font-bold text-green-700">
+                            <td className={`${cellPadding} text-right font-bold text-green-700`}>
                                 {grandTotalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </td>
                         </tr>
                         <tr>
-                            <td className="px-3 py-4 whitespace-nowrap font-medium text-slate-900 sticky left-0 bg-white z-10">Despesas</td>
+                            <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 sticky left-0 bg-white z-10`}>Despesas</td>
                             {expenseTotals.map((total: any, i: number) => (
-                                <td key={i} className={`px-3 py-4 text-right text-red-600 ${expandedMonth === i ? 'bg-cyan-50/30' : ''}`}>
+                                <td key={i} className={`${cellPadding} text-right text-red-600 ${expandedMonth === i ? 'bg-cyan-50/30' : ''}`}>
                                     {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </td>
                             ))}
-                            <td className="px-3 py-4 text-right font-bold text-red-700">
+                            <td className={`${cellPadding} text-right font-bold text-red-700`}>
                                 {grandTotalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </td>
                         </tr>
                     </tbody>
                     <tfoot className="bg-slate-100">
                         <tr>
-                            <td className="px-3 py-3 text-left font-bold text-slate-700 sticky left-0 bg-slate-100 z-10">Balanço</td>
+                            <td className={`${cellPadding} text-left font-bold text-slate-700 sticky left-0 bg-slate-100 z-10`}>Balanço</td>
                             {incomeTotals.map((inc: any, i: number) => { 
                                 const balance = inc - expenseTotals[i]; 
                                 return (
-                                    <td key={i} className={`px-3 py-3 text-right font-bold ${expandedMonth === i ? 'bg-cyan-50/50' : ''} ${balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                                    <td key={i} className={`${cellPadding} text-right font-bold ${expandedMonth === i ? 'bg-cyan-50/50' : ''} ${balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
                                         {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </td>
                                 ); 
                             })}
-                            <td className={`px-3 py-3 text-right font-bold ${(grandTotalIncome - grandTotalExpense) >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                            <td className={`${cellPadding} text-right font-bold ${(grandTotalIncome - grandTotalExpense) >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
                                 {(grandTotalIncome - grandTotalExpense).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </td>
                         </tr>
@@ -1288,17 +1323,18 @@ const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange }: any)
     );
 };
 
-const TransactionList = ({ transactions, onDelete, onEdit, onStatusChange }: any) => {
+const TransactionList = ({ transactions, onDelete, onEdit, onStatusChange, density }: any) => {
+    const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-3';
     return (
         <div className="overflow-x-auto">
             {transactions.length > 0 ? (
-                <ul className="space-y-3">
+                <ul className={spacingClass}>
                     {transactions.map((t: any) => (
                         <TransactionItem key={t.id} transaction={t} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
                     ))}
                 </ul>
             ) : (
-                <p className="text-center text-slate-500 py-8">Nenhuma transação neste mês.</p>
+                <p className="text-center text-slate-500 py-8">Nenhuma transação neste período.</p>
             )}
         </div>
     );
@@ -1391,7 +1427,7 @@ const TransactionModal = ({ onClose, onSave, transaction, categories }: any) => 
                         <div>
                             <label className="block text-sm font-medium text-slate-600">Centro de Custo</label>
                             <select value={category} onChange={e => setCategory(e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
-                                {categories[type as keyof typeof categories].map((c: string) => <option key={c} value={c}>{c}</option>)}
+                                {Array.from(new Set(categories[type as keyof typeof categories] as string[])).map((c: string) => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
                     </div>
@@ -1470,7 +1506,7 @@ const BatchTransactionModal = ({ onClose, onSaveBatch, categories }: any) => {
                             <div>
                                 <label className="block text-sm font-medium text-slate-600">Centro de Custo</label>
                                 <select value={baseData.category} onChange={e => handleBaseDataChange('category', e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
-                                    {categories[baseData.type as keyof typeof categories].map((c: string) => <option key={c} value={c}>{c}</option>)}
+                                    {Array.from(new Set(categories[baseData.type as keyof typeof categories] as string[])).map((c: string) => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
                             <div>
@@ -1638,7 +1674,7 @@ const BudgetModal = ({ onClose, onSave, currentBudgets, categories }: any) => {
             <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col">
                 <h2 className="text-xl font-bold mb-4">Definir Orçamentos</h2>
                 <div className="flex-grow overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {categories.expense.map((category: string) => (
+                    {Array.from(new Set(categories.expense as string[])).map((category: string) => (
                         <div key={category}>
                             <label className="block text-sm font-medium text-slate-600">{category}</label>
                             <input type="number" step="0.01" value={budgets[category] || ''} onChange={(e) => handleBudgetChange(category, e.target.value)} className="mt-1 block w-full rounded-md border-slate-300" />
@@ -1670,25 +1706,32 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, transaction }: an
     );
 };
 
-const UpcomingBills = ({ bills, onEdit, onDelete, onStatusChange }: any) => {
+const UpcomingBills = ({ bills, onEdit, onDelete, onStatusChange, density }: any) => {
     const { overdue, dueToday, dueNext7Days } = bills;
     const hasBills = overdue.length > 0 || dueToday.length > 0 || dueNext7Days.length > 0;
+    const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-4';
     return (
         <div>
             {!hasBills ? (
                 <p className="text-center text-slate-500 py-8">Nenhuma conta a vencer.</p>
             ) : (
-                <div className="space-y-4">
+                <div className={spacingClass}>
                     {overdue.length > 0 && (
                         <div>
-                            <h4 className="font-bold text-red-600 mb-2">Atrasadas</h4>
-                            <TransactionList transactions={overdue} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
+                            <h4 className="font-bold text-red-600 mb-2 text-xs uppercase tracking-wider">Atrasadas</h4>
+                            <TransactionList transactions={overdue} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
                         </div>
                     )}
                     {dueToday.length > 0 && (
                         <div>
-                            <h4 className="font-bold text-yellow-600 mb-2">Vencendo Hoje</h4>
-                            <TransactionList transactions={dueToday} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
+                            <h4 className="font-bold text-yellow-600 mb-2 text-xs uppercase tracking-wider">Vencendo Hoje</h4>
+                            <TransactionList transactions={dueToday} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
+                        </div>
+                    )}
+                    {dueNext7Days.length > 0 && (
+                        <div>
+                            <h4 className="font-bold text-cyan-600 mb-2 text-xs uppercase tracking-wider">Próximos 7 Dias</h4>
+                            <TransactionList transactions={dueNext7Days} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
                         </div>
                     )}
                 </div>
@@ -1697,20 +1740,71 @@ const UpcomingBills = ({ bills, onEdit, onDelete, onStatusChange }: any) => {
     );
 };
 
-const ReportModal = ({ onClose, onGenerate }: any) => {
+const ReportModal = ({ onClose, onGenerate, categories }: any) => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [type, setType] = useState('all');
+    const [category, setCategory] = useState('all');
+    const [status, setStatus] = useState('all');
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-lg animate-fade-in-up">
-                <h2 className="text-2xl font-bold mb-6">Gerar Relatório PDF</h2>
-                <div className="space-y-4">
-                    <div><label className="block text-sm font-medium">Início</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full rounded-md border-slate-300" /></div>
-                    <div><label className="block text-sm font-medium">Fim</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full rounded-md border-slate-300" /></div>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-fade-in-up">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-slate-800">Gerar Relatório PDF</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full"><X size={20} /></button>
                 </div>
-                <div className="mt-8 flex justify-end space-x-3">
-                    <button onClick={onClose} className="bg-slate-200 px-4 py-2 rounded-lg">Cancelar</button>
-                    <button onClick={() => onGenerate({ startDate, endDate })} className="bg-teal-500 text-white px-4 py-2 rounded-lg">Gerar PDF</button>
+                
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Início</label>
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Fim</label>
+                            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Tipo de Lançamento</label>
+                        <select value={type} onChange={e => setType(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500">
+                            <option value="all">Todos os tipos</option>
+                            <option value="income">Apenas Receitas</option>
+                            <option value="expense">Apenas Despesas</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Categoria</label>
+                        <select value={category} onChange={e => setCategory(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500">
+                            <option value="all">Todas as categorias</option>
+                            {Array.from(new Set([...categories.expense, ...categories.income])).sort().map(c => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Status</label>
+                        <select value={status} onChange={e => setStatus(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500">
+                            <option value="all">Todos os status</option>
+                            <option value={STATUSES.PAID}>Pago / Recebido</option>
+                            <option value={STATUSES.CONFIRMED}>Confirmado</option>
+                            <option value={STATUSES.WAITING}>Aguardando</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="mt-8 flex justify-end gap-3">
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 transition">Cancelar</button>
+                    <button 
+                        onClick={() => onGenerate({ startDate, endDate, type, category, status })} 
+                        className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-cyan-200 hover:bg-cyan-600 transition"
+                    >
+                        Gerar PDF
+                    </button>
                 </div>
             </div>
         </div>
@@ -1723,6 +1817,10 @@ const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensi
 
     const handleAdd = (type: 'expense' | 'income') => {
         if (!newCategory[type]) return;
+        if (localCategories[type].includes(newCategory[type])) {
+            toast.error('Esta categoria já existe!');
+            return;
+        }
         setLocalCategories((prev: any) => ({
             ...prev,
             [type]: [...prev[type], newCategory[type]]
@@ -1947,34 +2045,42 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
         
         const filtered = transactions.filter((t: any) => {
             const tDate = new Date(t.date + 'T00:00:00');
-            const start = new Date(options.startDate + 'T00:00:00');
-            const end = new Date(options.endDate + 'T00:00:00');
-            return tDate >= start && tDate <= end;
+            const start = options.startDate ? new Date(options.startDate + 'T00:00:00') : new Date(0);
+            const end = options.endDate ? new Date(options.endDate + 'T00:00:00') : new Date(8640000000000000);
+            
+            const matchesDate = tDate >= start && tDate <= end;
+            const matchesType = options.type === 'all' || t.type === options.type;
+            const matchesCategory = options.category === 'all' || t.category === options.category;
+            const matchesStatus = options.status === 'all' || t.status === options.status;
+
+            return matchesDate && matchesType && matchesCategory && matchesStatus;
         });
 
         doc.setFontSize(18);
-        doc.text('Relatório Financeiro', 14, 22);
+        doc.text('Relatório Financeiro Personalizado', 14, 22);
         doc.setFontSize(11);
-        doc.text(`Período: ${options.startDate} a ${options.endDate}`, 14, 30);
+        doc.text(`Período: ${options.startDate || 'Início'} a ${options.endDate || 'Fim'}`, 14, 30);
+        doc.text(`Filtros: Tipo: ${options.type}, Categoria: ${options.category}, Status: ${options.status}`, 14, 36);
 
-        const head = [['Data', 'Tipo', 'Descrição', 'Categoria', 'Valor']];
+        const head = [['Data', 'Tipo', 'Descrição', 'Categoria', 'Valor', 'Status']];
         const body = filtered.map((t: any) => [
             t.date,
             t.type === 'income' ? 'Receita' : 'Despesa',
             t.description,
             t.category,
-            t.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+            t.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+            t.status || '-'
         ]);
 
         autoTable(doc, {
             head,
             body,
-            startY: 40,
+            startY: 45,
             theme: 'striped',
-            headStyles: { fillColor: [38, 166, 154] }
+            headStyles: { fillColor: [6, 182, 212] } // Cyan-500
         });
 
-        doc.save(`relatorio-${options.startDate}-${options.endDate}.pdf`);
+        doc.save(`relatorio-financeiro-${new Date().getTime()}.pdf`);
         ui.setIsReportModalOpen(false);
         toast.success('Relatório gerado com sucesso!');
     };
@@ -2062,10 +2168,27 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
 
     return (
         <div className="bg-slate-100 min-h-screen">
-            <header className="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-50">
-                <h1 className="text-xl font-bold flex items-center"><DollarSign className="text-cyan-500 mr-2" /> Meu Controle Financeiro</h1>
-                <div className="flex gap-2">
-                    {user.email === APP_CONFIG.adminEmail && (
+            <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+                <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-cyan-500 p-2 rounded-xl text-white shadow-lg shadow-cyan-200">
+                            <DollarSign size={24} />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-black text-slate-800 tracking-tight">Meu Controle</h1>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Resumo Financeiro</p>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                        <div className="hidden md:flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-100 mr-2">
+                            <div className="px-3 py-1">
+                                <p className="text-[10px] text-slate-400 font-bold uppercase">Bem-vindo(a),</p>
+                                <p className="text-sm font-bold text-slate-700 truncate max-w-[150px]">{user.email?.split('@')[0]}</p>
+                            </div>
+                        </div>
+                        
+                        {user.email === APP_CONFIG.adminEmail && (
                         <button onClick={() => ui.setIsAdminOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg" title="Painel Admin"><ShieldCheck size={20} /></button>
                     )}
                     <button onClick={() => ui.setIsHelpOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg" title="Manual do Usuário"><HelpCircle size={20} /></button>
@@ -2084,7 +2207,8 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                     <button onClick={() => ui.setIsSettingsModalOpen(true)} className="p-2 hover:bg-slate-100 rounded-lg"><Settings size={20} /></button>
                     <button onClick={onLogout} className="p-2 text-red-500 hover:bg-red-50"><LogOut size={20} /></button>
                 </div>
-            </header>
+            </div>
+        </header>
             <main className="container mx-auto p-4 space-y-6">
                 {isDemo && (
                     <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
@@ -2098,22 +2222,41 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                         <button onClick={onLogout} className="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition">Criar Minha Conta</button>
                     </div>
                 )}
-                <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-lg shadow gap-4">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 hover:bg-slate-100 rounded-full"><ArrowLeft /></button>
-                        <h2 className="text-xl font-bold capitalize w-48 text-center">{currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h2>
-                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 hover:bg-slate-100 rounded-full"><ArrowRight /></button>
+                <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-4">
+                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 hover:bg-slate-100 rounded-full transition"><ArrowLeft size={20} /></button>
+                        <h2 className="text-lg font-bold capitalize text-slate-700">{currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h2>
+                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 hover:bg-slate-100 rounded-full transition"><ArrowRight size={20} /></button>
                     </div>
-                    <div className="flex bg-slate-100 p-1 rounded-lg w-full md:w-auto">
-                        <button onClick={() => ui.setView('dashboard')} className={`flex-1 md:flex-none px-6 py-2 rounded-md transition ${ui.view === 'dashboard' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500'}`}>Painel</button>
-                        <button onClick={() => ui.setView('calendar')} className={`flex-1 md:flex-none px-6 py-2 rounded-md transition ${ui.view === 'calendar' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500'}`}>Calendário</button>
+                    <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto no-scrollbar">
+                        <button onClick={() => ui.setView('dashboard')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'dashboard' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>Painel</button>
+                        <button onClick={() => ui.setView('transactions')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'transactions' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>Lançamentos</button>
+                        <button onClick={() => ui.setView('calendar')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'calendar' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500'}`}>Calendário</button>
                     </div>
                 </div>
 
-                {ui.view === 'dashboard' ? (
-                    <div className="space-y-6">
-                        <Dashboard stats={monthlyData} density={ui.layoutDensity} />
+                {ui.view === 'dashboard' && (
+                    <div className="space-y-6 animate-fade-in">
+                        <Dashboard stats={monthlyData} density={ui.layoutDensity} userProfile={userProfile} />
                         
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2">
+                                <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} />
+                            </div>
+                            <div>
+                                <FinancialHealth stats={monthlyData} />
+                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mt-6">
+                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
+                                    <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} />
+                                    <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-cyan-500 hover:text-cyan-500 transition-all font-medium text-sm">Configurar Orçamentos</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {ui.view === 'transactions' && (
+                    <div className="space-y-6 animate-fade-in">
                         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                             <CollapsibleWidget 
                                 title={`Balanço Anual - ${currentDate.getFullYear()}`} 
@@ -2134,13 +2277,6 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className="lg:col-span-2 space-y-6">
                                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
-                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} />
-                                </div>
-                                
-                                <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} />
-
-                                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                         <h3 className="text-lg font-bold flex items-center gap-2 text-slate-700"><Table className="text-cyan-500" /> Transações do Mês</h3>
                                         <div className="relative w-full sm:w-auto">
@@ -2154,16 +2290,13 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                         </div>
                                     </div>
-                                    <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onStatusChange={handleStatusChange} />
+                                    <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onStatusChange={handleStatusChange} density={ui.layoutDensity} />
                                 </div>
                             </div>
                             <div className="space-y-6">
-                                <FinancialHealth stats={monthlyData} />
-                                
                                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><PiggyBank className="text-cyan-500" /> Metas de Orçamento</h3>
-                                    <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} />
-                                    <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-cyan-500 hover:text-cyan-500 transition-all font-medium text-sm">Configurar Orçamentos</button>
+                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
+                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} />
                                 </div>
                                 
                                 <div className="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
@@ -2177,8 +2310,12 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                             </div>
                         </div>
                     </div>
-                ) : (
-                    <CalendarView currentDate={currentDate} transactions={transactions} onDayClick={handleDayClick} density={ui.layoutDensity} />
+                )}
+
+                {ui.view === 'calendar' && (
+                    <div className="animate-fade-in">
+                        <CalendarView currentDate={currentDate} transactions={transactions} onDayClick={handleDayClick} density={ui.layoutDensity} />
+                    </div>
                 )}
             </main>
 
@@ -2186,7 +2323,7 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
             {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
             {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} />}
             {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} />}
-            {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} />}
+            {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
             {ui.isAdminOpen && <AdminPanel db={db} onClose={() => ui.setIsAdminOpen(false)} />}
             {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
             <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} date={ui.drillDown.date} onStatusChange={handleStatusChange} />
