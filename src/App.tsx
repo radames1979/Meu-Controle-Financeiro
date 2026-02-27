@@ -1078,7 +1078,7 @@ const Charts = ({ data, annualData, year, density }: any) => {
     );
 };
 
-const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, density }: any) => {
+const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
     const { incomeTotals, expenseTotals, grandTotalIncome, grandTotalExpense, monthlyTransactions } = data;
     const [expandedMonth, setExpandedMonth] = useState<number | null>(null);
     const monthNames = Array.from({ length: 12 }, (_, i) => new Date(year, i, 1).toLocaleString('pt-BR', { month: 'short' }));
@@ -1192,6 +1192,7 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, dens
                                     onEdit={onEdit} 
                                     onDelete={onDelete}
                                     onStatusChange={onStatusChange} 
+                                    onRepeat={onRepeat}
                                 />
                             </div>
                         </div>
@@ -1205,6 +1206,7 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, dens
                                     onEdit={onEdit} 
                                     onDelete={onDelete}
                                     onStatusChange={onStatusChange} 
+                                    onRepeat={onRepeat}
                                 />
                             </div>
                         </div>
@@ -1283,7 +1285,7 @@ const useUIManager = () => {
     };
 };
 
-const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, density }: any) => {
+const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
     const { id, type, description, date, amount, status, paymentCodeType, recurringId, installmentNumber, totalInstallments } = transaction;
     
     const itemPadding = density === 'super-compact' ? 'p-1.5' : density === 'compact' ? 'p-2' : density === 'relaxed' ? 'p-4' : density === 'super-relaxed' ? 'p-5' : 'p-3';
@@ -1332,6 +1334,9 @@ const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, densit
                 <button onClick={(e) => { e.stopPropagation(); onEdit(transaction); }} className="text-slate-400 hover:text-cyan-500 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Editar">
                     <Edit size={18} />
                 </button>
+                <button onClick={(e) => { e.stopPropagation(); onRepeat(transaction); }} className="text-slate-400 hover:text-amber-500 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Repetir no próximo mês">
+                    <Copy size={18} />
+                </button>
                 <button onClick={(e) => { e.stopPropagation(); onDelete(transaction); }} className="text-slate-400 hover:text-red-500 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Excluir">
                     <Trash2 size={18} />
                 </button>
@@ -1340,14 +1345,14 @@ const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, densit
     );
 };
 
-const TransactionList = ({ transactions, onDelete, onEdit, onStatusChange, density }: any) => {
+const TransactionList = ({ transactions, onDelete, onEdit, onStatusChange, onRepeat, density }: any) => {
     const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-3';
     return (
         <div className="overflow-x-auto">
             {transactions.length > 0 ? (
                 <ul className={spacingClass}>
                     {transactions.map((t: any) => (
-                        <TransactionItem key={t.id} transaction={t} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
+                        <TransactionItem key={t.id} transaction={t} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                     ))}
                 </ul>
             ) : (
@@ -1566,7 +1571,7 @@ const BatchTransactionModal = ({ onClose, onSaveBatch, categories }: any) => {
     );
 };
 
-const DrillDownModal = ({ isOpen, onClose, title, transactions, onEdit, onDelete, date, onStatusChange, density }: any) => {
+const DrillDownModal = ({ isOpen, onClose, title, transactions, onEdit, onDelete, date, onStatusChange, onRepeat, density }: any) => {
     if (!isOpen) return null;
     const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
     return (
@@ -1577,7 +1582,7 @@ const DrillDownModal = ({ isOpen, onClose, title, transactions, onEdit, onDelete
                     <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-200 transition"><X size={20} /></button>
                 </div>
                 <div className="flex-grow overflow-y-auto pr-2">
-                    <TransactionList transactions={transactions} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
+                    <TransactionList transactions={transactions} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                 </div>
                 <div className="mt-6 flex justify-end border-t pt-4">
                     <button type="button" onClick={onClose} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition">Fechar</button>
@@ -1727,7 +1732,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, transaction }: an
     );
 };
 
-const UpcomingBills = ({ bills, onEdit, onDelete, onStatusChange, density }: any) => {
+const UpcomingBills = ({ bills, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
     const { overdue, dueToday, dueNext7Days } = bills;
     const hasBills = overdue.length > 0 || dueToday.length > 0 || dueNext7Days.length > 0;
     const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-4';
@@ -1740,19 +1745,19 @@ const UpcomingBills = ({ bills, onEdit, onDelete, onStatusChange, density }: any
                     {overdue.length > 0 && (
                         <div>
                             <h4 className="font-bold text-red-600 mb-2 text-xs uppercase tracking-wider">Atrasadas</h4>
-                            <TransactionList transactions={overdue} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
+                            <TransactionList transactions={overdue} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                         </div>
                     )}
                     {dueToday.length > 0 && (
                         <div>
                             <h4 className="font-bold text-yellow-600 mb-2 text-xs uppercase tracking-wider">Vencendo Hoje</h4>
-                            <TransactionList transactions={dueToday} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
+                            <TransactionList transactions={dueToday} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                         </div>
                     )}
                     {dueNext7Days.length > 0 && (
                         <div>
                             <h4 className="font-bold text-cyan-600 mb-2 text-xs uppercase tracking-wider">Próximos 7 Dias</h4>
-                            <TransactionList transactions={dueNext7Days} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} density={density} />
+                            <TransactionList transactions={dueNext7Days} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                         </div>
                     )}
                 </div>
@@ -2029,6 +2034,38 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
         await updateDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, id), { status: nextStatus });
     };
 
+    const handleRepeatTransaction = async (transaction: any) => {
+        const originalDate = new Date(transaction.date + 'T00:00:00');
+        const nextMonthDate = new Date(originalDate);
+        nextMonthDate.setMonth(originalDate.getMonth() + 1);
+        
+        // Tratar estouro de mês (ex: 31 de Jan -> 3 de Mar se Fev tiver 28 dias)
+        if (nextMonthDate.getMonth() !== (originalDate.getMonth() + 1) % 12) {
+            nextMonthDate.setDate(0); // Último dia do mês anterior
+        }
+
+        const { id, ...rest } = transaction;
+        const newTransaction = {
+            ...rest,
+            date: nextMonthDate.toISOString().split('T')[0],
+            status: transaction.type === 'expense' ? STATUSES.WAITING : null,
+            recurringId: null,
+            installmentNumber: null,
+            totalInstallments: null
+        };
+
+        if (isDemo) {
+            setTransactions([...transactions, { ...newTransaction, id: `demo-${Date.now()}` }]);
+            toast.success('Lançamento repetido para o próximo mês (Demo)!');
+            return;
+        }
+
+        const appId = 'meu-controle-financeiro';
+        const colRef = collection(db, `artifacts/${appId}/users/${user.uid}/transactions`);
+        await addDoc(colRef, newTransaction);
+        toast.success('Lançamento repetido para o próximo mês!');
+    };
+
     const handleSaveBudgets = async (newBudgets: any) => {
         if (isDemo) {
             setBudgets(newBudgets);
@@ -2291,6 +2328,7 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                                     onEdit={ui.handleOpenModal} 
                                     onDelete={ui.setDeleteConfirmation}
                                     onStatusChange={handleStatusChange} 
+                                    onRepeat={handleRepeatTransaction}
                                     density={ui.layoutDensity}
                                 />
                             </CollapsibleWidget>
@@ -2312,13 +2350,13 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                         </div>
                                     </div>
-                                    <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onStatusChange={handleStatusChange} density={ui.layoutDensity} />
+                                    <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
                                 </div>
                             </div>
                             <div className={DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}>
                                 <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                     <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
-                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} density={ui.layoutDensity} />
+                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
                                 </div>
                                 
                                 <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} text-white`}>
@@ -2348,7 +2386,7 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
             {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
             {ui.isAdminOpen && <AdminPanel db={db} onClose={() => ui.setIsAdminOpen(false)} />}
             {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
-            <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} date={ui.drillDown.date} onStatusChange={handleStatusChange} density={ui.layoutDensity} />
+            <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} date={ui.drillDown.date} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
             <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
         </div>
     );
