@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, AreaChart, Area } from 'recharts';
-import { PlusCircle, ArrowLeft, ArrowRight, TrendingUp, TrendingDown, DollarSign, Trash2, FileDown, FileUp, Edit, Table, CheckCircle, AlertTriangle, Clock, Layers, GripVertical, Plus, Minus, EyeOff, X, Calendar, LayoutDashboard, Barcode, Copy, QrCode, ArrowUpDown, PiggyBank, ChevronDown, Repeat, Bell, Printer, Settings, Check, ArrowUp, ArrowDown, CaseSensitive, LogOut, Mail, Lock, User, ShieldCheck, Star, HelpCircle, Menu, Gift, Search, Layout, Tags, PieChart as PieChartIcon, Activity, AlertCircle, Shield } from 'lucide-react';
+import { PlusCircle, ArrowLeft, ArrowRight, TrendingUp, TrendingDown, DollarSign, Trash2, FileDown, FileUp, Edit, Table, CheckCircle, AlertTriangle, Clock, Layers, GripVertical, Plus, Minus, EyeOff, X, Calendar, LayoutDashboard, Barcode, Copy, QrCode, ArrowUpDown, PiggyBank, ChevronDown, Repeat, Bell, Printer, Settings, Check, ArrowUp, ArrowDown, CaseSensitive, LogOut, Mail, Lock, User, ShieldCheck, Star, HelpCircle, Menu, Gift, Search, Layout, Tags, PieChart as PieChartIcon, Activity, AlertCircle, Shield, Sun, Moon } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -497,12 +497,12 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-800 text-white">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-800 dark:bg-slate-900 text-white">
                     <div className="flex items-center gap-4">
                         <h2 className="text-xl font-bold flex items-center gap-2"><ShieldCheck /> Admin</h2>
-                        <div className="flex bg-slate-700 p-1 rounded-lg">
+                        <div className="flex bg-slate-700 dark:bg-slate-800 p-1 rounded-lg">
                             <button onClick={() => setActiveTab('users')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'users' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Usuários</button>
                             <button onClick={() => setActiveTab('whitelist')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'whitelist' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Pré-Aprovar</button>
                             <button onClick={() => setActiveTab('settings')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'settings' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Configurações</button>
@@ -511,57 +511,57 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                     <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition"><X /></button>
                 </div>
                 
-                <div className="p-8 overflow-y-auto">
+                <div className="p-8 overflow-y-auto custom-scrollbar">
                     {activeTab === 'users' ? (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                                    <p className="text-slate-500 text-xs uppercase font-bold mb-1">Total de Usuários</p>
-                                    <p className="text-3xl font-black text-slate-800">{appStats.totalUsers}</p>
+                                <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                    <p className="text-slate-500 dark:text-slate-400 text-xs uppercase font-bold mb-1">Total de Usuários</p>
+                                    <p className="text-3xl font-black text-slate-800 dark:text-slate-100">{appStats.totalUsers}</p>
                                 </div>
-                                <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
-                                    <p className="text-emerald-600 text-xs uppercase font-bold mb-1">Licenças Ativas</p>
-                                    <p className="text-3xl font-black text-emerald-700">{appStats.activeLicenses}</p>
+                                <div className="bg-emerald-50 dark:bg-emerald-500/10 p-6 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
+                                    <p className="text-emerald-600 dark:text-emerald-400 text-xs uppercase font-bold mb-1">Licenças Ativas</p>
+                                    <p className="text-3xl font-black text-emerald-700 dark:text-emerald-300">{appStats.activeLicenses}</p>
                                 </div>
-                                <div className="bg-cyan-50 p-6 rounded-2xl border border-cyan-100">
-                                    <p className="text-cyan-600 text-xs uppercase font-bold mb-1">Receita Potencial</p>
-                                    <p className="text-3xl font-black text-cyan-700">R$ {(appStats.activeLicenses * config.defaultPrice).toFixed(2)}</p>
+                                <div className="bg-cyan-50 dark:bg-cyan-500/10 p-6 rounded-2xl border border-cyan-100 dark:border-cyan-500/20">
+                                    <p className="text-cyan-600 dark:text-cyan-400 text-xs uppercase font-bold mb-1">Receita Potencial</p>
+                                    <p className="text-3xl font-black text-cyan-700 dark:text-cyan-300">R$ {(appStats.activeLicenses * config.defaultPrice).toFixed(2)}</p>
                                 </div>
                             </div>
 
-                            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                                <table className="min-w-full divide-y divide-slate-200">
-                                    <thead className="bg-slate-50">
+                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+                                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                                    <thead className="bg-slate-50 dark:bg-slate-900/50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Usuário</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
-                                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Ações</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Usuário</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Status</th>
+                                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Ações</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-200">
+                                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                                         {loading ? (
-                                            <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-400">Carregando...</td></tr>
+                                            <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-400 dark:text-slate-500">Carregando...</td></tr>
                                         ) : users.map((user, idx) => (
-                                            <tr key={user.uid || user.id || idx} className="hover:bg-slate-50 transition">
+                                            <tr key={user.uid || user.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition">
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-slate-700">{user.email}</span>
+                                                        <span className="font-bold text-slate-700 dark:text-slate-200">{user.email}</span>
                                                         <div className="flex items-center gap-2 mt-1">
-                                                            <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-mono">ID: {(user.uid || user.id || '').substring(0, 8)}...</span>
-                                                            {user.lastSeen && <span className="text-[9px] text-slate-400">Visto em: {new Date(user.lastSeen).toLocaleDateString()}</span>}
+                                                            <span className="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase font-mono">ID: {(user.uid || user.id || '').substring(0, 8)}...</span>
+                                                            {user.lastSeen && <span className="text-[9px] text-slate-400 dark:text-slate-500">Visto em: {new Date(user.lastSeen).toLocaleDateString()}</span>}
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${user.licenseStatus === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${user.licenseStatus === 'active' ? 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'}`}>
                                                         {user.licenseStatus === 'active' ? 'Ativo' : 'Pendente'}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-2">
-                                                    <button onClick={() => handleToggleLicense(user)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${user.licenseStatus === 'active' ? 'text-rose-500 hover:bg-rose-50' : 'text-emerald-500 hover:bg-emerald-50'}`}>
+                                                    <button onClick={() => handleToggleLicense(user)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${user.licenseStatus === 'active' ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10' : 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>
                                                         {user.licenseStatus === 'active' ? 'Desativar' : 'Ativar'}
                                                     </button>
-                                                    <button onClick={() => handleDeleteUser(user.uid || user.id)} className="text-slate-400 hover:text-rose-500 p-1.5 transition"><Trash2 size={16} /></button>
+                                                    <button onClick={() => handleDeleteUser(user.uid || user.id)} className="text-slate-400 dark:text-slate-500 hover:text-rose-500 p-1.5 transition"><Trash2 size={16} /></button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -572,8 +572,8 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                     ) : activeTab === 'whitelist' ? (
                         <div className="max-w-2xl space-y-8">
                             <div>
-                                <h3 className="text-lg font-bold text-slate-800 mb-4">Pré-Aprovar E-mails</h3>
-                                <p className="text-sm text-slate-500 mb-6">E-mails cadastrados aqui terão acesso liberado automaticamente assim que criarem a conta.</p>
+                                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">Pré-Aprovar E-mails</h3>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">E-mails cadastrados aqui terão acesso liberado automaticamente assim que criarem a conta.</p>
                                 <form onSubmit={handleAddToWhitelist} className="flex gap-2">
                                     <input 
                                         type="email" 
@@ -581,7 +581,7 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                         value={newWhitelistEmail}
                                         onChange={e => setNewWhitelistEmail(e.target.value)}
                                         placeholder="email@cliente.com"
-                                        className="flex-1 rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                        className="flex-1 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                     />
                                     <button type="submit" className="bg-emerald-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-emerald-600 transition flex items-center gap-2">
                                         <Plus size={20} /> Aprovar
@@ -589,22 +589,22 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                 </form>
                             </div>
 
-                            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                                <table className="min-w-full divide-y divide-slate-200">
-                                    <thead className="bg-slate-50">
+                            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+                                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                                    <thead className="bg-slate-50 dark:bg-slate-900/50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase">E-mail Pré-Aprovado</th>
-                                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase">Ação</th>
+                                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">E-mail Pré-Aprovado</th>
+                                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Ação</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-200">
+                                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                                         {whitelist.length === 0 ? (
-                                            <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-400">Nenhum e-mail na lista branca.</td></tr>
+                                            <tr><td colSpan={2} className="px-6 py-8 text-center text-slate-400 dark:text-slate-500">Nenhum e-mail na lista branca.</td></tr>
                                         ) : whitelist.map((email, idx) => (
-                                            <tr key={`${email}-${idx}`} className="hover:bg-slate-50 transition">
-                                                <td className="px-6 py-4 text-sm font-medium text-slate-700">{email}</td>
+                                            <tr key={`${email}-${idx}`} className="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition">
+                                                <td className="px-6 py-4 text-sm font-medium text-slate-700 dark:text-slate-200">{email}</td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <button onClick={() => handleRemoveFromWhitelist(email)} className="text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition">
+                                                    <button onClick={() => handleRemoveFromWhitelist(email)} className="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-2 rounded-lg transition">
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </td>
@@ -618,40 +618,40 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                         <form onSubmit={handleUpdateConfig} className="max-w-2xl space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Preço da Licença (R$)</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Preço da Licença (R$)</label>
                                     <input 
                                         type="number" 
                                         step="0.01"
                                         value={config.defaultPrice} 
                                         onChange={e => setConfig({ ...config, defaultPrice: parseFloat(e.target.value) })}
-                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                        className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Chave PIX</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Chave PIX</label>
                                     <input 
                                         type="text" 
                                         value={config.pixKey} 
                                         onChange={e => setConfig({ ...config, pixKey: e.target.value })}
-                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                        className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">E-mail de Suporte</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">E-mail de Suporte</label>
                                     <input 
                                         type="email" 
                                         value={config.supportEmail} 
                                         onChange={e => setConfig({ ...config, supportEmail: e.target.value })}
-                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                        className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">WhatsApp de Suporte</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">WhatsApp de Suporte</label>
                                     <input 
                                         type="text" 
                                         value={config.supportWhatsapp} 
                                         onChange={e => setConfig({ ...config, supportWhatsapp: e.target.value })}
-                                        className="w-full rounded-xl border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                        className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                     />
                                 </div>
                             </div>
@@ -807,22 +807,22 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
     return (
         <div className={`space-y-6 ${dashboardPaddingClass}`}>
             {/* Hero Summary Section */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className={`${heroPaddingClass} flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-gradient-to-br from-slate-50 to-white`}>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-300">
+                <div className={`${heroPaddingClass} flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50`}>
                     <div className="w-full md:w-auto">
-                        <h2 className="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-widest mb-2">Balanço Total do Mês</h2>
+                        <h2 className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest mb-2">Balanço Total do Mês</h2>
                         <div className="flex items-baseline gap-2 overflow-hidden">
-                            <span className="text-3xl md:text-6xl font-black text-slate-900 tracking-tighter truncate">
+                            <span className="text-3xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter truncate">
                                 {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </span>
                         </div>
-                        <p className="mt-4 text-slate-500 text-xs md:text-sm flex flex-wrap items-center gap-2">
+                        <p className="mt-4 text-slate-500 dark:text-slate-400 text-xs md:text-sm flex flex-wrap items-center gap-2">
                             {balance >= 0 ? (
-                                <span className="flex items-center gap-1 text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded">
+                                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded">
                                     <TrendingUp size={14} /> Superávit
                                 </span>
                             ) : (
-                                <span className="flex items-center gap-1 text-rose-600 font-bold bg-rose-50 px-2 py-1 rounded">
+                                <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400 font-bold bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded">
                                     <TrendingDown size={14} /> Déficit
                                 </span>
                             )}
@@ -832,46 +832,46 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
                         <div className={`bg-emerald-500/10 ${paddingClass} rounded-2xl border border-emerald-500/20`}>
-                            <p className="text-emerald-700 text-[10px] md:text-xs font-bold uppercase mb-1">Entradas</p>
-                            <p className="text-xl md:text-2xl font-black text-emerald-700">
+                            <p className="text-emerald-700 dark:text-emerald-400 text-[10px] md:text-xs font-bold uppercase mb-1">Entradas</p>
+                            <p className="text-xl md:text-2xl font-black text-emerald-700 dark:text-emerald-400">
                                 {income.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </p>
                         </div>
                         <div className={`bg-rose-500/10 ${paddingClass} rounded-2xl border border-rose-500/20`}>
-                            <p className="text-rose-700 text-[10px] md:text-xs font-bold uppercase mb-1">Saídas</p>
-                            <p className="text-xl md:text-2xl font-black text-rose-700">
+                            <p className="text-rose-700 dark:text-rose-400 text-[10px] md:text-xs font-bold uppercase mb-1">Saídas</p>
+                            <p className="text-xl md:text-2xl font-black text-rose-700 dark:text-rose-400">
                                 {expense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </p>
                         </div>
                     </div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-3 border-t border-slate-100">
-                    <div className={`${paddingClass} flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0`}>
-                        <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
+                <div className="grid grid-cols-1 sm:grid-cols-3 border-t border-slate-100 dark:border-slate-700">
+                    <div className={`${paddingClass} flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-slate-700 last:border-r-0`}>
+                        <div className="bg-slate-100 dark:bg-slate-700 p-2 md:p-3 rounded-xl text-slate-600 dark:text-slate-300">
                             <CheckCircle size={20} />
                         </div>
                         <div>
                             <p className="text-[10px] text-slate-400 font-bold uppercase">Pago / Recebido</p>
-                            <p className="text-sm md:text-lg font-bold text-slate-700">{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            <p className="text-sm md:text-lg font-bold text-slate-700 dark:text-slate-200">{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                     </div>
-                    <div className={`${paddingClass} flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 last:border-r-0`}>
-                        <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
+                    <div className={`${paddingClass} flex items-center gap-4 border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-slate-700 last:border-r-0`}>
+                        <div className="bg-slate-100 dark:bg-slate-700 p-2 md:p-3 rounded-xl text-slate-600 dark:text-slate-300">
                             <Clock size={20} />
                         </div>
                         <div>
                             <p className="text-[10px] text-slate-400 font-bold uppercase">Confirmado</p>
-                            <p className="text-sm md:text-lg font-bold text-slate-700">{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            <p className="text-sm md:text-lg font-bold text-slate-700 dark:text-slate-200">{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                     </div>
-                    <div className={`${paddingClass} flex items-center gap-4 border-slate-100 last:border-r-0`}>
-                        <div className="bg-slate-100 p-2 md:p-3 rounded-xl text-slate-600">
+                    <div className={`${paddingClass} flex items-center gap-4 border-slate-100 dark:border-slate-700 last:border-r-0`}>
+                        <div className="bg-slate-100 dark:bg-slate-700 p-2 md:p-3 rounded-xl text-slate-600 dark:text-slate-300">
                             <AlertCircle size={20} />
                         </div>
                         <div>
                             <p className="text-[10px] text-slate-400 font-bold uppercase">Aguardando</p>
-                            <p className="text-sm md:text-lg font-bold text-slate-700">{waiting.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            <p className="text-sm md:text-lg font-bold text-slate-700 dark:text-slate-200">{waiting.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                     </div>
                 </div>
@@ -879,28 +879,28 @@ const Dashboard = ({ stats, density, userProfile }: any) => {
 
             {/* Secondary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-300">
                     <div>
-                        <h3 className="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-wider">Taxa de Poupança</h3>
-                        <p className={`text-2xl md:text-3xl font-black mt-1 ${savingsRate >= 20 ? 'text-emerald-600' : savingsRate >= 0 ? 'text-cyan-600' : 'text-rose-600'}`}>
+                        <h3 className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-wider">Taxa de Poupança</h3>
+                        <p className={`text-2xl md:text-3xl font-black mt-1 ${savingsRate >= 20 ? 'text-emerald-600 dark:text-emerald-400' : savingsRate >= 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-rose-600 dark:text-rose-400'}`}>
                             {savingsRate.toFixed(1)}%
                         </p>
                         <p className="text-[10px] md:text-xs text-slate-400 mt-2">Percentual da receita que sobra após despesas.</p>
                     </div>
-                    <div className={`p-3 md:p-4 rounded-2xl ${savingsRate >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                    <div className={`p-3 md:p-4 rounded-2xl ${savingsRate >= 0 ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'}`}>
                         <PiggyBank size={28} />
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-300">
                     <div>
-                        <h3 className="text-slate-500 text-xs md:text-sm font-bold uppercase tracking-wider">Status da Licença</h3>
-                        <p className="text-2xl md:text-3xl font-black mt-1 text-slate-800 capitalize">
+                        <h3 className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-wider">Status da Licença</h3>
+                        <p className="text-2xl md:text-3xl font-black mt-1 text-slate-800 dark:text-slate-200 capitalize">
                             {userProfile?.licenseStatus === 'active' ? 'Ativa' : 'Pendente'}
                         </p>
                         <p className="text-[10px] md:text-xs text-slate-400 mt-2">Acesso vitalício ao sistema financeiro.</p>
                     </div>
-                    <div className="bg-slate-50 p-3 md:p-4 rounded-2xl text-slate-400">
+                    <div className="bg-slate-50 dark:bg-slate-700 p-3 md:p-4 rounded-2xl text-slate-400 dark:text-slate-300">
                         <Shield size={28} />
                     </div>
                 </div>
@@ -923,18 +923,18 @@ const FinancialHealth = ({ stats, density }: any) => {
     else score = 30;
 
     const getStatus = () => {
-        if (score >= 85) return { text: 'Excelente', color: 'text-emerald-500', bg: 'bg-emerald-50' };
-        if (score >= 70) return { text: 'Bom', color: 'text-cyan-500', bg: 'bg-cyan-50' };
-        if (score >= 50) return { text: 'Regular', color: 'text-amber-500', bg: 'bg-amber-50' };
-        return { text: 'Crítico', color: 'text-rose-500', bg: 'bg-rose-50' };
+        if (score >= 85) return { text: 'Excelente', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-500/10' };
+        if (score >= 70) return { text: 'Bom', color: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-500/10' };
+        if (score >= 50) return { text: 'Regular', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10' };
+        return { text: 'Crítico', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-500/10' };
     };
 
     const status = getStatus();
 
     return (
-        <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200`}>
+        <div className={`bg-white dark:bg-slate-800 ${paddingClass} rounded-xl shadow-sm border border-slate-200 dark:border-slate-700`}>
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-slate-700 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                     <Activity size={20} className="text-cyan-500" /> Saúde Financeira
                 </h3>
                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${status.bg} ${status.color}`}>
@@ -945,7 +945,7 @@ const FinancialHealth = ({ stats, density }: any) => {
                 <div className="relative w-24 h-24 flex-shrink-0">
                     <svg className="w-full h-full" viewBox="0 0 36 36">
                         <path
-                            className="text-slate-100 stroke-current"
+                            className="text-slate-100 dark:text-slate-700 stroke-current"
                             strokeWidth="3"
                             fill="none"
                             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
@@ -958,15 +958,15 @@ const FinancialHealth = ({ stats, density }: any) => {
                             fill="none"
                             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
-                        <text x="18" y="20.35" className="text-[8px] font-bold fill-current text-slate-700" textAnchor="middle">{score}%</text>
+                        <text x="18" y="20.35" className="text-[8px] font-bold fill-current text-slate-700 dark:text-slate-200" textAnchor="middle">{score}%</text>
                     </svg>
                 </div>
                 <div className={`flex-1 ${spacingClass}`}>
-                    <p className="text-sm text-slate-500 leading-tight">
-                        Sua taxa de poupança está em <span className="font-bold text-slate-700">{savingsRate.toFixed(1)}%</span>. 
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-tight">
+                        Sua taxa de poupança está em <span className="font-bold text-slate-700 dark:text-slate-200">{savingsRate.toFixed(1)}%</span>. 
                         {score >= 85 ? " Você está no caminho certo!" : " Tente reduzir gastos supérfluos."}
                     </p>
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div className={`h-full ${status.color.replace('text', 'bg')} transition-all duration-1000`} style={{ width: `${score}%` }}></div>
                     </div>
                 </div>
@@ -978,7 +978,7 @@ const FinancialHealth = ({ stats, density }: any) => {
 const Charts = ({ data, annualData, year, density }: any) => {
     const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
     const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6';
-    if (data.length === 0) return (<div className={`text-center text-slate-500 ${paddingClass} bg-white rounded-xl border border-dashed border-slate-300`}><h3 className="text-lg font-semibold mb-2">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
+    if (data.length === 0) return (<div className={`text-center text-slate-500 ${paddingClass} bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-700`}><h3 className="text-lg font-semibold mb-2 dark:text-slate-200">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
     
     const cashFlowData = useMemo(() => {
         return annualData.incomeTotals.map((income: number, i: number) => ({
@@ -991,13 +991,13 @@ const Charts = ({ data, annualData, year, density }: any) => {
 
     return (
         <div className={spacingClass}>
-            <div className={`bg-white ${paddingClass} rounded-xl shadow-sm border border-slate-200 min-h-[400px]`}>
-                <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
+            <div className={`bg-white dark:bg-slate-800 ${paddingClass} rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 min-h-[400px] overflow-hidden`}>
+                <h3 className="text-lg font-bold mb-6 text-slate-700 dark:text-slate-200 flex items-center gap-2">
                     <TrendingUp size={20} className="text-cyan-500" /> Fluxo de Caixa Anual ({year})
                 </h3>
                 <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
-                    <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} aspect={2}>
-                        <AreaChart data={cashFlowData}>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={cashFlowData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="colorReceitas" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
@@ -1012,7 +1012,7 @@ const Charts = ({ data, annualData, year, density }: any) => {
                             <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$ ${value}`} />
                             <Tooltip 
                                 formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
                             />
                             <Legend iconType="circle" />
                             <Area type="monotone" dataKey="Receitas" stroke="#10b981" fillOpacity={1} fill="url(#colorReceitas)" strokeWidth={3} />
@@ -1023,12 +1023,12 @@ const Charts = ({ data, annualData, year, density }: any) => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px]">
-                    <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 min-h-[400px] overflow-hidden">
+                    <h3 className="text-lg font-bold mb-6 text-slate-700 dark:text-slate-200 flex items-center gap-2">
                         <PieChartIcon size={20} className="text-cyan-500" /> Distribuição de Gastos
                     </h3>
-                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
-                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} aspect={1}>
+                    <div className="h-[300px] w-full flex justify-center" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie 
                                     data={data} 
@@ -1036,8 +1036,8 @@ const Charts = ({ data, annualData, year, density }: any) => {
                                     nameKey="name" 
                                     cx="50%" 
                                     cy="50%" 
-                                    innerRadius={70}
-                                    outerRadius={100} 
+                                    innerRadius="60%"
+                                    outerRadius="80%" 
                                     paddingAngle={5}
                                     stroke="none"
                                 >
@@ -1047,28 +1047,28 @@ const Charts = ({ data, annualData, year, density }: any) => {
                                 </Pie>
                                 <Tooltip 
                                     formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
                                 />
-                                <Legend layout="vertical" align="right" verticalAlign="middle" iconType="circle" />
+                                <Legend layout="horizontal" align="center" verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '20px' }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px]">
-                    <h3 className="text-lg font-bold mb-6 text-slate-700 flex items-center gap-2">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 min-h-[400px] overflow-hidden">
+                    <h3 className="text-lg font-bold mb-6 text-slate-700 dark:text-slate-200 flex items-center gap-2">
                         <Table size={20} className="text-cyan-500" /> Ranking de Categorias
                     </h3>
                     <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
-                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} aspect={1.5}>
-                            <BarChart data={data.slice(0, 5)} layout="vertical" margin={{ left: 20 }}>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart data={data.slice(0, 5)} layout="vertical" margin={{ left: 0, right: 30 }}>
                                 <XAxis type="number" hide />
-                                <YAxis type="category" dataKey="name" width={100} stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis type="category" dataKey="name" width={80} stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
                                 <Tooltip 
                                     formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
                                 />
-                                <Bar dataKey="value" fill="#06b6d4" radius={[0, 4, 4, 0]} barSize={24} />
+                                <Bar dataKey="value" fill="#06b6d4" radius={[0, 4, 4, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -1106,59 +1106,59 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, onRe
     return (
         <div className="flex flex-col">
             <div className="overflow-x-auto" ref={tableContainerRef}>
-                <table className="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead className="bg-slate-50">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50">
                         <tr>
-                            <th className={`${cellPadding} text-left text-xs font-medium text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-50 z-10`}>Descrição</th>
+                            <th className={`${cellPadding} text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider sticky left-0 bg-slate-50 dark:bg-slate-800 z-10`}>Descrição</th>
                             {monthNames.map((name, i) => (
                                 <th 
                                     key={name} 
                                     onClick={() => setExpandedMonth(expandedMonth === i ? null : i)}
-                                    className={`${cellPadding} text-right text-xs font-medium uppercase tracking-wider capitalize cursor-pointer hover:bg-slate-100 transition-colors ${expandedMonth === i ? 'bg-cyan-50 text-cyan-600' : 'text-slate-500'}`}
+                                    className={`${cellPadding} text-right text-xs font-medium uppercase tracking-wider capitalize cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${expandedMonth === i ? 'bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' : 'text-slate-500 dark:text-slate-400'}`}
                                 >
                                     {name}
                                     <div className="text-[10px] font-normal lowercase">{expandedMonth === i ? 'ocultar' : 'ver detalhes'}</div>
                                 </th>
                             ))}
-                            <th className={`${cellPadding} text-right text-xs font-medium text-slate-500 uppercase tracking-wider`}>Total</th>
+                            <th className={`${cellPadding} text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider`}>Total</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-slate-200">
+                    <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                         <tr>
-                            <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 sticky left-0 bg-white z-10`}>Receitas</td>
+                            <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-800 z-10`}>Receitas</td>
                             {incomeTotals.map((total: any, i: number) => (
-                                <td key={i} className={`${cellPadding} text-right text-green-600 ${expandedMonth === i ? 'bg-cyan-50/30' : ''}`}>
+                                <td key={i} className={`${cellPadding} text-right text-green-600 dark:text-green-400 ${expandedMonth === i ? 'bg-cyan-50/30 dark:bg-cyan-500/5' : ''}`}>
                                     {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </td>
                             ))}
-                            <td className={`${cellPadding} text-right font-bold text-green-700`}>
+                            <td className={`${cellPadding} text-right font-bold text-green-700 dark:text-green-500`}>
                                 {grandTotalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </td>
                         </tr>
                         <tr>
-                            <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 sticky left-0 bg-white z-10`}>Despesas</td>
+                            <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-800 z-10`}>Despesas</td>
                             {expenseTotals.map((total: any, i: number) => (
-                                <td key={i} className={`${cellPadding} text-right text-red-600 ${expandedMonth === i ? 'bg-cyan-50/30' : ''}`}>
+                                <td key={i} className={`${cellPadding} text-right text-red-600 dark:text-red-400 ${expandedMonth === i ? 'bg-cyan-50/30 dark:bg-cyan-500/5' : ''}`}>
                                     {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </td>
                             ))}
-                            <td className={`${cellPadding} text-right font-bold text-red-700`}>
+                            <td className={`${cellPadding} text-right font-bold text-red-700 dark:text-red-500`}>
                                 {grandTotalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </td>
                         </tr>
                     </tbody>
-                    <tfoot className="bg-slate-100">
+                    <tfoot className="bg-slate-100 dark:bg-slate-700/50">
                         <tr>
-                            <td className={`${cellPadding} text-left font-bold text-slate-700 sticky left-0 bg-slate-100 z-10`}>Balanço</td>
+                            <td className={`${cellPadding} text-left font-bold text-slate-700 dark:text-slate-200 sticky left-0 bg-slate-100 dark:bg-slate-700 z-10`}>Balanço</td>
                             {incomeTotals.map((inc: any, i: number) => { 
                                 const balance = inc - expenseTotals[i]; 
                                 return (
-                                    <td key={i} className={`${cellPadding} text-right font-bold ${expandedMonth === i ? 'bg-cyan-50/50' : ''} ${balance >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                                    <td key={i} className={`${cellPadding} text-right font-bold ${expandedMonth === i ? 'bg-cyan-50/50 dark:bg-cyan-500/10' : ''} ${balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
                                         {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </td>
                                 ); 
                             })}
-                            <td className={`${cellPadding} text-right font-bold ${(grandTotalIncome - grandTotalExpense) >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                            <td className={`${cellPadding} text-right font-bold ${(grandTotalIncome - grandTotalExpense) >= 0 ? 'text-blue-700 dark:text-blue-500' : 'text-orange-700 dark:text-orange-500'}`}>
                                 {(grandTotalIncome - grandTotalExpense).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </td>
                         </tr>
@@ -1167,15 +1167,15 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, onRe
             </div>
 
             {expandedMonth !== null && (
-                <div className="p-6 bg-slate-50 border-t border-slate-200 animate-fade-in">
+                <div className="p-6 bg-slate-50 dark:bg-slate-900/20 border-t border-slate-200 dark:border-slate-700 animate-fade-in">
                     <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-bold text-slate-700 flex items-center gap-2">
+                        <h4 className="text-lg font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                             <Calendar size={20} className="text-cyan-500" /> 
                             Detalhes de {new Date(year, expandedMonth, 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
                         </h4>
                         <button 
                             onClick={() => setExpandedMonth(null)}
-                            className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-200 transition"
+                            className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                         >
                             <X size={20} />
                         </button>
@@ -1255,6 +1255,7 @@ const useDataManagement = (db: any, userId: string, isDemo: boolean = false) => 
 };
 
 const useUIManager = () => {
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [view, setView] = useState('dashboard');
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -1273,9 +1274,19 @@ const useUIManager = () => {
     const [expenseGrouping, setExpenseGrouping] = useState('category');
     const [incomeGrouping, setIncomeGrouping] = useState('category');
 
+    useEffect(() => {
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [theme]);
+
     const handleOpenModal = (transaction = null) => { setEditingTransaction(transaction); setIsModalOpen(true); };
 
     return {
+        theme, setTheme,
         view, setView, widgetOrder, setWidgetOrder, layoutDensity, setLayoutDensity, hideZeroRows, setHideZeroRows,
         collapsedWidgets, setCollapsedWidgets, isModalOpen, setIsModalOpen, isBatchModalOpen, setIsBatchModalOpen,
         isBudgetModalOpen, setIsBudgetModalOpen, isReportModalOpen, setIsReportModalOpen, isSettingsModalOpen,
@@ -1291,7 +1302,7 @@ const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepe
     const itemPadding = density === 'super-compact' ? 'p-1.5' : density === 'compact' ? 'p-2' : density === 'relaxed' ? 'p-4' : density === 'super-relaxed' ? 'p-5' : 'p-3';
     const indicatorHeight = density === 'super-compact' ? 'h-6' : density === 'compact' ? 'h-8' : 'h-10';
     const textSize = density === 'super-compact' ? 'text-xs' : 'text-sm';
-    const titleSize = density === 'super-compact' ? 'text-sm' : 'font-semibold text-slate-700';
+    const titleSize = density === 'super-compact' ? 'text-sm' : 'font-semibold text-slate-700 dark:text-slate-200';
 
     const getStatusIndicatorClass = (s: string) => {
         if (s === STATUSES.PAID) return 'bg-green-500';
@@ -1299,45 +1310,45 @@ const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepe
         return 'bg-red-500';
     };
     const PaymentIcon = ({ type }: any) => {
-        if (type?.includes('Pix')) return <QrCode size={14} className="text-slate-500" />;
-        if (type === 'Código de Barras') return <Barcode size={14} className="text-slate-500" />;
+        if (type?.includes('Pix')) return <QrCode size={14} className="text-slate-500 dark:text-slate-400" />;
+        if (type === 'Código de Barras') return <Barcode size={14} className="text-slate-500 dark:text-slate-400" />;
         return null;
     };
     return (
-        <li className={`flex items-center justify-between ${itemPadding} rounded-lg hover:bg-slate-50 border-b last:border-b-0 group transition-all`}>
+        <li className={`flex items-center justify-between ${itemPadding} rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all`}>
             <div className="flex flex-grow items-center cursor-pointer" onClick={() => onEdit(transaction)}>
-                <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-300 relative`}>
+                <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-300 dark:bg-slate-600 relative`}>
                     {type === 'expense' && <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)}`} />}
                     {type === 'income' && <div className="absolute w-full h-full rounded-full bg-green-500" />}
                 </div>
                 <div>
                     <p className={`${titleSize} flex items-center gap-1`}>
                         {description}
-                        {installmentNumber && totalInstallments && <span className="text-[10px] text-slate-400 ml-1">[{installmentNumber}/{totalInstallments}]</span>}
+                        {installmentNumber && totalInstallments && <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-1">[{installmentNumber}/{totalInstallments}]</span>}
                         <PaymentIcon type={paymentCodeType} />
-                        {recurringId && <Repeat size={12} className="text-slate-500" />}
+                        {recurringId && <Repeat size={12} className="text-slate-500 dark:text-slate-400" />}
                     </p>
-                    <p className={`${textSize} text-slate-500`}>
+                    <p className={`${textSize} text-slate-500 dark:text-slate-400`}>
                         {new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')}
                     </p>
                 </div>
             </div>
             <div className="flex items-center">
-                <p className={`font-bold text-right mr-4 ${textSize} ${type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`font-bold text-right mr-4 ${textSize} ${type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {type === 'income' ? '+' : '-'} {amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </p>
                 {type === 'expense' && (
-                    <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 hover:text-cyan-500 p-2 rounded-full transition" title="Alterar status">
+                    <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-full transition" title="Alterar status">
                         <ArrowUpDown size={16} />
                     </button>
                 )}
-                <button onClick={(e) => { e.stopPropagation(); onEdit(transaction); }} className="text-slate-400 hover:text-cyan-500 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Editar">
+                <button onClick={(e) => { e.stopPropagation(); onEdit(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Editar">
                     <Edit size={18} />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); onRepeat(transaction); }} className="text-slate-400 hover:text-amber-500 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Repetir no próximo mês">
+                <button onClick={(e) => { e.stopPropagation(); onRepeat(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-amber-500 dark:hover:text-amber-400 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Repetir no próximo mês">
                     <Copy size={18} />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); onDelete(transaction); }} className="text-slate-400 hover:text-red-500 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Excluir">
+                <button onClick={(e) => { e.stopPropagation(); onDelete(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Excluir">
                     <Trash2 size={18} />
                 </button>
             </div>
@@ -1356,7 +1367,7 @@ const TransactionList = ({ transactions, onDelete, onEdit, onStatusChange, onRep
                     ))}
                 </ul>
             ) : (
-                <p className="text-center text-slate-500 py-8">Nenhuma transação neste período.</p>
+                <p className="text-center text-slate-500 dark:text-slate-400 py-8">Nenhuma transação neste período.</p>
             )}
         </div>
     );
@@ -1412,34 +1423,37 @@ const TransactionModal = ({ onClose, onSave, transaction, categories }: any) => 
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-lg animate-fade-in-up overflow-y-auto max-h-[90vh]">
-                <h2 className="text-2xl font-bold mb-6 text-slate-700">{isEditing ? 'Editar' : 'Adicionar'} Transação</h2>
-                <form onSubmit={handleSubmit}>
-                    {error && <p className="text-red-500 bg-red-100 p-3 rounded-md text-sm mb-4">{error}</p>}
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-fade-in-up overflow-y-auto max-h-[90vh] border border-slate-200 dark:border-slate-700">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-200">{isEditing ? 'Editar' : 'Adicionar'} Transação</h2>
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition text-slate-500 dark:text-slate-400"><X size={24} /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {error && <p className="text-red-500 bg-red-100 dark:bg-red-500/10 p-3 rounded-xl text-sm mb-4">{error}</p>}
                     <div className="mb-4">
-                        <div className="flex rounded-md shadow-sm">
-                            <button type="button" onClick={() => setType('expense')} className={`flex-1 py-2 px-4 rounded-l-md transition ${type === 'expense' ? 'bg-red-500 text-white' : 'bg-slate-200'}`} disabled={isEditing}>Despesa</button>
-                            <button type="button" onClick={() => setType('income')} className={`flex-1 py-2 px-4 rounded-r-md transition ${type === 'income' ? 'bg-green-500 text-white' : 'bg-slate-200'}`} disabled={isEditing}>Receita</button>
+                        <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                            <button type="button" onClick={() => setType('expense')} className={`flex-1 py-2 px-4 rounded-lg transition text-sm font-bold ${type === 'expense' ? 'bg-white dark:bg-slate-800 shadow text-red-500' : 'text-slate-500'}`} disabled={isEditing}>Despesa</button>
+                            <button type="button" onClick={() => setType('income')} className={`flex-1 py-2 px-4 rounded-lg transition text-sm font-bold ${type === 'income' ? 'bg-white dark:bg-slate-800 shadow text-green-500' : 'text-slate-500'}`} disabled={isEditing}>Receita</button>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
-                            <label className="block text-sm font-medium text-slate-600">Descrição</label>
-                            <input type="text" value={description} onChange={e => setDescription(e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500" required />
+                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Descrição</label>
+                            <input type="text" value={description} onChange={e => setDescription(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3" required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-600">Valor (R$)</label>
-                            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min="0" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500" required />
+                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Valor (R$)</label>
+                            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min="0" className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3" required />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-600">Data de Vencimento</label>
-                            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500" required />
+                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Data de Vencimento</label>
+                            <input type="date" value={date} onChange={e => setDate(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3" required />
                         </div>
                         {type === 'expense' && (
                             <div>
-                                <label className="block text-sm font-medium text-slate-600">Status</label>
-                                <select value={status} onChange={e => setStatus(e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status</label>
+                                <select value={status} onChange={e => setStatus(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3">
                                     <option value={STATUSES.WAITING}>Aguardando</option>
                                     <option value={STATUSES.CONFIRMED}>Confirmado</option>
                                     <option value={STATUSES.PAID}>Pago</option>
@@ -1447,15 +1461,15 @@ const TransactionModal = ({ onClose, onSave, transaction, categories }: any) => 
                             </div>
                         )}
                         <div>
-                            <label className="block text-sm font-medium text-slate-600">Centro de Custo</label>
-                            <select value={category} onChange={e => setCategory(e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
+                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Centro de Custo</label>
+                            <select value={category} onChange={e => setCategory(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3">
                                 {Array.from(new Set(categories[type as keyof typeof categories] as string[])).map((c: string) => <option key={c} value={c}>{c}</option>)}
                             </select>
                         </div>
                     </div>
                     <div className="mt-8 flex justify-end space-x-3">
-                        <button type="button" onClick={onClose} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition">Cancelar</button>
-                        <button type="submit" className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition">Salvar</button>
+                        <button type="button" onClick={onClose} className="px-6 py-3 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition">Cancelar</button>
+                        <button type="submit" className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]">Salvar</button>
                     </div>
                 </form>
             </div>
@@ -1507,64 +1521,67 @@ const BatchTransactionModal = ({ onClose, onSaveBatch, categories }: any) => {
         onSaveBatch(transactionsToCreate);
     };
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col">
-                <h2 className="text-2xl font-bold mb-4 text-slate-700">Lançamento em Lote</h2>
-                <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto pr-2">
-                    {error && <p className="text-red-500 bg-red-100 p-3 rounded-md text-sm mb-4">{error}</p>}
-                    <fieldset className="border p-4 rounded-md mb-4">
-                        <legend className="text-lg font-semibold px-2 text-slate-600">Dados Comuns</legend>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-700">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-200">Lançamento em Lote</h2>
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition text-slate-500 dark:text-slate-400"><X size={24} /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
+                    {error && <p className="text-red-500 bg-red-100 dark:bg-red-500/10 p-3 rounded-xl text-sm mb-4">{error}</p>}
+                    <fieldset className="border border-slate-200 dark:border-slate-700 p-4 rounded-xl mb-6">
+                        <legend className="text-sm font-bold px-2 text-slate-500 dark:text-slate-400 uppercase tracking-wider">Dados Comuns</legend>
                         <div className="mb-4">
-                            <div className="flex rounded-md shadow-sm">
-                                <button type="button" onClick={() => handleBaseDataChange('type', 'expense')} className={`flex-1 py-2 px-4 rounded-l-md transition ${baseData.type === 'expense' ? 'bg-red-500 text-white' : 'bg-slate-200'}`}>Despesa</button>
-                                <button type="button" onClick={() => handleBaseDataChange('type', 'income')} className={`flex-1 py-2 px-4 rounded-r-md transition ${baseData.type === 'income' ? 'bg-green-500 text-white' : 'bg-slate-200'}`}>Receita</button>
+                            <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                                <button type="button" onClick={() => handleBaseDataChange('type', 'expense')} className={`flex-1 py-2 px-4 rounded-lg transition text-sm font-bold ${baseData.type === 'expense' ? 'bg-white dark:bg-slate-800 shadow text-red-500' : 'text-slate-500'}`}>Despesa</button>
+                                <button type="button" onClick={() => handleBaseDataChange('type', 'income')} className={`flex-1 py-2 px-4 rounded-lg transition text-sm font-bold ${baseData.type === 'income' ? 'bg-white dark:bg-slate-800 shadow text-green-500' : 'text-slate-500'}`}>Receita</button>
                             </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-600">Descrição</label>
-                                <input type="text" value={baseData.description} onChange={e => handleBaseDataChange('description', e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500" required />
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Descrição</label>
+                                <input type="text" value={baseData.description} onChange={e => handleBaseDataChange('description', e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2.5 text-sm" required />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-600">Centro de Custo</label>
-                                <select value={baseData.category} onChange={e => handleBaseDataChange('category', e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Centro de Custo</label>
+                                <select value={baseData.category} onChange={e => handleBaseDataChange('category', e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2.5 text-sm">
                                     {Array.from(new Set(categories[baseData.type as keyof typeof categories] as string[])).map((c: string) => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-600">Tipo de Conta</label>
-                                <select value={baseData.account} onChange={e => handleBaseDataChange('account', e.target.value)} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500">
+                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tipo de Conta</label>
+                                <select value={baseData.account} onChange={e => handleBaseDataChange('account', e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2.5 text-sm">
                                     {ACCOUNT_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
                                 </select>
                             </div>
                         </div>
                     </fieldset>
-                    <fieldset className="border p-4 rounded-md">
-                        <legend className="text-lg font-semibold px-2 text-slate-600">Lançamentos Individuais</legend>
+                    <fieldset className="border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
+                        <legend className="text-sm font-bold px-2 text-slate-500 dark:text-slate-400 uppercase tracking-wider">Lançamentos Individuais</legend>
                         <div className="space-y-3">
                             {entries.map((entry, index) => (
-                                <div key={entry.id} className="flex items-center gap-3 p-2 bg-slate-50 rounded-md">
-                                    <span className="font-bold text-slate-500">{index + 1}</span>
+                                <div key={entry.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                                    <span className="font-bold text-slate-400 dark:text-slate-600 w-6">{index + 1}</span>
                                     <div className="flex-1">
-                                        <input type="month" value={entry.monthYear} onChange={e => handleEntryChange(entry.id, 'monthYear', e.target.value)} className="block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-sm" required />
+                                        <input type="month" value={entry.monthYear} onChange={e => handleEntryChange(entry.id, 'monthYear', e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2 text-sm" required />
                                     </div>
                                     <div className="flex-1">
-                                        <input type="number" value={entry.amount} onChange={e => handleEntryChange(entry.id, 'amount', e.target.value)} step="0.01" min="0.01" placeholder="Valor (R$)" className="block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 text-sm" required />
+                                        <input type="number" value={entry.amount} onChange={e => handleEntryChange(entry.id, 'amount', e.target.value)} step="0.01" min="0.01" placeholder="Valor (R$)" className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2 text-sm" required />
                                     </div>
-                                    <button type="button" onClick={() => handleRemoveEntry(entry.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full disabled:opacity-50" disabled={entries.length <= 1}>
+                                    <button type="button" onClick={() => handleRemoveEntry(entry.id)} className="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-2 rounded-xl transition disabled:opacity-30" disabled={entries.length <= 1}>
                                         <Trash2 size={18} />
                                     </button>
                                 </div>
                             ))}
                         </div>
-                        <button type="button" onClick={handleAddEntry} className="mt-4 w-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold py-2 px-4 rounded-lg transition text-sm flex items-center justify-center gap-2">
-                            <PlusCircle size={16} /> Adicionar Lançamento
+                        <button type="button" onClick={handleAddEntry} className="mt-4 w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold py-3 px-4 rounded-xl transition text-sm flex items-center justify-center gap-2">
+                            <PlusCircle size={18} /> Adicionar Lançamento
                         </button>
                     </fieldset>
                 </form>
-                <div className="mt-6 flex justify-end space-x-3 border-t pt-4">
-                    <button type="button" onClick={onClose} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition">Cancelar</button>
-                    <button type="button" onClick={handleSubmit} className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition">Salvar Lote</button>
+                <div className="mt-6 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700 pt-4">
+                    <button type="button" onClick={onClose} className="px-6 py-3 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition">Cancelar</button>
+                    <button type="button" onClick={handleSubmit} className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]">Salvar Lote</button>
                 </div>
             </div>
         </div>
@@ -1575,17 +1592,17 @@ const DrillDownModal = ({ isOpen, onClose, title, transactions, onEdit, onDelete
     if (!isOpen) return null;
     const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className={`bg-white rounded-lg shadow-2xl ${paddingClass} w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col`}>
-                <div className="flex justify-between items-center mb-4 border-b pb-3">
-                    <h2 className="text-xl font-bold text-slate-700">{title}</h2>
-                    <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-200 transition"><X size={20} /></button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+            <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl ${paddingClass} w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-700`}>
+                <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-700 pb-3">
+                    <h2 className="text-xl font-bold text-slate-700 dark:text-slate-200">{title}</h2>
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition text-slate-500 dark:text-slate-400"><X size={20} /></button>
                 </div>
-                <div className="flex-grow overflow-y-auto pr-2">
+                <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
                     <TransactionList transactions={transactions} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                 </div>
-                <div className="mt-6 flex justify-end border-t pt-4">
-                    <button type="button" onClick={onClose} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition">Fechar</button>
+                <div className="mt-6 flex justify-end border-t border-slate-100 dark:border-slate-700 pt-4">
+                    <button type="button" onClick={onClose} className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold py-2 px-6 rounded-xl transition">Fechar</button>
                 </div>
             </div>
         </div>
@@ -1620,17 +1637,17 @@ const CalendarView = ({ currentDate, transactions, onDayClick, density }: any) =
     }, [currentDate, transactions]);
     const weekDays = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
     return (
-        <div className={`bg-white ${paddingClass} rounded-lg shadow-md`}>
-            <div className="grid grid-cols-7 gap-1 text-center font-bold text-slate-500 text-sm mb-2">
+        <div className={`bg-white dark:bg-slate-800 ${paddingClass} rounded-lg shadow-md border border-slate-200 dark:border-slate-700`}>
+            <div className="grid grid-cols-7 gap-1 text-center font-bold text-slate-500 dark:text-slate-400 text-sm mb-2">
                 {weekDays.map(day => <div key={day}>{day}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-1">
                 {calendarData.map((day, index) => (
-                    <div key={index} className={`border rounded-md ${dayHeight} flex flex-col p-1 ${day.isPlaceholder ? 'bg-slate-50' : 'cursor-pointer hover:bg-cyan-50'}`} onClick={() => !day.isPlaceholder && onDayClick(day.date)} >
+                    <div key={index} className={`border border-slate-100 dark:border-slate-700 rounded-md ${dayHeight} flex flex-col p-1 ${day.isPlaceholder ? 'bg-slate-50 dark:bg-slate-900/20' : 'cursor-pointer hover:bg-cyan-50 dark:hover:bg-cyan-900/20'}`} onClick={() => !day.isPlaceholder && onDayClick(day.date)} >
                         {!day.isPlaceholder && (
                             <>
-                                <span className="font-bold text-slate-600 text-sm">{day.date.getDate()}</span>
-                                <div className="flex-grow overflow-y-auto text-xs mt-1 space-y-1">
+                                <span className="font-bold text-slate-600 dark:text-slate-300 text-sm">{day.date.getDate()}</span>
+                                <div className="flex-grow overflow-y-auto text-xs mt-1 space-y-1 no-scrollbar">
                                     {day.transactions.map((t: any) => (
                                         <div key={t.id} className={`p-1 rounded text-white truncate ${t.type === 'income' ? 'bg-blue-500' : 'bg-red-500'}`}>{t.description}</div>
                                     ))}
@@ -1660,27 +1677,27 @@ const BudgetStatus = ({ budgets, monthlyExpenses, categories, density }: any) =>
             });
     }, [budgets, monthlyExpenses, categories]);
 
-    if (budgetData.length === 0) return <p className="text-center text-slate-500 py-8">Nenhum orçamento definido.</p>;
+    if (budgetData.length === 0) return <p className="text-center text-slate-500 dark:text-slate-400 py-8">Nenhum orçamento definido.</p>;
     return (
         <div className={spacingClass}>
             {budgetData.map(item => (
                 <div key={item.category}>
                     <div className="flex justify-between items-center text-sm mb-2">
-                        <span className="font-bold text-slate-700">{item.category}</span>
-                        <span className="text-slate-500 font-medium">
+                        <span className="font-bold text-slate-700 dark:text-slate-200">{item.category}</span>
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">
                             {item.spent.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})} 
-                            <span className="mx-1 text-slate-300">/</span> 
+                            <span className="mx-1 text-slate-300 dark:text-slate-600">/</span> 
                             {item.budget.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}
                         </span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
                         <div 
                             className={`${item.barColor} h-full rounded-full transition-all duration-1000 ease-out`}
                             style={{ width: `${Math.min(item.percentage, 100)}%` }}
                         ></div>
                     </div>
                     <div className="flex justify-end mt-1">
-                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${item.percentage > 100 ? 'text-rose-500' : 'text-slate-400'}`}>
+                        <span className={`text-[10px] font-bold uppercase tracking-tighter ${item.percentage > 100 ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500'}`}>
                             {item.percentage.toFixed(0)}% Utilizado
                         </span>
                     </div>
@@ -1739,24 +1756,24 @@ const UpcomingBills = ({ bills, onEdit, onDelete, onStatusChange, onRepeat, dens
     return (
         <div>
             {!hasBills ? (
-                <p className="text-center text-slate-500 py-8">Nenhuma conta a vencer.</p>
+                <p className="text-center text-slate-500 dark:text-slate-400 py-8">Nenhuma conta a vencer.</p>
             ) : (
                 <div className={spacingClass}>
                     {overdue.length > 0 && (
                         <div>
-                            <h4 className="font-bold text-red-600 mb-2 text-xs uppercase tracking-wider">Atrasadas</h4>
+                            <h4 className="font-bold text-red-600 dark:text-red-400 mb-2 text-xs uppercase tracking-wider">Atrasadas</h4>
                             <TransactionList transactions={overdue} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                         </div>
                     )}
                     {dueToday.length > 0 && (
                         <div>
-                            <h4 className="font-bold text-yellow-600 mb-2 text-xs uppercase tracking-wider">Vencendo Hoje</h4>
+                            <h4 className="font-bold text-yellow-600 dark:text-yellow-400 mb-2 text-xs uppercase tracking-wider">Vencendo Hoje</h4>
                             <TransactionList transactions={dueToday} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                         </div>
                     )}
                     {dueNext7Days.length > 0 && (
                         <div>
-                            <h4 className="font-bold text-cyan-600 mb-2 text-xs uppercase tracking-wider">Próximos 7 Dias</h4>
+                            <h4 className="font-bold text-cyan-600 dark:text-cyan-400 mb-2 text-xs uppercase tracking-wider">Próximos 7 Dias</h4>
                             <TransactionList transactions={dueNext7Days} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} onRepeat={onRepeat} density={density} />
                         </div>
                     )}
@@ -2225,31 +2242,38 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
     }, [transactions, currentDate]);
 
     return (
-        <div className="bg-slate-100 min-h-screen">
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className={`min-h-screen transition-colors duration-300 ${ui.theme === 'dark' ? 'bg-slate-900 text-slate-100' : 'bg-slate-100 text-slate-800'}`}>
+            <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
                 <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="bg-cyan-500 p-2 rounded-xl text-white shadow-lg shadow-cyan-200">
+                        <div className="bg-cyan-500 p-2 rounded-xl text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20">
                             <DollarSign size={24} />
                         </div>
                         <div>
-                            <h1 className="text-xl font-black text-slate-800 tracking-tight">Meu Controle</h1>
+                            <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">Meu Controle</h1>
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Resumo Financeiro</p>
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-2">
-                        <div className="hidden md:flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-100 mr-2">
+                        <div className="hidden md:flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 p-1.5 rounded-xl border border-slate-100 dark:border-slate-700 mr-2">
                             <div className="px-3 py-1">
                                 <p className="text-[10px] text-slate-400 font-bold uppercase">Bem-vindo(a),</p>
-                                <p className="text-sm font-bold text-slate-700 truncate max-w-[150px]">{user.email?.split('@')[0]}</p>
+                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate max-w-[150px]">{user.email?.split('@')[0]}</p>
                             </div>
                         </div>
                         
                         {user.email === APP_CONFIG.adminEmail && (
-                        <button onClick={() => ui.setIsAdminOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg" title="Painel Admin"><ShieldCheck size={20} /></button>
+                        <button onClick={() => ui.setIsAdminOpen(true)} className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Painel Admin"><ShieldCheck size={20} /></button>
                     )}
-                    <button onClick={() => ui.setIsHelpOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg" title="Manual do Usuário"><HelpCircle size={20} /></button>
+                    <button 
+                        onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
+                        className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" 
+                        title={ui.theme === 'dark' ? 'Mudar para Modo Claro' : 'Mudar para Modo Escuro'}
+                    >
+                        {ui.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                    <button onClick={() => ui.setIsHelpOpen(true)} className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Manual do Usuário"><HelpCircle size={20} /></button>
                     {!notificationsEnabled && 'Notification' in window && (
                         <button 
                             onClick={requestNotificationPermission} 
@@ -2280,16 +2304,16 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                         <button onClick={onLogout} className="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition">Criar Minha Conta</button>
                     </div>
                 )}
-                <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 gap-4">
                     <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 hover:bg-slate-100 rounded-full transition"><ArrowLeft size={20} /></button>
-                        <h2 className="text-lg font-bold capitalize text-slate-700">{currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h2>
-                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 hover:bg-slate-100 rounded-full transition"><ArrowRight size={20} /></button>
+                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition text-slate-600 dark:text-slate-400"><ArrowLeft size={20} /></button>
+                        <h2 className="text-lg font-bold capitalize text-slate-700 dark:text-slate-200">{currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h2>
+                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition text-slate-600 dark:text-slate-400"><ArrowRight size={20} /></button>
                     </div>
-                    <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto overflow-x-auto no-scrollbar">
-                        <button onClick={() => ui.setView('dashboard')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'dashboard' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>Painel</button>
-                        <button onClick={() => ui.setView('transactions')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'transactions' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>Lançamentos</button>
-                        <button onClick={() => ui.setView('calendar')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'calendar' ? 'bg-white shadow text-cyan-600 font-bold' : 'text-slate-500'}`}>Calendário</button>
+                    <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl w-full md:w-auto overflow-x-auto no-scrollbar">
+                        <button onClick={() => ui.setView('dashboard')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'dashboard' ? 'bg-white dark:bg-slate-800 shadow text-cyan-600 dark:text-cyan-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Painel</button>
+                        <button onClick={() => ui.setView('transactions')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'transactions' ? 'bg-white dark:bg-slate-800 shadow text-cyan-600 dark:text-cyan-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Lançamentos</button>
+                        <button onClick={() => ui.setView('calendar')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'calendar' ? 'bg-white dark:bg-slate-800 shadow text-cyan-600 dark:text-cyan-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Calendário</button>
                     </div>
                 </div>
 
@@ -2303,10 +2327,10 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                             </div>
                             <div>
                                 <FinancialHealth stats={monthlyData} density={ui.layoutDensity} />
-                                <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} mt-6`}>
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
+                                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} mt-6`}>
+                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
                                     <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} density={ui.layoutDensity} />
-                                    <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-cyan-500 hover:text-cyan-500 transition-all font-medium text-sm">Configurar Orçamentos</button>
+                                    <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all font-medium text-sm">Configurar Orçamentos</button>
                                 </div>
                             </div>
                         </div>
