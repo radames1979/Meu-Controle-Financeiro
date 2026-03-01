@@ -1021,7 +1021,6 @@ const Charts = ({ data, annualData, year, density }: any) => {
     const ui = useUIManager();
     const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
     const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6';
-    if (data.length === 0) return (<div className={`text-center text-slate-500 ${paddingClass} bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-700`}><h3 className="text-lg font-semibold mb-2 dark:text-slate-200">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
     
     const cashFlowData = useMemo(() => {
         return annualData.incomeTotals.map((income: number, i: number) => ({
@@ -1031,6 +1030,8 @@ const Charts = ({ data, annualData, year, density }: any) => {
             Saldo: income - annualData.expenseTotals[i]
         }));
     }, [annualData, year]);
+
+    if (data.length === 0) return (<div className={`text-center text-slate-500 ${paddingClass} bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-700`}><h3 className="text-lg font-semibold mb-2 dark:text-slate-200">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
 
     return (
         <div className={spacingClass}>
@@ -1337,7 +1338,7 @@ const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepe
         return null;
     };
     return (
-        <li className={`flex items-center justify-between ${itemPadding} rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all`}>
+        <li className={`flex items-center justify-between ${itemPadding} rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all ${status === STATUSES.WAITING ? 'border-2 border-dotted border-yellow-400 dark:border-yellow-500' : ''}`}>
             <div className="flex flex-grow items-center cursor-pointer" onClick={() => onEdit(transaction)}>
                 <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-300 dark:bg-slate-600 relative`}>
                     {type === 'expense' && <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)}`} />}
@@ -2230,13 +2231,16 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
     };
 
     useEffect(() => {
-        if (upcomingBills.length > 0 && notificationsEnabled) {
+        // Correção da Tela Branca: upcomingBills é um objeto, precisamos extrair as listas para validar
+        const allBills = [...(upcomingBills.overdue || []), ...(upcomingBills.dueToday || []), ...(upcomingBills.dueNext7Days || [])];
+        
+        if (allBills.length > 0 && notificationsEnabled) {
             // Evitar múltiplas notificações na mesma sessão
             const lastCheck = sessionStorage.getItem('last_bill_check');
             const todayStr = new Date().toDateString();
             
             if (lastCheck !== todayStr) {
-                checkUpcomingBillsNotifications(upcomingBills);
+                checkUpcomingBillsNotifications(allBills);
                 sessionStorage.setItem('last_bill_check', todayStr);
             }
         }
