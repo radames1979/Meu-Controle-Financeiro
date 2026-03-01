@@ -78,13 +78,13 @@ const DENSITY_CLASSES = {
     dashboardPadding: { 'super-compact': 'p-4', compact: 'p-6', normal: 'p-8', relaxed: 'p-10', 'super-relaxed': 'p-12' }
 };
 
-const useUIManager = () => {
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+const useUIManager = (initialSettings: any = {}) => {
+    const [theme, setTheme] = useState(initialSettings.theme || localStorage.getItem('theme') || 'light');
     const [view, setView] = useState('dashboard');
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [isAdminOpen, setIsAdminOpen] = useState(false);
     const [widgetOrder, setWidgetOrder] = useState(INITIAL_WIDGET_ORDER);
-    const [layoutDensity, setLayoutDensity] = useState('normal');
+    const [layoutDensity, setLayoutDensity] = useState(initialSettings.layoutDensity || localStorage.getItem('layoutDensity') || 'normal');
     const [hideZeroRows, setHideZeroRows] = useState(false);
     const [collapsedWidgets, setCollapsedWidgets] = useState<any>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -106,6 +106,10 @@ const useUIManager = () => {
             document.documentElement.classList.remove('dark');
         }
     }, [theme]);
+
+    useEffect(() => {
+        localStorage.setItem('layoutDensity', layoutDensity);
+    }, [layoutDensity]);
 
     const handleOpenModal = (transaction = null) => { setEditingTransaction(transaction); setIsModalOpen(true); };
 
@@ -1973,8 +1977,24 @@ const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensi
 const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
     if (!user) return null;
     const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid, isDemo);
-    const ui = useUIManager();
+    const ui = useUIManager(userProfile?.uiSettings);
     const [currentDate, setCurrentDate] = useState(new Date());
+
+    // Persist UI settings to Firestore
+    useEffect(() => {
+        if (!isDemo && userProfile) {
+            const currentSettings = userProfile.uiSettings || {};
+            if (currentSettings.layoutDensity !== ui.layoutDensity || currentSettings.theme !== ui.theme) {
+                onUpdateProfile({
+                    uiSettings: {
+                        ...currentSettings,
+                        layoutDensity: ui.layoutDensity,
+                        theme: ui.theme
+                    }
+                });
+            }
+        }
+    }, [ui.layoutDensity, ui.theme, isDemo, onUpdateProfile, userProfile]);
 
     const monthlyData = useMemo(() => {
         const filtered = transactions.filter(t => {
@@ -2021,11 +2041,13 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
         }
         const appId = 'meu-controle-financeiro';
         const colRef = collection(db, `artifacts/${appId}/users/${user.uid}/transactions`);
-        if (data.id) {
-            await updateDoc(doc(colRef, data.id), data);
+        const { id, ...payload } = data;
+
+        if (id) {
+            await updateDoc(doc(colRef, id), payload);
             toast.success('Transação atualizada!');
         } else {
-            await addDoc(colRef, data);
+            await addDoc(colRef, payload);
             toast.success('Transação adicionada!');
         }
         ui.setIsModalOpen(false);
@@ -2046,8 +2068,9 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
         const appId = 'meu-controle-financeiro';
         const batch = writeBatch(db);
         batchData.forEach(item => {
+            const { id, ...payload } = item;
             const newDocRef = doc(collection(db, `artifacts/${appId}/users/${user.uid}/transactions`));
-            batch.set(newDocRef, { ...item, status: item.type === 'expense' ? STATUSES.WAITING : null });
+            batch.set(newDocRef, { ...payload, status: item.type === 'expense' ? STATUSES.WAITING : null });
         });
         await batch.commit();
         ui.setIsBatchModalOpen(false);
