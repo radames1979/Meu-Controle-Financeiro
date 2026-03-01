@@ -78,6 +78,48 @@ const DENSITY_CLASSES = {
     dashboardPadding: { 'super-compact': 'p-4', compact: 'p-6', normal: 'p-8', relaxed: 'p-10', 'super-relaxed': 'p-12' }
 };
 
+const useUIManager = () => {
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [view, setView] = useState('dashboard');
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [isAdminOpen, setIsAdminOpen] = useState(false);
+    const [widgetOrder, setWidgetOrder] = useState(INITIAL_WIDGET_ORDER);
+    const [layoutDensity, setLayoutDensity] = useState('normal');
+    const [hideZeroRows, setHideZeroRows] = useState(false);
+    const [collapsedWidgets, setCollapsedWidgets] = useState<any>({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+    const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<any>(null);
+    const [drillDown, setDrillDown] = useState<any>({ isOpen: false, transactions: [], title: '', date: null });
+    const [deleteConfirmation, setDeleteConfirmation] = useState<any>({ isOpen: false, transaction: null });
+    const [expenseGrouping, setExpenseGrouping] = useState('category');
+    const [incomeGrouping, setIncomeGrouping] = useState('category');
+
+    useEffect(() => {
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [theme]);
+
+    const handleOpenModal = (transaction = null) => { setEditingTransaction(transaction); setIsModalOpen(true); };
+
+    return {
+        theme, setTheme,
+        view, setView, widgetOrder, setWidgetOrder, layoutDensity, setLayoutDensity, hideZeroRows, setHideZeroRows,
+        collapsedWidgets, setCollapsedWidgets, isModalOpen, setIsModalOpen, isBatchModalOpen, setIsBatchModalOpen,
+        isBudgetModalOpen, setIsBudgetModalOpen, isReportModalOpen, setIsReportModalOpen, isSettingsModalOpen,
+        setIsSettingsModalOpen, editingTransaction, setEditingTransaction, drillDown, setDrillDown, deleteConfirmation,
+        setDeleteConfirmation, handleOpenModal, expenseGrouping, setExpenseGrouping, incomeGrouping, setIncomeGrouping,
+        isHelpOpen, setIsHelpOpen, isAdminOpen, setIsAdminOpen
+    };
+};
+
 // --- Componente da Landing Page ---
 const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: any, onRegister: any, onDemo: any, config: any }) => {
     const authSectionRef = useRef<HTMLDivElement>(null);
@@ -87,24 +129,24 @@ const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: any, on
     };
 
     return (
-        <div className="bg-slate-50 text-slate-800">
+        <div className="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-300">
             {/* Hero Section */}
-            <section className="min-h-screen flex flex-col justify-center items-center text-center p-8 bg-slate-100">
+            <section className="min-h-screen flex flex-col justify-center items-center text-center p-8 bg-slate-100 dark:bg-slate-800/50">
                 <DollarSign className="h-16 w-16 text-cyan-500 mb-4" />
-                <h1 className="text-4xl md:text-6xl font-bold text-slate-800">Assuma o Controle da Sua Vida Financeira</h1>
-                <p className="mt-4 text-lg md:text-xl text-slate-600 max-w-2xl">
+                <h1 className="text-4xl md:text-6xl font-bold text-slate-800 dark:text-slate-100">Assuma o Controle da Sua Vida Financeira</h1>
+                <p className="mt-4 text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl">
                     Organize suas despesas, planeje seus orçamentos e alcance suas metas com uma ferramenta simples e poderosa.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 mt-8">
                     <button 
                         onClick={scrollToAuth}
-                        className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-lg"
+                        className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20"
                     >
                         Comece Agora
                     </button>
                     <button 
                         onClick={onDemo}
-                        className="bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-md flex items-center gap-2"
+                        className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold py-3 px-8 rounded-full text-lg transition-transform duration-200 hover:scale-105 shadow-md flex items-center gap-2"
                     >
                         <EyeOff size={20} /> Experimentar Demo
                     </button>
@@ -112,17 +154,17 @@ const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: any, on
             </section>
 
             {/* Sponsors Section */}
-            <section className="py-16 bg-slate-100">
+            <section className="py-16 bg-slate-100 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
                 <div className="container mx-auto px-6 text-center">
-                    <h2 className="text-3xl font-bold text-slate-700 mb-2">Nossos Patrocinadores</h2>
-                    <p className="text-slate-500 mb-10">Apoiando a educação financeira para todos.</p>
+                    <h2 className="text-3xl font-bold text-slate-700 dark:text-slate-200 mb-2">Nossos Patrocinadores</h2>
+                    <p className="text-slate-500 dark:text-slate-400 mb-10">Apoiando a educação financeira para todos.</p>
                     <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
                         {config.sponsors && config.sponsors.map((sponsor: any, idx: number) => (
                             <img 
                                 key={idx} 
                                 src={sponsor.logo} 
                                 alt={sponsor.name} 
-                                className="h-12 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100" 
+                                className="h-12 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100 dark:invert dark:opacity-40 dark:hover:opacity-80" 
                             />
                         ))}
                     </div>
@@ -130,19 +172,19 @@ const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: any, on
             </section>
 
             {/* Auth Section */}
-            <section ref={authSectionRef} className="py-20 bg-white">
+            <section ref={authSectionRef} className="py-20 bg-white dark:bg-slate-900">
                 <div className="container mx-auto px-6">
                     <div className="w-full max-w-md mx-auto text-center mb-12">
                          <ShieldCheck className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                         <h2 className="text-3xl font-bold text-slate-700 mb-2">Segurança em Primeiro Lugar</h2>
-                         <p className="text-slate-600">Seus dados são criptografados e jamais compartilhados. Sua privacidade é nossa prioridade.</p>
+                         <h2 className="text-3xl font-bold text-slate-700 dark:text-slate-100 mb-2">Segurança em Primeiro Lugar</h2>
+                         <p className="text-slate-600 dark:text-slate-400">Seus dados são criptografados e jamais compartilhados. Sua privacidade é nossa prioridade.</p>
                     </div>
                     <AuthForm onLogin={onLogin} onRegister={onRegister} onDemo={onDemo} />
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="bg-slate-800 text-slate-300 py-8">
+            <footer className="bg-slate-800 dark:bg-slate-950 text-slate-300 py-8">
                 <div className="container mx-auto px-6 text-center">
                     <div className="flex justify-center gap-6 mb-4">
                         <a href={`mailto:${YOUR_CONTACT_EMAIL}`} className="text-sm hover:text-cyan-400 transition">Contato & Sugestões</a>
@@ -199,10 +241,10 @@ const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: a
 
     return (
         <div className="w-full max-w-md mx-auto">
-            <div className="bg-white rounded-lg shadow-2xl p-8">
-                <h2 className="text-2xl font-bold text-center text-slate-800 mb-6">{isLogin ? 'Acesse sua conta' : 'Crie sua conta'}</h2>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-100 dark:border-slate-700">
+                <h2 className="text-2xl font-bold text-center text-slate-800 dark:text-slate-100 mb-6">{isLogin ? 'Acesse sua conta' : 'Crie sua conta'}</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {error && <p className="bg-red-100 text-red-700 p-3 rounded-md text-sm text-center">{error}</p>}
+                    {error && <p className="bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 p-3 rounded-xl text-sm text-center">{error}</p>}
                     <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                         <input
@@ -210,7 +252,7 @@ const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: a
                             placeholder="Seu e-mail"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:text-slate-200 transition-all"
                             required
                         />
                     </div>
@@ -221,30 +263,30 @@ const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: a
                             placeholder="Sua senha"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:text-slate-200 transition-all"
                             required
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition-transform duration-200 hover:scale-105"
+                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-cyan-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                         {isLogin ? 'Entrar' : 'Cadastrar'}
                     </button>
                 </form>
 
-                <div className="relative py-6">
-                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
-                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-slate-400">Ou experimente</span></div>
+                <div className="relative py-8">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100 dark:border-slate-700"></div></div>
+                    <div className="relative flex justify-center text-xs uppercase"><span className="bg-white dark:bg-slate-800 px-4 text-slate-400 font-bold tracking-wider">Ou experimente</span></div>
                 </div>
 
-                <button onClick={onDemo} className="w-full bg-slate-50 text-slate-600 py-3 rounded-lg font-bold hover:bg-slate-100 transition flex items-center justify-center gap-2 border border-slate-200">
+                <button onClick={onDemo} className="w-full bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 py-4 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700">
                     <EyeOff size={18} /> Modo Demo (Visitante)
                 </button>
 
-                <p className="text-center text-sm text-slate-500 mt-6">
+                <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-8">
                     {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}
-                    <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="font-semibold text-cyan-500 hover:text-cyan-600 ml-1">
+                    <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="font-bold text-cyan-500 hover:text-cyan-600 ml-2 transition-colors">
                         {isLogin ? 'Cadastre-se' : 'Faça login'}
                     </button>
                 </p>
@@ -256,47 +298,47 @@ const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: a
 // --- Componente da Página de Assinatura ---
 const SubscriptionPage = ({ user, onSubscribe, onLogout, config }: { user: any, onSubscribe: any, onLogout: any, config: any }) => {
     return (
-        <div className="min-h-screen bg-slate-100 flex flex-col items-center p-4">
+        <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex flex-col items-center p-4 transition-colors duration-300">
             <header className="w-full max-w-5xl mx-auto py-4 flex justify-between items-center">
-                 <h1 className="text-xl font-bold text-slate-700 flex items-center"><DollarSign className="mr-2 text-cyan-500" /> Meu Controle Financeiro</h1>
-                 <button onClick={onLogout} className="flex items-center gap-2 text-sm text-slate-600 hover:text-red-500 font-semibold transition">
+                 <h1 className="text-xl font-bold text-slate-700 dark:text-slate-200 flex items-center"><DollarSign className="mr-2 text-cyan-500" /> Meu Controle Financeiro</h1>
+                 <button onClick={onLogout} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-red-500 font-semibold transition">
                      Sair <LogOut size={16} />
                  </button>
             </header>
             <main className="flex-grow flex flex-col justify-center items-center text-center">
-                <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 max-w-2xl border border-slate-200">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 md:p-12 max-w-2xl border border-slate-200 dark:border-slate-700">
                     <Star className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                    <h2 className="text-3xl font-bold text-slate-800">Ative seu Acesso</h2>
-                    <p className="mt-4 text-slate-600">
+                    <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Ative seu Acesso</h2>
+                    <p className="mt-4 text-slate-600 dark:text-slate-400">
                         Para liberar seu painel financeiro vitalício, realize o pagamento único via PIX. A liberação é processada pelo administrador.
                     </p>
                     
-                    <div className="mt-8 bg-cyan-50 border-2 border-cyan-500 rounded-2xl p-6">
-                        <h3 className="text-xl font-bold text-cyan-600 uppercase tracking-wider text-sm">Acesso Vitalício</h3>
-                        <p className="text-5xl font-extrabold text-slate-800 my-4">R$ {config.defaultPrice.toFixed(2).replace('.', ',')}</p>
+                    <div className="mt-8 bg-cyan-50 dark:bg-cyan-500/10 border-2 border-cyan-500 rounded-2xl p-6">
+                        <h3 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider text-sm">Acesso Vitalício</h3>
+                        <p className="text-5xl font-extrabold text-slate-800 dark:text-slate-100 my-4">R$ {config.defaultPrice.toFixed(2).replace('.', ',')}</p>
                         
-                        <div className="bg-white p-4 rounded-xl border border-cyan-100 mb-6 flex flex-col items-center">
-                            <p className="text-xs text-slate-400 uppercase font-bold mb-2">Chave PIX (E-mail)</p>
-                            <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-lg border border-slate-200 w-full justify-between">
-                                <code className="text-cyan-700 font-mono">{config.pixKey}</code>
-                                <button onClick={() => { navigator.clipboard.writeText(config.pixKey); toast.success('Chave copiada!'); }} className="text-cyan-500 hover:text-cyan-600"><Copy size={18} /></button>
+                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-cyan-100 dark:border-cyan-900/30 mb-6 flex flex-col items-center">
+                            <p className="text-xs text-slate-400 dark:text-slate-500 uppercase font-bold mb-2">Chave PIX (E-mail)</p>
+                            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 w-full justify-between">
+                                <code className="text-cyan-700 dark:text-cyan-400 font-mono">{config.pixKey}</code>
+                                <button onClick={() => { navigator.clipboard.writeText(config.pixKey); toast.success('Chave copiada!'); }} className="text-cyan-500 hover:text-cyan-600 transition-colors"><Copy size={18} /></button>
                             </div>
                         </div>
 
-                        <ul className="text-left space-y-3 text-slate-600 mb-8">
+                        <ul className="text-left space-y-3 text-slate-600 dark:text-slate-400 mb-8">
                             <li className="flex items-center gap-2 text-sm"><CheckCircle size={18} className="text-emerald-500" /> Sem mensalidades, pagamento único</li>
                             <li className="flex items-center gap-2 text-sm"><CheckCircle size={18} className="text-emerald-500" /> Acesso total a gráficos e relatórios</li>
                         </ul>
 
                         <div className="grid grid-cols-1 gap-4">
-                            <button onClick={onLogout} className="flex items-center justify-center gap-2 bg-white text-slate-600 border border-slate-200 py-3 rounded-xl font-bold hover:bg-slate-50 transition">
+                            <button onClick={onLogout} className="flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-3 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-md">
                                 <LogOut size={20} /> Sair e aguardar liberação
                             </button>
                         </div>
                     </div>
 
                     <div className="mt-8 flex flex-col items-center gap-2">
-                        <p className="text-xs text-slate-400">Dúvidas? Suporte rápido:</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">Dúvidas? Suporte rápido:</p>
                         <div className="flex gap-4">
                             <a href={`https://wa.me/${config.supportWhatsapp}`} target="_blank" rel="noreferrer" className="text-emerald-500 hover:underline text-sm flex items-center gap-1 font-bold"><Check size={14} /> WhatsApp {config.supportWhatsapp}</a>
                         </div>
@@ -309,41 +351,41 @@ const SubscriptionPage = ({ user, onSubscribe, onLogout, config }: { user: any, 
 
 const UserManual = ({ onClose }: { onClose: () => void }) => {
     return (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-cyan-500 text-white">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-cyan-500 text-white">
                     <h2 className="text-xl font-bold flex items-center gap-2"><HelpCircle /> Manual do Usuário</h2>
                     <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition"><X /></button>
                 </div>
-                <div className="p-8 overflow-y-auto space-y-8">
+                <div className="p-8 overflow-y-auto space-y-8 custom-scrollbar">
                     <section>
-                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><PlusCircle className="text-cyan-500" /> 1. Primeiros Passos</h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2"><PlusCircle className="text-cyan-500" /> 1. Primeiros Passos</h3>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">
                             Para começar, use o botão <strong>"Nova Transação"</strong> no topo da tela. Você pode registrar tanto Receitas (dinheiro que entra) quanto Despesas (dinheiro que sai). 
                             Escolha uma categoria e defina se o pagamento já foi realizado ou se está pendente.
                         </p>
                     </section>
                     <section>
-                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><Calendar className="text-cyan-500" /> 2. Calendário e Vencimentos</h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2"><Calendar className="text-cyan-500" /> 2. Calendário e Vencimentos</h3>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">
                             O widget de <strong>"Próximas Contas"</strong> mostra tudo o que vence nos próximos dias. Ative as notificações no ícone de sino para receber alertas automáticos e evitar multas.
                         </p>
                     </section>
                     <section>
-                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><PieChartIcon className="text-cyan-500" /> 3. Gráficos e Saúde Financeira</h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2"><PieChartIcon className="text-cyan-500" /> 3. Gráficos e Saúde Financeira</h3>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">
                             Acompanhe sua <strong>Saúde Financeira</strong> no widget lateral. Ele calcula sua taxa de poupança mensal. Se estiver acima de 20%, você está em uma excelente posição!
                         </p>
                     </section>
                     <section>
-                        <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2"><Settings className="text-cyan-500" /> 4. Personalização</h3>
-                        <p className="text-slate-600 text-sm leading-relaxed">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3 flex items-center gap-2"><Settings className="text-cyan-500" /> 4. Personalização</h3>
+                        <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">
                             Nas <strong>Configurações</strong>, você pode ajustar a densidade do layout (mais compacto ou mais espaçoso), gerenciar categorias e definir orçamentos mensais para cada categoria.
                         </p>
                     </section>
                 </div>
-                <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
-                    <button onClick={onClose} className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-cyan-600 transition">Entendi!</button>
+                <div className="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+                    <button onClick={onClose} className="bg-cyan-500 text-white px-8 py-2 rounded-xl font-bold hover:bg-cyan-600 transition shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20">Entendi!</button>
                 </div>
             </div>
         </div>
@@ -656,15 +698,15 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                 </div>
                             </div>
 
-                            <div className="pt-8 border-t border-slate-100">
-                                <h3 className="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                            <div className="pt-8 border-t border-slate-100 dark:border-slate-700">
+                                <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase mb-4 flex items-center gap-2">
                                     <Tags size={18} className="text-cyan-500" /> Gerenciar Patrocinadores
                                 </h3>
                                 <div className="space-y-4">
                                     {config.sponsors && config.sponsors.map((sponsor: any, idx: number) => (
-                                        <div key={idx} className="flex flex-col sm:flex-row gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                        <div key={idx} className="flex flex-col sm:flex-row gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
                                             <div className="flex-1">
-                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nome do Patrocinador</label>
+                                                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Nome do Patrocinador</label>
                                                 <input 
                                                     type="text" 
                                                     value={sponsor.name} 
@@ -673,11 +715,11 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                                         newSponsors[idx].name = e.target.value;
                                                         setConfig({ ...config, sponsors: newSponsors });
                                                     }}
-                                                    className="w-full text-sm rounded-lg border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                                    className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                                 />
                                             </div>
                                             <div className="flex-[2]">
-                                                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">URL da Logo (PNG/SVG)</label>
+                                                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">URL da Logo (PNG/SVG)</label>
                                                 <input 
                                                     type="text" 
                                                     value={sponsor.logo} 
@@ -686,7 +728,7 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                                         newSponsors[idx].logo = e.target.value;
                                                         setConfig({ ...config, sponsors: newSponsors });
                                                     }}
-                                                    className="w-full text-sm rounded-lg border-slate-200 focus:ring-cyan-500 focus:border-cyan-500"
+                                                    className="w-full text-sm rounded-lg border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                                 />
                                             </div>
                                             <button 
@@ -695,7 +737,7 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                                     const newSponsors = config.sponsors.filter((_: any, i: number) => i !== idx);
                                                     setConfig({ ...config, sponsors: newSponsors });
                                                 }}
-                                                className="self-end p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                                                className="self-end p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -707,15 +749,15 @@ const AdminPanel = ({ db, onClose }: { db: any, onClose: () => void }) => {
                                             const newSponsors = [...(config.sponsors || []), { name: '', logo: '' }];
                                             setConfig({ ...config, sponsors: newSponsors });
                                         }}
-                                        className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-cyan-500 hover:text-cyan-500 transition-all font-medium text-sm flex items-center justify-center gap-2"
+                                        className="w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 hover:text-cyan-500 transition-all font-medium text-sm flex items-center justify-center gap-2"
                                     >
                                         <Plus size={18} /> Adicionar Patrocinador
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-slate-100 flex justify-end">
-                                <button type="submit" className="bg-cyan-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-cyan-600 transition shadow-lg shadow-cyan-100">Salvar Alterações</button>
+                            <div className="pt-6 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+                                <button type="submit" className="bg-cyan-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-cyan-600 transition shadow-lg shadow-cyan-500/30">Salvar Alterações</button>
                             </div>
                         </form>
                     )}
@@ -754,20 +796,20 @@ const TutorialModal = ({ onClose }: { onClose: any }) => {
     const currentStep = tutorialSteps[step];
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md text-center animate-fade-in-up">
-                <div className="mb-6">{currentStep.icon}</div>
-                <h2 className="text-2xl font-bold mb-4 text-slate-700">{currentStep.title}</h2>
-                <p className="text-slate-600 mb-8">{currentStep.text}</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center animate-fade-in-up border border-slate-200 dark:border-slate-700">
+                <div className="mb-6 flex justify-center">{currentStep.icon}</div>
+                <h2 className="text-2xl font-bold mb-4 text-slate-800 dark:text-slate-100">{currentStep.title}</h2>
+                <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium">{currentStep.text}</p>
                 <div className="flex justify-between items-center">
                     {step < tutorialSteps.length - 1 ? (
-                        <button onClick={onClose} className="text-sm text-slate-500 hover:text-slate-700">Pular</button>
+                        <button onClick={onClose} className="text-sm font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">Pular</button>
                     ) : <div></div>}
                     
                     {step < tutorialSteps.length - 1 ? (
-                        <button onClick={() => setStep(s => s + 1)} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-lg transition">Próximo</button>
+                        <button onClick={() => setStep(s => s + 1)} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-8 rounded-xl transition shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20">Próximo</button>
                     ) : (
-                        <button onClick={onClose} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg transition">Começar a Usar!</button>
+                        <button onClick={onClose} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20">Começar a Usar!</button>
                     )}
                 </div>
             </div>
@@ -976,6 +1018,7 @@ const FinancialHealth = ({ stats, density }: any) => {
 };
 
 const Charts = ({ data, annualData, year, density }: any) => {
+    const ui = useUIManager();
     const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
     const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6';
     if (data.length === 0) return (<div className={`text-center text-slate-500 ${paddingClass} bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-700`}><h3 className="text-lg font-semibold mb-2 dark:text-slate-200">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
@@ -1012,7 +1055,14 @@ const Charts = ({ data, annualData, year, density }: any) => {
                             <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$ ${value}`} />
                             <Tooltip 
                                 formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
+                                contentStyle={{ 
+                                    borderRadius: '12px', 
+                                    border: 'none', 
+                                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', 
+                                    backgroundColor: ui.theme === 'dark' ? '#1e293b' : 'rgba(255, 255, 255, 0.9)',
+                                    color: ui.theme === 'dark' ? '#f1f5f9' : '#1e293b'
+                                }}
+                                itemStyle={{ color: ui.theme === 'dark' ? '#f1f5f9' : '#1e293b' }}
                             />
                             <Legend iconType="circle" />
                             <Area type="monotone" dataKey="Receitas" stroke="#10b981" fillOpacity={1} fill="url(#colorReceitas)" strokeWidth={3} />
@@ -1047,7 +1097,14 @@ const Charts = ({ data, annualData, year, density }: any) => {
                                 </Pie>
                                 <Tooltip 
                                     formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
+                                    contentStyle={{ 
+                                        borderRadius: '12px', 
+                                        border: 'none', 
+                                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', 
+                                        backgroundColor: ui.theme === 'dark' ? '#1e293b' : 'rgba(255, 255, 255, 0.9)',
+                                        color: ui.theme === 'dark' ? '#f1f5f9' : '#1e293b'
+                                    }}
+                                    itemStyle={{ color: ui.theme === 'dark' ? '#f1f5f9' : '#1e293b' }}
                                 />
                                 <Legend layout="horizontal" align="center" verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '20px' }} />
                             </PieChart>
@@ -1066,7 +1123,14 @@ const Charts = ({ data, annualData, year, density }: any) => {
                                 <YAxis type="category" dataKey="name" width={80} stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
                                 <Tooltip 
                                     formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
+                                    contentStyle={{ 
+                                        borderRadius: '12px', 
+                                        border: 'none', 
+                                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', 
+                                        backgroundColor: ui.theme === 'dark' ? '#1e293b' : 'rgba(255, 255, 255, 0.9)',
+                                        color: ui.theme === 'dark' ? '#f1f5f9' : '#1e293b'
+                                    }}
+                                    itemStyle={{ color: ui.theme === 'dark' ? '#f1f5f9' : '#1e293b' }}
                                 />
                                 <Bar dataKey="value" fill="#06b6d4" radius={[0, 4, 4, 0]} barSize={20} />
                             </BarChart>
@@ -1183,10 +1247,10 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, onRe
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
-                            <h5 className="text-sm font-bold text-green-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <h5 className="text-sm font-bold text-green-600 dark:text-green-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                 <TrendingUp size={16} /> Receitas
                             </h5>
-                            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
                                 <TransactionList 
                                     transactions={monthlyTransactions[expandedMonth].filter(t => t.type === 'income')} 
                                     onEdit={onEdit} 
@@ -1197,10 +1261,10 @@ const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, onRe
                             </div>
                         </div>
                         <div>
-                            <h5 className="text-sm font-bold text-red-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <h5 className="text-sm font-bold text-red-600 dark:text-red-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                 <TrendingDown size={16} /> Despesas
                             </h5>
-                            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
                                 <TransactionList 
                                     transactions={monthlyTransactions[expandedMonth].filter(t => t.type === 'expense')} 
                                     onEdit={onEdit} 
@@ -1252,48 +1316,6 @@ const useDataManagement = (db: any, userId: string, isDemo: boolean = false) => 
     }, [db, userId]);
 
     return { transactions, setTransactions, budgets, setBudgets, categories, setCategories };
-};
-
-const useUIManager = () => {
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-    const [view, setView] = useState('dashboard');
-    const [isHelpOpen, setIsHelpOpen] = useState(false);
-    const [isAdminOpen, setIsAdminOpen] = useState(false);
-    const [widgetOrder, setWidgetOrder] = useState(INITIAL_WIDGET_ORDER);
-    const [layoutDensity, setLayoutDensity] = useState('normal');
-    const [hideZeroRows, setHideZeroRows] = useState(false);
-    const [collapsedWidgets, setCollapsedWidgets] = useState<any>({});
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-    const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
-    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-    const [editingTransaction, setEditingTransaction] = useState<any>(null);
-    const [drillDown, setDrillDown] = useState<any>({ isOpen: false, transactions: [], title: '', date: null });
-    const [deleteConfirmation, setDeleteConfirmation] = useState<any>({ isOpen: false, transaction: null });
-    const [expenseGrouping, setExpenseGrouping] = useState('category');
-    const [incomeGrouping, setIncomeGrouping] = useState('category');
-
-    useEffect(() => {
-        localStorage.setItem('theme', theme);
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [theme]);
-
-    const handleOpenModal = (transaction = null) => { setEditingTransaction(transaction); setIsModalOpen(true); };
-
-    return {
-        theme, setTheme,
-        view, setView, widgetOrder, setWidgetOrder, layoutDensity, setLayoutDensity, hideZeroRows, setHideZeroRows,
-        collapsedWidgets, setCollapsedWidgets, isModalOpen, setIsModalOpen, isBatchModalOpen, setIsBatchModalOpen,
-        isBudgetModalOpen, setIsBudgetModalOpen, isReportModalOpen, setIsReportModalOpen, isSettingsModalOpen,
-        setIsSettingsModalOpen, editingTransaction, setEditingTransaction, drillDown, setDrillDown, deleteConfirmation,
-        setDeleteConfirmation, handleOpenModal, expenseGrouping, setExpenseGrouping, incomeGrouping, setIncomeGrouping,
-        isHelpOpen, setIsHelpOpen, isAdminOpen, setIsAdminOpen
-    };
 };
 
 const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
@@ -1713,20 +1735,26 @@ const BudgetModal = ({ onClose, onSave, currentBudgets, categories }: any) => {
         setBudgets((prev: any) => ({ ...prev, [category]: parseFloat(value) || 0 }));
     };
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col">
-                <h2 className="text-xl font-bold mb-4">Definir Orçamentos</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-700">
+                <h2 className="text-xl font-bold mb-4 text-slate-800 dark:text-slate-100">Definir Orçamentos</h2>
                 <div className="flex-grow overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {Array.from(new Set(categories.expense as string[])).map((category: string) => (
                         <div key={category}>
-                            <label className="block text-sm font-medium text-slate-600">{category}</label>
-                            <input type="number" step="0.01" value={budgets[category] || ''} onChange={(e) => handleBudgetChange(category, e.target.value)} className="mt-1 block w-full rounded-md border-slate-300" />
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">{category}</label>
+                            <input 
+                                type="number" 
+                                step="0.01" 
+                                value={budgets[category] || ''} 
+                                onChange={(e) => handleBudgetChange(category, e.target.value)} 
+                                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all" 
+                            />
                         </div>
                     ))}
                 </div>
-                <div className="mt-6 flex justify-end space-x-3 border-t pt-4">
-                    <button onClick={onClose} className="bg-slate-200 px-4 py-2 rounded-lg">Cancelar</button>
-                    <button onClick={() => onSave(budgets)} className="bg-cyan-500 text-white px-4 py-2 rounded-lg">Salvar</button>
+                <div className="mt-6 flex justify-end space-x-3 border-t border-slate-100 dark:border-slate-700 pt-4">
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
+                    <button onClick={() => onSave(budgets)} className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 hover:bg-cyan-600 transition">Salvar</button>
                 </div>
             </div>
         </div>
@@ -1736,13 +1764,13 @@ const BudgetModal = ({ onClose, onSave, currentBudgets, categories }: any) => {
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, transaction }: any) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-md animate-fade-in-up">
-                <h2 className="text-xl font-bold text-slate-700 mb-4">Confirmar Exclusão</h2>
-                <p className="text-slate-600 mb-6">Deseja excluir esta transação?</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-md animate-fade-in-up border border-slate-200 dark:border-slate-700">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">Confirmar Exclusão</h2>
+                <p className="text-slate-600 dark:text-slate-400 mb-6 font-medium">Deseja excluir esta transação? Esta ação não pode ser desfeita.</p>
                 <div className="flex justify-end space-x-3">
-                    <button onClick={onClose} className="bg-slate-200 px-4 py-2 rounded-lg">Cancelar</button>
-                    <button onClick={() => onConfirm(transaction, 'single')} className="bg-red-500 text-white px-4 py-2 rounded-lg">Excluir</button>
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
+                    <button onClick={() => onConfirm(transaction, 'single')} className="bg-red-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-red-200 dark:shadow-red-900/20 hover:bg-red-600 transition">Excluir</button>
                 </div>
             </div>
         </div>
@@ -1791,28 +1819,28 @@ const ReportModal = ({ onClose, onGenerate, categories }: any) => {
     const [status, setStatus] = useState('all');
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-fade-in-up">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-lg animate-fade-in-up border border-slate-200 dark:border-slate-700">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-slate-800">Gerar Relatório PDF</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full"><X size={20} /></button>
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Gerar Relatório PDF</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-colors"><X size={20} /></button>
                 </div>
                 
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Início</label>
-                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500" />
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Início</label>
+                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all" />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Fim</label>
-                            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500" />
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Fim</label>
+                            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all" />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Tipo de Lançamento</label>
-                        <select value={type} onChange={e => setType(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500">
+                        <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Tipo de Lançamento</label>
+                        <select value={type} onChange={e => setType(e.target.value)} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all">
                             <option value="all">Todos os tipos</option>
                             <option value="income">Apenas Receitas</option>
                             <option value="expense">Apenas Despesas</option>
@@ -1820,8 +1848,8 @@ const ReportModal = ({ onClose, onGenerate, categories }: any) => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Categoria</label>
-                        <select value={category} onChange={e => setCategory(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500">
+                        <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Categoria</label>
+                        <select value={category} onChange={e => setCategory(e.target.value)} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all">
                             <option value="all">Todas as categorias</option>
                             {Array.from(new Set([...categories.expense, ...categories.income])).sort().map(c => (
                                 <option key={c} value={c}>{c}</option>
@@ -1830,8 +1858,8 @@ const ReportModal = ({ onClose, onGenerate, categories }: any) => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Status</label>
-                        <select value={status} onChange={e => setStatus(e.target.value)} className="w-full rounded-xl border-slate-200 text-sm focus:ring-cyan-500">
+                        <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Status</label>
+                        <select value={status} onChange={e => setStatus(e.target.value)} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all">
                             <option value="all">Todos os status</option>
                             <option value={STATUSES.PAID}>Pago / Recebido</option>
                             <option value={STATUSES.CONFIRMED}>Confirmado</option>
@@ -1841,10 +1869,10 @@ const ReportModal = ({ onClose, onGenerate, categories }: any) => {
                 </div>
 
                 <div className="mt-8 flex justify-end gap-3">
-                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 transition">Cancelar</button>
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
                     <button 
                         onClick={() => onGenerate({ startDate, endDate, type, category, status })} 
-                        className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-cyan-200 hover:bg-cyan-600 transition"
+                        className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 hover:bg-cyan-600 transition"
                     >
                         Gerar PDF
                     </button>
@@ -1879,22 +1907,22 @@ const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensi
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-2xl animate-fade-in-up max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-700">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold">Configurações</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full"><X size={20} /></button>
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Configurações</h2>
+                    <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 transition-colors"><X size={20} /></button>
                 </div>
                 
-                <div className="flex-grow overflow-y-auto pr-2 space-y-8">
+                <div className="flex-grow overflow-y-auto pr-2 space-y-8 no-scrollbar">
                     <section>
-                        <h3 className="font-bold mb-4 text-slate-700 flex items-center gap-2"><Layout size={18} /> Visualização</h3>
+                        <h3 className="font-bold mb-4 text-slate-700 dark:text-slate-200 flex items-center gap-2"><Layout size={18} /> Visualização</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                             {['super-compact', 'compact', 'normal', 'relaxed', 'super-relaxed'].map(d => (
                                 <button 
                                     key={d} 
                                     onClick={() => onDensityChange(d)}
-                                    className={`px-2 py-2 rounded-md text-xs capitalize transition ${density === d ? 'bg-cyan-500 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                                    className={`px-2 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition ${density === d ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}
                                 >
                                     {d.replace('-', ' ')}
                                 </button>
@@ -1903,26 +1931,26 @@ const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensi
                     </section>
 
                     <section>
-                        <h3 className="font-bold mb-4 text-slate-700 flex items-center gap-2"><Tags size={18} /> Centros de Custo</h3>
+                        <h3 className="font-bold mb-4 text-slate-700 dark:text-slate-200 flex items-center gap-2"><Tags size={18} /> Centros de Custo</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {(['expense', 'income'] as const).map(type => (
-                                <div key={type} className="bg-slate-50 p-4 rounded-lg">
-                                    <h4 className="font-bold mb-4 capitalize text-slate-600 text-sm">{type === 'expense' ? 'Despesas' : 'Receitas'}</h4>
+                                <div key={type} className="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                    <h4 className="font-bold mb-4 capitalize text-slate-600 dark:text-slate-400 text-xs uppercase tracking-widest">{type === 'expense' ? 'Despesas' : 'Receitas'}</h4>
                                     <div className="flex gap-2 mb-4">
                                         <input 
                                             type="text" 
                                             value={newCategory[type]} 
                                             onChange={e => setNewCategory({ ...newCategory, [type]: e.target.value })}
                                             placeholder="Nova categoria..."
-                                            className="flex-1 rounded-md border-slate-300 text-sm"
+                                            className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all"
                                         />
-                                        <button onClick={() => handleAdd(type)} className="bg-cyan-500 text-white p-2 rounded-md"><Plus size={16} /></button>
+                                        <button onClick={() => handleAdd(type)} className="bg-cyan-500 text-white p-2 rounded-xl shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 hover:bg-cyan-600 transition"><Plus size={16} /></button>
                                     </div>
-                                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
                                         {localCategories[type].map((cat: string) => (
-                                            <div key={cat} className="flex justify-between items-center bg-white p-2 rounded border border-slate-100 text-sm group">
-                                                <span>{cat}</span>
-                                                <button onClick={() => handleRemove(type, cat)} className="text-red-400 opacity-0 group-hover:opacity-100 transition"><Trash2 size={14} /></button>
+                                            <div key={cat} className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-xl border border-slate-100 dark:border-slate-700 text-sm group shadow-sm">
+                                                <span className="text-slate-700 dark:text-slate-200 font-medium">{cat}</span>
+                                                <button onClick={() => handleRemove(type, cat)} className="text-slate-400 hover:text-red-500 transition p-1"><Trash2 size={14} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -1932,9 +1960,9 @@ const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensi
                     </section>
                 </div>
 
-                <div className="mt-8 flex justify-end space-x-3 border-t pt-4">
-                    <button onClick={onClose} className="bg-slate-200 px-4 py-2 rounded-lg">Cancelar</button>
-                    <button onClick={() => { onSaveCategories(localCategories); onClose(); }} className="bg-cyan-500 text-white px-4 py-2 rounded-lg">Salvar Alterações</button>
+                <div className="mt-8 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700 pt-6">
+                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
+                    <button onClick={() => { onSaveCategories(localCategories); onClose(); }} className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 hover:bg-cyan-600 transition">Salvar Alterações</button>
                 </div>
             </div>
         </div>
@@ -2283,11 +2311,11 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                             <Bell size={20} />
                         </button>
                     )}
-                    <button onClick={() => ui.setIsReportModalOpen(true)} className="p-2 hover:bg-slate-100 rounded-lg" title="Gerar PDF"><Printer size={20} /></button>
-                    <button onClick={() => ui.setIsBatchModalOpen(true)} className="bg-teal-500 text-white px-4 py-2 rounded-lg hidden sm:flex items-center gap-2"><Layers size={18} /> Lote</button>
-                    <button onClick={() => ui.handleOpenModal()} className="bg-cyan-500 text-white px-4 py-2 rounded-lg flex items-center gap-2"><PlusCircle size={18} /> Nova</button>
-                    <button onClick={() => ui.setIsSettingsModalOpen(true)} className="p-2 hover:bg-slate-100 rounded-lg"><Settings size={20} /></button>
-                    <button onClick={onLogout} className="p-2 text-red-500 hover:bg-red-50"><LogOut size={20} /></button>
+                    <button onClick={() => ui.setIsReportModalOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-400 transition-colors" title="Gerar PDF"><Printer size={20} /></button>
+                    <button onClick={() => ui.setIsBatchModalOpen(true)} className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl hidden sm:flex items-center gap-2 shadow-lg shadow-teal-200 dark:shadow-teal-900/20 transition-all"><Layers size={18} /> Lote</button>
+                    <button onClick={() => ui.handleOpenModal()} className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 transition-all"><PlusCircle size={18} /> Nova</button>
+                    <button onClick={() => ui.setIsSettingsModalOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-400 transition-colors" title="Configurações"><Settings size={20} /></button>
+                    <button onClick={onLogout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Sair"><LogOut size={20} /></button>
                 </div>
             </div>
         </header>
@@ -2339,7 +2367,7 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
 
                 {ui.view === 'transactions' && (
                     <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in`}>
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <CollapsibleWidget 
                                 title={`Balanço Anual - ${currentDate.getFullYear()}`} 
                                 isCollapsed={ui.collapsedWidgets['annual']} 
@@ -2360,16 +2388,16 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             <div className={`lg:col-span-2 ${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}`}>
-                                <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
+                                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                                        <h3 className="text-lg font-bold flex items-center gap-2 text-slate-700"><Table className="text-cyan-500" /> Transações do Mês</h3>
+                                        <h3 className="text-lg font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200"><Table className="text-cyan-500" /> Transações do Mês</h3>
                                         <div className="relative w-full sm:w-auto">
                                             <input 
                                                 type="text" 
                                                 placeholder="Buscar transação..." 
                                                 value={searchTerm}
                                                 onChange={e => setSearchTerm(e.target.value)}
-                                                className="pl-10 pr-4 py-2 rounded-xl border-slate-200 text-sm focus:ring-cyan-500 focus:border-cyan-500 w-full sm:w-64 shadow-sm"
+                                                className="pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 w-full sm:w-64 shadow-sm transition-all"
                                             />
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                         </div>
@@ -2378,8 +2406,8 @@ const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo
                                 </div>
                             </div>
                             <div className={DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}>
-                                <div className={`bg-white rounded-xl shadow-sm border border-slate-200 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
+                                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
+                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
                                     <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
                                 </div>
                                 
