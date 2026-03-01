@@ -29,6 +29,7 @@ import { ReportModal } from './ReportModal';
 import { SettingsModal } from './SettingsModal';
 import { AdminPanel } from './AdminPanel';
 import { UserManual } from './UserManual';
+import { RecurringTransactions } from './RecurringTransactions';
 import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
 
 export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
@@ -85,24 +86,87 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
     }, [transactions]);
 
     const handleSaveTransaction = async (data: any) => {
+        const { id, isRecurring, frequency, recurrences, isNewCategory, ...payload } = data;
+        const appId = 'meu-controle-financeiro';
+        const colRef = collection(db, `artifacts/${appId}/users/${user.uid}/transactions`);
+
+        // Adicionar nova categoria se necessário
+        if (isNewCategory && payload.category) {
+            const type = payload.type as 'income' | 'expense';
+            if (!categories[type].includes(payload.category)) {
+                const updatedCategories = {
+                    ...categories,
+                    [type]: [...categories[type], payload.category]
+                };
+                handleSaveSettings(updatedCategories);
+            }
+        }
+
         if (isDemo) {
-            if (data.id) {
-                setTransactions(transactions.map(t => t.id === data.id ? { ...data } : t));
+            if (id) {
+                setTransactions(transactions.map(t => t.id === id ? { ...data } : t));
                 toast.success('Transação atualizada (Demo)!');
+            } else if (isRecurring) {
+                const recurringId = `rec-${Date.now()}`;
+                const newTransactions: any[] = [];
+                const startDate = new Date(payload.date + 'T00:00:00');
+
+                for (let i = 0; i < recurrences; i++) {
+                    const currentDate = new Date(startDate);
+                    if (frequency === 'weekly') currentDate.setDate(startDate.getDate() + (i * 7));
+                    else if (frequency === 'biweekly') currentDate.setDate(startDate.getDate() + (i * 14));
+                    else if (frequency === 'monthly') currentDate.setMonth(startDate.getMonth() + i);
+                    else if (frequency === 'quarterly') currentDate.setMonth(startDate.getMonth() + (i * 3));
+                    else if (frequency === 'yearly') currentDate.setFullYear(startDate.getFullYear() + i);
+
+                    newTransactions.push({
+                        ...payload,
+                        id: `demo-${Date.now()}-${i}`,
+                        date: currentDate.toISOString().split('T')[0],
+                        recurringId,
+                        installmentNumber: i + 1,
+                        totalInstallments: recurrences,
+                        status: payload.type === 'expense' ? STATUSES.WAITING : null
+                    });
+                }
+                setTransactions([...transactions, ...newTransactions]);
+                toast.success(`${recurrences} parcelas geradas (Demo)!`);
             } else {
-                setTransactions([...transactions, { ...data, id: `demo-${Date.now()}` }]);
+                setTransactions([...transactions, { ...payload, id: `demo-${Date.now()}` }]);
                 toast.success('Transação adicionada (Demo)!');
             }
             ui.setIsModalOpen(false);
             return;
         }
-        const appId = 'meu-controle-financeiro';
-        const colRef = collection(db, `artifacts/${appId}/users/${user.uid}/transactions`);
-        const { id, ...payload } = data;
 
         if (id) {
             await updateDoc(doc(colRef, id), payload);
             toast.success('Transação atualizada!');
+        } else if (isRecurring) {
+            const batch = writeBatch(db);
+            const recurringId = `rec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            const startDate = new Date(payload.date + 'T00:00:00');
+
+            for (let i = 0; i < recurrences; i++) {
+                const currentDate = new Date(startDate);
+                if (frequency === 'weekly') currentDate.setDate(startDate.getDate() + (i * 7));
+                else if (frequency === 'biweekly') currentDate.setDate(startDate.getDate() + (i * 14));
+                else if (frequency === 'monthly') currentDate.setMonth(startDate.getMonth() + i);
+                else if (frequency === 'quarterly') currentDate.setMonth(startDate.getMonth() + (i * 3));
+                else if (frequency === 'yearly') currentDate.setFullYear(startDate.getFullYear() + i);
+
+                const newDocRef = doc(colRef);
+                batch.set(newDocRef, {
+                    ...payload,
+                    date: currentDate.toISOString().split('T')[0],
+                    recurringId,
+                    installmentNumber: i + 1,
+                    totalInstallments: recurrences,
+                    status: payload.type === 'expense' ? STATUSES.WAITING : null
+                });
+            }
+            await batch.commit();
+            toast.success(`${recurrences} parcelas geradas com sucesso!`);
         } else {
             await addDoc(colRef, payload);
             toast.success('Transação adicionada!');
@@ -145,6 +209,25 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         await deleteDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, transaction.id));
         ui.setDeleteConfirmation({ isOpen: false, transaction: null });
         toast.success('Transação removida.');
+    };
+
+    const handleDeleteRecurrence = async (recurringId: string) => {
+        const toDelete = transactions.filter(t => t.recurringId === recurringId);
+        if (toDelete.length === 0) return;
+
+        if (isDemo) {
+            setTransactions(transactions.filter(t => t.recurringId !== recurringId));
+            toast.success('Recorrência removida (Demo).');
+            return;
+        }
+
+        const appId = 'meu-controle-financeiro';
+        const batch = writeBatch(db);
+        toDelete.forEach(t => {
+            batch.delete(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, t.id));
+        });
+        await batch.commit();
+        toast.success('Recorrência completa removida.');
     };
 
     const handleStatusChange = async (id: string) => {
@@ -464,6 +547,23 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                     onRepeat={handleRepeatTransaction}
                                     density={ui.layoutDensity}
                                 />
+                            </CollapsibleWidget>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                            <CollapsibleWidget 
+                                title={`Recorrências Ativas`} 
+                                isCollapsed={ui.collapsedWidgets['recurring']} 
+                                onToggle={() => ui.setCollapsedWidgets((prev: any) => ({ ...prev, recurring: !prev.recurring }))}
+                                density={ui.layoutDensity}
+                            >
+                                <div className={DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}>
+                                    <RecurringTransactions 
+                                        transactions={transactions} 
+                                        onDeleteRecurrence={handleDeleteRecurrence} 
+                                        density={ui.layoutDensity} 
+                                    />
+                                </div>
                             </CollapsibleWidget>
                         </div>
 
