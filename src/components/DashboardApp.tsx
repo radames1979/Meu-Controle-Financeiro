@@ -32,6 +32,8 @@ import { UserManual } from './UserManual';
 import { RecurringTransactions } from './RecurringTransactions';
 import { GenericConfirmationModal } from './GenericConfirmationModal';
 import { AnnualComparisonCard } from './AnnualComparisonCard';
+import { Sidebar } from './Sidebar';
+import { BottomNav } from './BottomNav';
 import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
 
 export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
@@ -39,6 +41,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
     const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid, isDemo);
     const ui = useUIManager(userProfile?.uiSettings);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // Persist UI settings to Firestore
     useEffect(() => {
@@ -463,186 +466,214 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
     }, [transactions, currentDate]);
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${ui.theme === 'dark' ? 'bg-slate-900 text-slate-100' : 'bg-slate-100 text-slate-800'}`}>
-            <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 transition-colors duration-300">
-                <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-cyan-500 p-2 rounded-xl text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20">
-                            <DollarSign size={24} />
+        <div className={`min-h-screen flex transition-colors duration-300 ${ui.theme === 'dark' ? 'bg-slate-900 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
+            {/* Desktop Sidebar */}
+            <Sidebar 
+                view={ui.view} 
+                setView={ui.setView} 
+                isCollapsed={isSidebarCollapsed} 
+                setIsCollapsed={setIsSidebarCollapsed}
+                user={user}
+                isAdmin={user.email === APP_CONFIG.adminEmail}
+                onLogout={onLogout}
+                onOpenSettings={() => ui.setIsSettingsModalOpen(true)}
+                onOpenHelp={() => ui.setIsHelpOpen(true)}
+                onOpenAdmin={() => ui.setIsAdminOpen(true)}
+                onOpenNewTransaction={() => ui.handleOpenModal()}
+                onOpenBatch={() => ui.setIsBatchModalOpen(true)}
+                onOpenReport={() => ui.setIsReportModalOpen(true)}
+            />
+
+            <div className="flex-grow flex flex-col min-h-screen overflow-hidden">
+                {/* Mobile Header */}
+                <header className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center sticky top-0 z-30">
+                    <div className="flex items-center gap-2">
+                        <div className="bg-cyan-500 p-1.5 rounded-lg text-white">
+                            <DollarSign size={20} />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">Meu Controle</h1>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Resumo Financeiro</p>
+                        <h1 className="font-black text-slate-800 dark:text-white tracking-tight">Meu Controle</h1>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
+                            className="p-2 text-slate-600 dark:text-slate-400"
+                        >
+                            {ui.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                        </button>
+                        <button onClick={onLogout} className="p-2 text-red-500">
+                            <LogOut size={18} />
+                        </button>
+                    </div>
+                </header>
+
+                {/* Top Bar (Desktop only) */}
+                <header className="hidden md:flex bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 p-4 justify-between items-center sticky top-0 z-30">
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                            <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-1.5 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-400 shadow-sm"><ArrowLeft size={16} /></button>
+                            <h2 className="px-4 text-sm font-bold capitalize text-slate-700 dark:text-slate-200 min-w-[140px] text-center">{currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h2>
+                            <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-1.5 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-400 shadow-sm"><ArrowRight size={16} /></button>
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                        <div className="hidden md:flex items-center gap-2 bg-slate-50 dark:bg-slate-700/50 p-1.5 rounded-xl border border-slate-100 dark:border-slate-700 mr-2">
-                            <div className="px-3 py-1">
-                                <p className="text-[10px] text-slate-400 font-bold uppercase">Bem-vindo(a),</p>
-                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate max-w-[150px]">{user.email?.split('@')[0]}</p>
-                            </div>
-                        </div>
-                        
-                        {user.email === APP_CONFIG.adminEmail && (
-                        <button onClick={() => ui.setIsAdminOpen(true)} className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Painel Admin"><ShieldCheck size={20} /></button>
-                    )}
-                    <button 
-                        onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
-                        className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" 
-                        title={ui.theme === 'dark' ? 'Mudar para Modo Claro' : 'Mudar para Modo Escuro'}
-                    >
-                        {ui.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                    </button>
-                    <button onClick={() => ui.setIsHelpOpen(true)} className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" title="Manual do Usuário"><HelpCircle size={20} /></button>
-                    {!notificationsEnabled && 'Notification' in window && (
+                    <div className="flex items-center gap-3">
                         <button 
-                            onClick={requestNotificationPermission} 
-                            className="p-2 text-amber-500 hover:bg-amber-50 rounded-lg animate-pulse" 
-                            title="Ativar Notificações"
+                            onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
+                            className="p-2 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
                         >
-                            <Bell size={20} />
+                            {ui.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
-                    )}
-                    <button onClick={() => ui.setIsReportModalOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-400 transition-colors" title="Gerar PDF"><Printer size={20} /></button>
-                    <button onClick={() => ui.setIsBatchModalOpen(true)} className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-xl hidden sm:flex items-center gap-2 shadow-lg shadow-teal-200 dark:shadow-teal-900/20 transition-all"><Layers size={18} /> Lote</button>
-                    <button onClick={() => ui.handleOpenModal()} className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 transition-all"><PlusCircle size={18} /> Nova</button>
-                    <button onClick={() => ui.setIsSettingsModalOpen(true)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-400 transition-colors" title="Configurações"><Settings size={20} /></button>
-                    <button onClick={onLogout} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Sair"><LogOut size={20} /></button>
-                </div>
-            </div>
-        </header>
-            <main className="container mx-auto p-4 space-y-6">
-                {isDemo && (
-                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-amber-100 p-2 rounded-lg text-amber-600"><EyeOff size={20} /></div>
-                            <div>
-                                <p className="text-amber-800 font-bold text-sm">Você está no Modo Demo</p>
-                                <p className="text-amber-700 text-xs">Os dados são fictícios e não serão salvos permanentemente.</p>
+                        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                        <div className="flex items-center gap-3 pl-2">
+                            <div className="text-right">
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Usuário</p>
+                                <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{user.email?.split('@')[0]}</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-cyan-200 dark:shadow-none">
+                                {user.email?.charAt(0).toUpperCase()}
                             </div>
                         </div>
-                        <button onClick={onLogout} className="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition">Criar Minha Conta</button>
                     </div>
-                )}
-                <div className="flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 gap-4">
-                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition text-slate-600 dark:text-slate-400"><ArrowLeft size={20} /></button>
-                        <h2 className="text-lg font-bold capitalize text-slate-700 dark:text-slate-200">{currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h2>
-                        <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition text-slate-600 dark:text-slate-400"><ArrowRight size={20} /></button>
-                    </div>
-                    <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl w-full md:w-auto overflow-x-auto no-scrollbar">
-                        <button onClick={() => ui.setView('dashboard')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'dashboard' ? 'bg-white dark:bg-slate-800 shadow text-cyan-600 dark:text-cyan-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Painel</button>
-                        <button onClick={() => ui.setView('transactions')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'transactions' ? 'bg-white dark:bg-slate-800 shadow text-cyan-600 dark:text-cyan-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Lançamentos</button>
-                        <button onClick={() => ui.setView('calendar')} className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm transition whitespace-nowrap ${ui.view === 'calendar' ? 'bg-white dark:bg-slate-800 shadow text-cyan-600 dark:text-cyan-400 font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>Calendário</button>
-                    </div>
-                </div>
+                </header>
 
-                {ui.view === 'dashboard' && (
-                    <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in`}>
-                        <Dashboard stats={monthlyData} density={ui.layoutDensity} userProfile={userProfile} />
-                        
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2">
-                                <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
-                            </div>
-                            <div>
-                                <FinancialHealth stats={monthlyData} density={ui.layoutDensity} />
-                                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} mt-6`}>
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
-                                    <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} density={ui.layoutDensity} />
-                                    <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all font-medium text-sm">Configurar Orçamentos</button>
+                <main className="flex-grow overflow-y-auto custom-scrollbar pb-24 md:pb-8">
+                    <div className="container mx-auto p-4 md:p-6 space-y-6 max-w-7xl">
+                        {isDemo && (
+                            <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm animate-fade-in">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-amber-100 dark:bg-amber-900/30 p-2 rounded-xl text-amber-600 dark:text-amber-500"><EyeOff size={20} /></div>
+                                    <div>
+                                        <p className="text-amber-800 dark:text-amber-200 font-bold text-sm">Modo de Demonstração</p>
+                                        <p className="text-amber-700 dark:text-amber-400 text-xs">Os dados são fictícios e não serão salvos permanentemente.</p>
+                                    </div>
                                 </div>
+                                <button onClick={onLogout} className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-amber-600/20">Criar Minha Conta</button>
                             </div>
-                        </div>
-                    </div>
-                )}
+                        )}
 
-                {ui.view === 'transactions' && (
-                    <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in`}>
-                        <AnnualComparisonCard data={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
-                        
-                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                            <CollapsibleWidget 
-                                title={`Balanço Anual - ${currentDate.getFullYear()}`} 
-                                isCollapsed={ui.collapsedWidgets['annual']} 
-                                onToggle={() => ui.setCollapsedWidgets((prev: any) => ({ ...prev, annual: !prev.annual }))}
-                                density={ui.layoutDensity}
-                            >
-                                <AnnualBalanceTable 
-                                    data={annualData} 
-                                    year={currentDate.getFullYear()} 
-                                    onEdit={ui.handleOpenModal} 
-                                    onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })}
-                                    onStatusChange={handleStatusChange} 
-                                    onRepeat={handleRepeatTransaction}
-                                    density={ui.layoutDensity}
-                                />
-                            </CollapsibleWidget>
+                        {/* Mobile Date Selector */}
+                        <div className="md:hidden flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
+                            <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))} className="p-2 text-slate-500"><ArrowLeft size={20} /></button>
+                            <h2 className="text-sm font-black capitalize text-slate-700 dark:text-slate-200">{currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</h2>
+                            <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))} className="p-2 text-slate-500"><ArrowRight size={20} /></button>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                            <CollapsibleWidget 
-                                title={`Recorrências Ativas`} 
-                                isCollapsed={ui.collapsedWidgets['recurring']} 
-                                onToggle={() => ui.setCollapsedWidgets((prev: any) => ({ ...prev, recurring: !prev.recurring }))}
-                                density={ui.layoutDensity}
-                            >
-                                <div className={DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}>
-                                    <RecurringTransactions 
-                                        transactions={transactions} 
-                                        onDeleteRecurrence={(recurringId, description) => ui.setRecurrenceDeleteConfirmation({ isOpen: true, recurringId, description })} 
-                                        density={ui.layoutDensity} 
-                                    />
-                                </div>
-                            </CollapsibleWidget>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className={`lg:col-span-2 ${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}`}>
-                                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                                        <h3 className="text-lg font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200"><Table className="text-cyan-500" /> Transações do Mês</h3>
-                                        <div className="relative w-full sm:w-auto">
-                                            <input 
-                                                type="text" 
-                                                placeholder="Buscar transação..." 
-                                                value={searchTerm}
-                                                onChange={e => setSearchTerm(e.target.value)}
-                                                className="pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 w-full sm:w-64 shadow-sm transition-all"
-                                            />
-                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        {ui.view === 'dashboard' && (
+                            <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
+                                <Dashboard stats={monthlyData} density={ui.layoutDensity} userProfile={userProfile} />
+                                
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div className="lg:col-span-2">
+                                        <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
+                                    </div>
+                                    <div className="space-y-6">
+                                        <FinancialHealth stats={monthlyData} density={ui.layoutDensity} />
+                                        <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
+                                            <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
+                                            <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} density={ui.layoutDensity} />
+                                            <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all font-medium text-sm">Configurar Orçamentos</button>
                                         </div>
                                     </div>
-                                    <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
                                 </div>
                             </div>
-                            <div className={DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}>
-                                <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
-                                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
-                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
-                                </div>
+                        )}
+
+                        {ui.view === 'transactions' && (
+                            <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
+                                <AnnualComparisonCard data={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
                                 
-                                <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} text-white`}>
-                                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Star className="text-yellow-300" /> Dica do Dia</h3>
-                                    <p className="text-sm text-cyan-50 opacity-90 leading-relaxed">
-                                        {monthlyData.expense > monthlyData.income 
-                                            ? "Seus gastos superaram suas receitas este mês. Tente revisar suas categorias de lazer e compras para equilibrar as contas."
-                                            : "Parabéns! Você está gastando menos do que ganha. Considere investir o excedente para acelerar suas metas financeiras."}
-                                    </p>
+                                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                    <CollapsibleWidget 
+                                        title={`Balanço Anual - ${currentDate.getFullYear()}`} 
+                                        isCollapsed={ui.collapsedWidgets['annual']} 
+                                        onToggle={() => ui.setCollapsedWidgets((prev: any) => ({ ...prev, annual: !prev.annual }))}
+                                        density={ui.layoutDensity}
+                                    >
+                                        <AnnualBalanceTable 
+                                            data={annualData} 
+                                            year={currentDate.getFullYear()} 
+                                            onEdit={ui.handleOpenModal} 
+                                            onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })}
+                                            onStatusChange={handleStatusChange} 
+                                            onRepeat={handleRepeatTransaction}
+                                            density={ui.layoutDensity}
+                                        />
+                                    </CollapsibleWidget>
+                                </div>
+
+                                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                                    <CollapsibleWidget 
+                                        title={`Recorrências Ativas`} 
+                                        isCollapsed={ui.collapsedWidgets['recurring']} 
+                                        onToggle={() => ui.setCollapsedWidgets((prev: any) => ({ ...prev, recurring: !prev.recurring }))}
+                                        density={ui.layoutDensity}
+                                    >
+                                        <div className={DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}>
+                                            <RecurringTransactions 
+                                                transactions={transactions} 
+                                                onDeleteRecurrence={(recurringId, description) => ui.setRecurrenceDeleteConfirmation({ isOpen: true, recurringId, description })} 
+                                                density={ui.layoutDensity} 
+                                            />
+                                        </div>
+                                    </CollapsibleWidget>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    <div className={`lg:col-span-2 ${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}`}>
+                                        <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                                <h3 className="text-lg font-bold flex items-center gap-2 text-slate-700 dark:text-slate-200"><Table className="text-cyan-500" /> Transações do Mês</h3>
+                                                <div className="relative w-full sm:w-auto">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Buscar transação..." 
+                                                        value={searchTerm}
+                                                        onChange={e => setSearchTerm(e.target.value)}
+                                                        className="pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 w-full sm:w-64 shadow-sm transition-all"
+                                                    />
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                                </div>
+                                            </div>
+                                            <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                        </div>
+                                    </div>
+                                    <div className={DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}>
+                                        <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
+                                            <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
+                                            <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                        </div>
+                                        
+                                        <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-lg ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} text-white`}>
+                                            <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Star className="text-yellow-300" /> Dica do Dia</h3>
+                                            <p className="text-sm text-cyan-50 opacity-90 leading-relaxed">
+                                                {monthlyData.expense > monthlyData.income 
+                                                    ? "Seus gastos superaram suas receitas este mês. Tente revisar suas categorias de lazer e compras para equilibrar as contas."
+                                                    : "Parabéns! Você está gastando menos do que ganha. Considere investir o excedente para acelerar suas metas financeiras."}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                )}
+                        )}
 
-                {ui.view === 'calendar' && (
-                    <div className="animate-fade-in">
-                        <CalendarView currentDate={currentDate} transactions={transactions} onDayClick={handleDayClick} density={ui.layoutDensity} />
+                        {ui.view === 'calendar' && (
+                            <div className="animate-fade-in-up">
+                                <CalendarView currentDate={currentDate} transactions={transactions} onDayClick={handleDayClick} density={ui.layoutDensity} />
+                            </div>
+                        )}
                     </div>
-                )}
-            </main>
+                </main>
 
+                {/* Mobile Bottom Nav */}
+                <BottomNav 
+                    view={ui.view} 
+                    setView={ui.setView} 
+                    onOpenNewTransaction={() => ui.handleOpenModal()}
+                    onOpenSettings={() => ui.setIsSettingsModalOpen(true)}
+                />
+            </div>
+
+            {/* Modals */}
             {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
             {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
             {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} />}

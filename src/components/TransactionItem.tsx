@@ -23,42 +23,54 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
     };
 
     return (
-        <li className={`flex items-center justify-between ${itemPadding} rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all ${status === STATUSES.WAITING ? 'border-2 border-dotted border-yellow-400 dark:border-yellow-500' : ''}`}>
-            <div className="flex flex-grow items-center cursor-pointer" onClick={() => onEdit(transaction)}>
-                <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-300 dark:bg-slate-600 relative`}>
-                    {type === 'expense' && <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)}`} />}
-                    {type === 'income' && <div className="absolute w-full h-full rounded-full bg-green-500" />}
+        <li className={`flex flex-col sm:flex-row sm:items-center justify-between ${itemPadding} rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all duration-200 ${status === STATUSES.WAITING ? 'bg-yellow-50/30 dark:bg-yellow-500/5' : ''}`}>
+            <div className="flex flex-grow items-center cursor-pointer mb-3 sm:mb-0" onClick={() => onEdit(transaction)}>
+                <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-200 dark:bg-slate-700 relative overflow-hidden`}>
+                    {type === 'expense' && <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)} transition-colors duration-300`} />}
+                    {type === 'income' && <div className="absolute w-full h-full rounded-full bg-emerald-500" />}
                 </div>
-                <div>
-                    <p className={`${titleSize} flex items-center gap-1`}>
-                        {description}
-                        {installmentNumber && totalInstallments && <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-1">[{installmentNumber}/{totalInstallments}]</span>}
-                        <PaymentIcon type={paymentCodeType} />
-                        {recurringId && <Repeat size={12} className="text-slate-500 dark:text-slate-400" />}
-                    </p>
-                    <p className={`${textSize} text-slate-500 dark:text-slate-400`}>
-                        {new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                <div className="min-w-0 flex-grow">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <p className={`${titleSize} truncate`}>
+                            {description}
+                        </p>
+                        <div className="flex items-center gap-1.5">
+                            {installmentNumber && totalInstallments && (
+                                <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                                    {installmentNumber}/{totalInstallments}
+                                </span>
+                            )}
+                            <PaymentIcon type={paymentCodeType} />
+                            {recurringId && <Repeat size={12} className="text-cyan-500" />}
+                        </div>
+                    </div>
+                    <p className={`${textSize} text-slate-400 dark:text-slate-500 font-medium`}>
+                        {new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                     </p>
                 </div>
             </div>
-            <div className="flex items-center">
-                <p className={`font-bold text-right mr-4 ${textSize} ${type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+            
+            <div className="flex items-center justify-between sm:justify-end gap-2">
+                <p className={`font-black text-right sm:mr-4 ${textSize} ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                     {type === 'income' ? '+' : '-'} {amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </p>
-                {type === 'expense' && (
-                    <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-full transition" title="Alterar status">
-                        <ArrowUpDown size={16} />
+                
+                <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">
+                    {type === 'expense' && (
+                        <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-lg transition-colors" title="Alterar status">
+                            <ArrowUpDown size={16} />
+                        </button>
+                    )}
+                    <button onClick={(e) => { e.stopPropagation(); onEdit(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-lg transition-colors" title="Editar">
+                        <Edit size={16} />
                     </button>
-                )}
-                <button onClick={(e) => { e.stopPropagation(); onEdit(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Editar">
-                    <Edit size={18} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); onRepeat(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-amber-500 dark:hover:text-amber-400 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Repetir no próximo mês">
-                    <Copy size={18} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); onDelete(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-2 rounded-full transition opacity-0 group-hover:opacity-100" title="Excluir">
-                    <Trash2 size={18} />
-                </button>
+                    <button onClick={(e) => { e.stopPropagation(); onRepeat(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-amber-500 dark:hover:text-amber-400 p-2 rounded-lg transition-colors" title="Repetir no próximo mês">
+                        <Copy size={16} />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-2 rounded-lg transition-colors" title="Excluir">
+                        <Trash2 size={16} />
+                    </button>
+                </div>
             </div>
         </li>
     );
