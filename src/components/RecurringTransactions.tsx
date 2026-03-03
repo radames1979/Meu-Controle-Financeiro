@@ -4,7 +4,7 @@ import { DENSITY_CLASSES } from '../constants';
 
 interface RecurringTransactionsProps {
     transactions: any[];
-    onDeleteRecurrence: (recurringId: string) => void;
+    onDeleteRecurrence: (recurringId: string, description: string) => void;
     density: string;
 }
 
@@ -85,7 +85,7 @@ export const RecurringTransactions = ({ transactions, onDeleteRecurrence, densit
                             </div>
                             
                             <button 
-                                onClick={() => onDeleteRecurrence(group.id)}
+                                onClick={() => onDeleteRecurrence(group.id, group.description)}
                                 className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                                 title="Excluir Recorrência"
                             >

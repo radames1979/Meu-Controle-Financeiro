@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
     DollarSign, ShieldCheck, Sun, Moon, HelpCircle, Bell, Printer, Layers, 
     PlusCircle, Settings, LogOut, ArrowLeft, ArrowRight, PiggyBank, Table, 
-    Search, Clock, Star, EyeOff 
+    Search, Clock, Star, EyeOff, Trash2
 } from 'lucide-react';
 import { collection, doc, addDoc, updateDoc, deleteDoc, writeBatch, setDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
@@ -542,7 +542,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                     data={annualData} 
                                     year={currentDate.getFullYear()} 
                                     onEdit={ui.handleOpenModal} 
-                                    onDelete={ui.setDeleteConfirmation}
+                                    onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })}
                                     onStatusChange={handleStatusChange} 
                                     onRepeat={handleRepeatTransaction}
                                     density={ui.layoutDensity}
@@ -560,7 +560,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                 <div className={DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}>
                                     <RecurringTransactions 
                                         transactions={transactions} 
-                                        onDeleteRecurrence={handleDeleteRecurrence} 
+                                        onDeleteRecurrence={(recurringId, description) => ui.setRecurrenceDeleteConfirmation({ isOpen: true, recurringId, description })} 
                                         density={ui.layoutDensity} 
                                     />
                                 </div>
@@ -583,13 +583,13 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                         </div>
                                     </div>
-                                    <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                    <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
                                 </div>
                             </div>
                             <div className={DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}>
                                 <div className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                     <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
-                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={ui.setDeleteConfirmation} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                    <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
                                 </div>
                                 
                                 <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl shadow-lg ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} text-white`}>
@@ -619,8 +619,47 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
             {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
             {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
-            <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+            <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
             <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
+            
+            {/* Recurrence Delete Confirmation Modal */}
+            {ui.recurrenceDeleteConfirmation.isOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[110] p-4">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-md animate-fade-in-up border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-4 mb-6 text-red-500">
+                            <div className="bg-red-100 dark:bg-red-500/10 p-3 rounded-full">
+                                <Trash2 size={24} />
+                            </div>
+                            <h3 className="text-xl font-bold">Excluir Recorrência?</h3>
+                        </div>
+                        
+                        <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+                            Você está prestes a excluir <span className="font-bold text-slate-800 dark:text-slate-200">todas as parcelas</span> da recorrência: <br/>
+                            <span className="italic">"{ui.recurrenceDeleteConfirmation.description}"</span>.
+                            <br/><br/>
+                            Esta ação não pode ser desfeita. Deseja continuar?
+                        </p>
+                        
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={() => ui.setRecurrenceDeleteConfirmation({ isOpen: false, recurringId: null, description: '' })}
+                                className="px-6 py-2.5 text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    handleDeleteRecurrence(ui.recurrenceDeleteConfirmation.recurringId);
+                                    ui.setRecurrenceDeleteConfirmation({ isOpen: false, recurringId: null, description: '' });
+                                }}
+                                className="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-lg shadow-red-500/30 transition-all"
+                            >
+                                Sim, Excluir Tudo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
