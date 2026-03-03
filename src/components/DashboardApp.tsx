@@ -31,6 +31,7 @@ import { AdminPanel } from './AdminPanel';
 import { UserManual } from './UserManual';
 import { RecurringTransactions } from './RecurringTransactions';
 import { GenericConfirmationModal } from './GenericConfirmationModal';
+import { AnnualComparisonCard } from './AnnualComparisonCard';
 import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
 
 export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
@@ -559,6 +560,8 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
                 {ui.view === 'transactions' && (
                     <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in`}>
+                        <AnnualComparisonCard data={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
+                        
                         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                             <CollapsibleWidget 
                                 title={`Balanço Anual - ${currentDate.getFullYear()}`} 
