@@ -30,6 +30,7 @@ import { SettingsModal } from './SettingsModal';
 import { AdminPanel } from './AdminPanel';
 import { UserManual } from './UserManual';
 import { RecurringTransactions } from './RecurringTransactions';
+import { GenericConfirmationModal } from './GenericConfirmationModal';
 import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
 
 export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
@@ -235,43 +236,70 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         if (!t) return;
         const nextStatus = t.status === STATUSES.WAITING ? STATUSES.CONFIRMED : t.status === STATUSES.CONFIRMED ? STATUSES.PAID : STATUSES.WAITING;
         
-        if (isDemo) {
-            setTransactions(transactions.map(item => item.id === id ? { ...item, status: nextStatus } : item));
-            return;
+        const performChange = async () => {
+            if (isDemo) {
+                setTransactions(transactions.map(item => item.id === id ? { ...item, status: nextStatus } : item));
+                return;
+            }
+            const appId = 'meu-controle-financeiro';
+            await updateDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, id), { status: nextStatus });
+            toast.success(`Status atualizado para ${nextStatus}!`);
+        };
+
+        if (nextStatus === STATUSES.PAID) {
+            ui.setGenericConfirmation({
+                isOpen: true,
+                title: 'Confirmar Pagamento?',
+                message: `Deseja marcar a transação "${t.description}" como PAGA?`,
+                type: 'success',
+                confirmText: 'Sim, Confirmar',
+                onConfirm: performChange
+            });
+        } else {
+            performChange();
         }
-        const appId = 'meu-controle-financeiro';
-        await updateDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, id), { status: nextStatus });
     };
 
     const handleRepeatTransaction = async (transaction: any) => {
-        const originalDate = new Date(transaction.date + 'T00:00:00');
-        const nextMonthDate = new Date(originalDate);
-        nextMonthDate.setMonth(originalDate.getMonth() + 1);
-        
-        if (nextMonthDate.getMonth() !== (originalDate.getMonth() + 1) % 12) {
-            nextMonthDate.setDate(0);
-        }
+        const performRepeat = async () => {
+            const originalDate = new Date(transaction.date + 'T00:00:00');
+            const nextMonthDate = new Date(originalDate);
+            nextMonthDate.setMonth(originalDate.getMonth() + 1);
+            
+            if (nextMonthDate.getMonth() !== (originalDate.getMonth() + 1) % 12) {
+                nextMonthDate.setDate(0);
+            }
 
-        const { id, ...rest } = transaction;
-        const newTransaction = {
-            ...rest,
-            date: nextMonthDate.toISOString().split('T')[0],
-            status: transaction.type === 'expense' ? STATUSES.WAITING : null,
-            recurringId: null,
-            installmentNumber: null,
-            totalInstallments: null
+            const { id, ...rest } = transaction;
+            const newTransaction = {
+                ...rest,
+                date: nextMonthDate.toISOString().split('T')[0],
+                status: transaction.type === 'expense' ? STATUSES.WAITING : null,
+                recurringId: null,
+                installmentNumber: null,
+                totalInstallments: null
+            };
+
+            if (isDemo) {
+                setTransactions([...transactions, { ...newTransaction, id: `demo-${Date.now()}` }]);
+                toast.success('Lançamento repetido para o próximo mês (Demo)!');
+                return;
+            }
+
+            const appId = 'meu-controle-financeiro';
+            const colRef = collection(db, `artifacts/${appId}/users/${user.uid}/transactions`);
+            await addDoc(colRef, newTransaction);
+            toast.success('Lançamento repetido para o próximo mês!');
         };
 
-        if (isDemo) {
-            setTransactions([...transactions, { ...newTransaction, id: `demo-${Date.now()}` }]);
-            toast.success('Lançamento repetido para o próximo mês (Demo)!');
-            return;
-        }
-
-        const appId = 'meu-controle-financeiro';
-        const colRef = collection(db, `artifacts/${appId}/users/${user.uid}/transactions`);
-        await addDoc(colRef, newTransaction);
-        toast.success('Lançamento repetido para o próximo mês!');
+        ui.setGenericConfirmation({
+            isOpen: true,
+            title: 'Repetir Lançamento?',
+            message: `Deseja criar uma cópia de "${transaction.description}" para o próximo mês (${new Date(new Date(transaction.date + 'T00:00:00').setMonth(new Date(transaction.date + 'T00:00:00').getMonth() + 1)).toLocaleDateString('pt-BR', { month: 'long' })})?`,
+            type: 'info',
+            confirmText: 'Sim, Repetir',
+            onConfirm: performRepeat
+        });
     };
 
     const handleSaveBudgets = async (newBudgets: any) => {
@@ -621,6 +649,15 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
             <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
             <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
+            <GenericConfirmationModal 
+                isOpen={ui.genericConfirmation.isOpen} 
+                onClose={() => ui.setGenericConfirmation({ ...ui.genericConfirmation, isOpen: false })} 
+                onConfirm={ui.genericConfirmation.onConfirm}
+                title={ui.genericConfirmation.title}
+                message={ui.genericConfirmation.message}
+                type={ui.genericConfirmation.type}
+                confirmText={ui.genericConfirmation.confirmText}
+            />
             
             {/* Recurrence Delete Confirmation Modal */}
             {ui.recurrenceDeleteConfirmation.isOpen && (

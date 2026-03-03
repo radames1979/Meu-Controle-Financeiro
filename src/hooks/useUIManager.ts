@@ -19,6 +19,14 @@ export const useUIManager = (initialSettings: any = {}) => {
     const [drillDown, setDrillDown] = useState<any>({ isOpen: false, transactions: [], title: '', date: null });
     const [deleteConfirmation, setDeleteConfirmation] = useState<any>({ isOpen: false, transaction: null });
     const [recurrenceDeleteConfirmation, setRecurrenceDeleteConfirmation] = useState<any>({ isOpen: false, recurringId: null, description: '' });
+    const [genericConfirmation, setGenericConfirmation] = useState<any>({ 
+        isOpen: false, 
+        title: '', 
+        message: '', 
+        onConfirm: () => {}, 
+        type: 'info',
+        confirmText: 'Confirmar'
+    });
     const [expenseGrouping, setExpenseGrouping] = useState('category');
     const [incomeGrouping, setIncomeGrouping] = useState('category');
 
@@ -43,7 +51,9 @@ export const useUIManager = (initialSettings: any = {}) => {
         collapsedWidgets, setCollapsedWidgets, isModalOpen, setIsModalOpen, isBatchModalOpen, setIsBatchModalOpen,
         isBudgetModalOpen, setIsBudgetModalOpen, isReportModalOpen, setIsReportModalOpen, isSettingsModalOpen,
         setIsSettingsModalOpen, editingTransaction, setEditingTransaction, drillDown, setDrillDown, deleteConfirmation,
-        setDeleteConfirmation, recurrenceDeleteConfirmation, setRecurrenceDeleteConfirmation, handleOpenModal, expenseGrouping, setExpenseGrouping, incomeGrouping, setIncomeGrouping,
+        setDeleteConfirmation, recurrenceDeleteConfirmation, setRecurrenceDeleteConfirmation, 
+        genericConfirmation, setGenericConfirmation,
+        handleOpenModal, expenseGrouping, setExpenseGrouping, incomeGrouping, setIncomeGrouping,
         isHelpOpen, setIsHelpOpen, isAdminOpen, setIsAdminOpen
     };
 };
