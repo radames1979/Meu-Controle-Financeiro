@@ -44,7 +44,7 @@ export const TransactionModal = ({ onClose, onSave, transaction, categories }: a
             category: finalCategory,
             isNewCategory: isAddingNewCategory,
             account,
-            status: type === 'expense' ? status : null,
+            status: status,
             paymentCodeType: paymentCodeType === 'Nenhum' ? null : paymentCodeType,
             paymentCode: paymentCodeType === 'Nenhum' ? null : paymentCode,
             isRecurring,
@@ -81,16 +81,14 @@ export const TransactionModal = ({ onClose, onSave, transaction, categories }: a
                             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Data de Vencimento</label>
                             <input type="date" value={date} onChange={e => setDate(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3" required />
                         </div>
-                        {type === 'expense' && (
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status</label>
-                                <select value={status} onChange={e => setStatus(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3">
-                                    <option value={STATUSES.WAITING}>Aguardando</option>
-                                    <option value={STATUSES.CONFIRMED}>Confirmado</option>
-                                    <option value={STATUSES.PAID}>Pago</option>
-                                </select>
-                            </div>
-                        )}
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status</label>
+                            <select value={status} onChange={e => setStatus(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3">
+                                <option value={STATUSES.WAITING}>Aguardando</option>
+                                <option value={STATUSES.CONFIRMED}>Confirmado</option>
+                                <option value={STATUSES.PAID}>{type === 'income' ? 'Recebido' : 'Pago'}</option>
+                            </select>
+                        </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Centro de Custo</label>
                             <div className="flex gap-2">

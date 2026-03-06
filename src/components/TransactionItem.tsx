@@ -26,8 +26,7 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
         <li className={`flex flex-col sm:flex-row sm:items-center justify-between ${itemPadding} rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all duration-200 ${status === STATUSES.WAITING ? 'bg-yellow-50/30 dark:bg-yellow-500/5' : ''}`}>
             <div className="flex flex-grow items-center cursor-pointer mb-3 sm:mb-0" onClick={() => onEdit(transaction)}>
                 <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-200 dark:bg-slate-700 relative overflow-hidden`}>
-                    {type === 'expense' && <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)} transition-colors duration-300`} />}
-                    {type === 'income' && <div className="absolute w-full h-full rounded-full bg-emerald-500" />}
+                    <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)} transition-colors duration-300`} />
                 </div>
                 <div className="min-w-0 flex-grow">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -56,11 +55,9 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
                 </p>
                 
                 <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">
-                    {type === 'expense' && (
-                        <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-lg transition-colors" title="Alterar status">
-                            <ArrowUpDown size={16} />
-                        </button>
-                    )}
+                    <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-lg transition-colors" title="Alterar status">
+                        <ArrowUpDown size={16} />
+                    </button>
                     <button onClick={(e) => { e.stopPropagation(); onEdit(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-lg transition-colors" title="Editar">
                         <Edit size={16} />
                     </button>

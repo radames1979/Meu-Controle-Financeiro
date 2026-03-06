@@ -70,9 +70,7 @@ export const AnnualComparisonCard = ({ data, year, density, onEdit, onDrillDown 
         }
     };
 
-    const getStatusColorClass = (status: string, type: string) => {
-        if (type === 'income') return 'text-green-600 dark:text-green-400 font-bold';
-        
+    const getStatusColorClass = (status: string, _type: string) => {
         switch (status) {
             case STATUSES.PAID: return 'text-green-600 dark:text-green-400 font-bold';
             case STATUSES.CONFIRMED: return 'text-yellow-600 dark:text-yellow-500 font-bold';
@@ -81,9 +79,7 @@ export const AnnualComparisonCard = ({ data, year, density, onEdit, onDrillDown 
         }
     };
 
-    const getStatusBgClass = (status: string, type: string) => {
-        if (type === 'income') return '';
-        
+    const getStatusBgClass = (status: string, _type: string) => {
         switch (status) {
             case STATUSES.PAID: return 'bg-green-50 dark:bg-green-500/10';
             case STATUSES.CONFIRMED: return 'bg-yellow-50 dark:bg-yellow-500/10';

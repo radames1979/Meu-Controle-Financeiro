@@ -69,16 +69,16 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         const balance = income - expense;
         const expenseByCategory = filtered.filter(t => t.type === 'expense').reduce((acc, t) => { acc[t.category] = (acc[t.category] || 0) + t.amount; return acc; }, {} as any);
         const chartData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value: value as number })).sort((a, b) => b.value - a.value);
-        const paid = filtered.filter(t => t.type === 'expense' && t.status === STATUSES.PAID).reduce((acc, t) => acc + t.amount, 0);
-        const confirmed = filtered.filter(t => t.type === 'expense' && t.status === STATUSES.CONFIRMED).reduce((acc, t) => acc + t.amount, 0);
-        const waiting = filtered.filter(t => t.type === 'expense' && t.status === STATUSES.WAITING).reduce((acc, t) => acc + t.amount, 0);
+        const paid = filtered.filter(t => t.status === STATUSES.PAID).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
+        const confirmed = filtered.filter(t => t.status === STATUSES.CONFIRMED).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
+        const waiting = filtered.filter(t => t.status === STATUSES.WAITING).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
         return { filtered, income, expense, balance, chartData, expenseByCategory, paid, confirmed, waiting };
     }, [transactions, currentDate]);
 
     const upcomingBills = useMemo(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const unpaid = transactions.filter(t => t.type === 'expense' && t.status !== STATUSES.PAID && t.date);
+        const unpaid = transactions.filter(t => t.status !== STATUSES.PAID && t.date);
         const overdue = unpaid.filter(t => new Date(t.date + 'T00:00:00') < today);
         const dueToday = unpaid.filter(t => new Date(t.date + 'T00:00:00').getTime() === today.getTime());
         const dueNext7Days = unpaid.filter(t => {
@@ -167,7 +167,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                     recurringId,
                     installmentNumber: i + 1,
                     totalInstallments: recurrences,
-                    status: payload.type === 'expense' ? STATUSES.WAITING : null
+                    status: STATUSES.WAITING
                 });
             }
             await batch.commit();
@@ -184,7 +184,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             const newTransactions = batchData.map(item => ({ 
                 ...item, 
                 id: `demo-${Math.random().toString(36).substr(2, 9)}`,
-                status: item.type === 'expense' ? STATUSES.WAITING : null 
+                status: STATUSES.WAITING 
             }));
             setTransactions([...transactions, ...newTransactions]);
             ui.setIsBatchModalOpen(false);
@@ -196,7 +196,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         batchData.forEach(item => {
             const { id, ...payload } = item;
             const newDocRef = doc(collection(db, `artifacts/${appId}/users/${user.uid}/transactions`));
-            batch.set(newDocRef, { ...payload, status: item.type === 'expense' ? STATUSES.WAITING : null });
+            batch.set(newDocRef, { ...payload, status: STATUSES.WAITING });
         });
         await batch.commit();
         ui.setIsBatchModalOpen(false);
@@ -251,10 +251,11 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         };
 
         if (nextStatus === STATUSES.PAID) {
+            const isIncome = t.type === 'income';
             ui.setGenericConfirmation({
                 isOpen: true,
-                title: 'Confirmar Pagamento?',
-                message: `Deseja marcar a transação "${t.description}" como PAGA?`,
+                title: isIncome ? 'Confirmar Recebimento?' : 'Confirmar Pagamento?',
+                message: `Deseja marcar a transação "${t.description}" como ${isIncome ? 'RECEBIDA' : 'PAGA'}?`,
                 type: 'success',
                 confirmText: 'Sim, Confirmar',
                 onConfirm: performChange
@@ -278,7 +279,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             const newTransaction = {
                 ...rest,
                 date: nextMonthDate.toISOString().split('T')[0],
-                status: transaction.type === 'expense' ? STATUSES.WAITING : null,
+                status: STATUSES.WAITING,
                 recurringId: null,
                 installmentNumber: null,
                 totalInstallments: null
