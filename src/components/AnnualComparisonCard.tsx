@@ -10,9 +10,11 @@ interface AnnualComparisonCardProps {
     };
     year: number;
     density: string;
+    onEdit: (t: any) => void;
+    onDrillDown: (title: string, transactions: any[]) => void;
 }
 
-export const AnnualComparisonCard = ({ data, year, density }: AnnualComparisonCardProps) => {
+export const AnnualComparisonCard = ({ data, year, density, onEdit, onDrillDown }: AnnualComparisonCardProps) => {
     const { monthlyTransactions } = data;
     const months = Array.from({ length: 12 }, (_, i) => 
         new Date(year, i, 1).toLocaleString('pt-BR', { month: 'short' })
@@ -55,7 +57,17 @@ export const AnnualComparisonCard = ({ data, year, density }: AnnualComparisonCa
         if (matches.some(t => t.status === STATUSES.WAITING)) status = STATUSES.WAITING;
         else if (matches.some(t => t.status === STATUSES.CONFIRMED)) status = STATUSES.CONFIRMED;
 
-        return { amount: totalAmount, status, type: matches[0].type };
+        return { amount: totalAmount, status, type: matches[0].type, matches };
+    };
+
+    const handleCellClick = (data: any, monthName: string, description: string) => {
+        if (!data || !data.matches || data.matches.length === 0) return;
+
+        if (data.matches.length === 1) {
+            onEdit(data.matches[0]);
+        } else {
+            onDrillDown(`${description} - ${monthName}`, data.matches);
+        }
     };
 
     const getStatusColorClass = (status: string, type: string) => {
@@ -117,10 +129,14 @@ export const AnnualComparisonCard = ({ data, year, density }: AnnualComparisonCa
                                 {sortedIncomes.map(desc => (
                                     <tr key={desc} className="border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                                         <td className="p-3 text-xs font-medium text-slate-600 dark:text-slate-300 sticky left-0 bg-white dark:bg-slate-800 z-10 border-r border-slate-100 dark:border-slate-700 truncate max-w-[200px]">{desc}</td>
-                                        {months.map((_, i) => {
+                                        {months.map((month, i) => {
                                             const data = getDataForDescription(desc, i);
                                             return (
-                                                <td key={i} className="p-3 text-right text-xs border-r border-slate-100 dark:border-slate-700 last:border-r-0">
+                                                <td 
+                                                    key={i} 
+                                                    className={`p-3 text-right text-xs border-r border-slate-100 dark:border-slate-700 last:border-r-0 ${data ? 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors' : ''}`}
+                                                    onClick={() => handleCellClick(data, month, desc)}
+                                                >
                                                     {data ? (
                                                         <span className={`px-2 py-1 rounded-md ${getStatusColorClass(data.status, data.type)} ${getStatusBgClass(data.status, data.type)}`}>
                                                             {data.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
@@ -145,10 +161,14 @@ export const AnnualComparisonCard = ({ data, year, density }: AnnualComparisonCa
                                 {sortedExpenses.map(desc => (
                                     <tr key={desc} className="border-b border-slate-50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                                         <td className="p-3 text-xs font-medium text-slate-600 dark:text-slate-300 sticky left-0 bg-white dark:bg-slate-800 z-10 border-r border-slate-100 dark:border-slate-700 truncate max-w-[200px]">{desc}</td>
-                                        {months.map((_, i) => {
+                                        {months.map((month, i) => {
                                             const data = getDataForDescription(desc, i);
                                             return (
-                                                <td key={i} className="p-3 text-right text-xs border-r border-slate-100 dark:border-slate-700 last:border-r-0">
+                                                <td 
+                                                    key={i} 
+                                                    className={`p-3 text-right text-xs border-r border-slate-100 dark:border-slate-700 last:border-r-0 ${data ? 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors' : ''}`}
+                                                    onClick={() => handleCellClick(data, month, desc)}
+                                                >
                                                     {data ? (
                                                         <span className={`px-2 py-1 rounded-md ${getStatusColorClass(data.status, data.type)} ${getStatusBgClass(data.status, data.type)}`}>
                                                             {data.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}

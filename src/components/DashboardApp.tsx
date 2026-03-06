@@ -580,7 +580,13 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
                         {ui.view === 'transactions' && (
                             <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
-                                <AnnualComparisonCard data={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
+                                <AnnualComparisonCard 
+                                    data={annualData} 
+                                    year={currentDate.getFullYear()} 
+                                    density={ui.layoutDensity} 
+                                    onEdit={ui.handleOpenModal}
+                                    onDrillDown={(title, transactions) => ui.setDrillDown({ isOpen: true, title, transactions })}
+                                />
                                 
                                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                                     <CollapsibleWidget 
