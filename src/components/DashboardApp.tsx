@@ -467,7 +467,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
     }, [transactions, currentDate]);
 
     return (
-        <div className={`min-h-screen flex transition-colors duration-300 ${ui.theme === 'dark' ? 'bg-slate-900 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
+        <div className={`h-full w-full flex transition-colors duration-300 ${ui.theme === 'dark' ? 'bg-slate-900 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
             {/* Desktop Sidebar */}
             <Sidebar 
                 view={ui.view} 
@@ -485,7 +485,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 onOpenReport={() => ui.setIsReportModalOpen(true)}
             />
 
-            <div className="flex-grow flex flex-col min-h-screen overflow-hidden">
+            <div className="flex-grow flex flex-col h-full overflow-hidden relative">
                 {/* Mobile Header */}
                 <header className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center sticky top-0 z-30">
                     <div className="flex items-center gap-2">
