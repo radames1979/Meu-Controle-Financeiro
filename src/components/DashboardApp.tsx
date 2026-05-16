@@ -523,7 +523,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                         <div className="bg-cyan-500 p-1.5 rounded-lg text-white">
                             <DollarSign size={20} />
                         </div>
-                        <h1 className="font-black text-slate-800 dark:text-white tracking-tight">Meu Controle</h1>
+                        <h1 className="font-black text-slate-800 dark:text-white tracking-tight">Plano Raiz</h1>
                     </div>
                     <div className="flex items-center gap-2">
                         <button 

@@ -6,7 +6,7 @@ export const SubscriptionPage = ({ user, onSubscribe, onLogout, config }: { user
     return (
         <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex flex-col items-center p-4 transition-colors duration-300">
             <header className="w-full max-w-5xl mx-auto py-4 flex justify-between items-center">
-                 <h1 className="text-xl font-bold text-slate-700 dark:text-slate-200 flex items-center"><DollarSign className="mr-2 text-cyan-500" /> Meu Controle Financeiro</h1>
+                 <h1 className="text-xl font-bold text-slate-700 dark:text-slate-200 flex items-center"><DollarSign className="mr-2 text-cyan-500" /> Plano Raiz</h1>
                  <button onClick={onLogout} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-red-500 font-semibold transition">
                      Sair <LogOut size={16} />
                  </button>

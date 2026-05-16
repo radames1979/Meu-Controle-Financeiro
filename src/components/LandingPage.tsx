@@ -72,7 +72,7 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: 
                         <a href={`mailto:${YOUR_CONTACT_EMAIL}`} className="text-sm hover:text-cyan-400 transition">Contato & Sugestões</a>
                         <a href={`mailto:${YOUR_CONTACT_EMAIL}?subject=Quero%20presentear%20um%20amigo`} className="text-sm hover:text-cyan-400 transition">Presenteie um Amigo</a>
                     </div>
-                    <p className="text-sm">&copy; {new Date().getFullYear()} Meu Controle Financeiro. Todos os direitos reservados.</p>
+                    <p className="text-sm">&copy; {new Date().getFullYear()} Plano Raiz. Todos os direitos reservados.</p>
                 </div>
             </footer>
         </div>
