@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { 
     DollarSign, ShieldCheck, Sun, Moon, HelpCircle, Bell, Printer, Layers, 
     PlusCircle, Settings, LogOut, ArrowLeft, ArrowRight, PiggyBank, Table, 
@@ -14,30 +14,33 @@ import autoTable from 'jspdf-autotable';
 
 import { useDataManagement } from '../hooks/useDataManagement';
 import { useUIManager } from '../hooks/useUIManager';
-import { Dashboard } from './Dashboard';
-import { FinancialHealth } from './FinancialHealth';
-import { Charts } from './Charts';
-import { AnnualBalanceTable } from './AnnualBalanceTable';
-import { TransactionList } from './TransactionList';
-import { CollapsibleWidget } from './CollapsibleWidget';
-import { TransactionModal } from './TransactionModal';
-import { BatchTransactionModal } from './BatchTransactionModal';
-import { DrillDownModal } from './DrillDownModal';
-import { CalendarView } from './CalendarView';
-import { BudgetStatus } from './BudgetStatus';
-import { BudgetModal } from './BudgetModal';
-import { DeleteConfirmationModal } from './DeleteConfirmationModal';
-import { UpcomingBills } from './UpcomingBills';
-import { ReportModal } from './ReportModal';
-import { SettingsModal } from './SettingsModal';
-import { AdminPanel } from './AdminPanel';
-import { UserManual } from './UserManual';
-import { RecurringTransactions } from './RecurringTransactions';
-import { GenericConfirmationModal } from './GenericConfirmationModal';
-import { AnnualComparisonCard } from './AnnualComparisonCard';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
+import { LazyWidget } from './LazyWidget';
 import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
+
+// Lazy Loaded Components
+const Dashboard = lazy(() => import('./Dashboard').then(m => ({ default: m.Dashboard })));
+const FinancialHealth = lazy(() => import('./FinancialHealth').then(m => ({ default: m.FinancialHealth })));
+const Charts = lazy(() => import('./Charts').then(m => ({ default: m.Charts })));
+const AnnualBalanceTable = lazy(() => import('./AnnualBalanceTable').then(m => ({ default: m.AnnualBalanceTable })));
+const TransactionList = lazy(() => import('./TransactionList').then(m => ({ default: m.TransactionList })));
+const CollapsibleWidget = lazy(() => import('./CollapsibleWidget').then(m => ({ default: m.CollapsibleWidget })));
+const TransactionModal = lazy(() => import('./TransactionModal').then(m => ({ default: m.TransactionModal })));
+const BatchTransactionModal = lazy(() => import('./BatchTransactionModal').then(m => ({ default: m.BatchTransactionModal })));
+const DrillDownModal = lazy(() => import('./DrillDownModal').then(m => ({ default: m.DrillDownModal })));
+const CalendarView = lazy(() => import('./CalendarView').then(m => ({ default: m.CalendarView })));
+const BudgetStatus = lazy(() => import('./BudgetStatus').then(m => ({ default: m.BudgetStatus })));
+const BudgetModal = lazy(() => import('./BudgetModal').then(m => ({ default: m.BudgetModal })));
+const DeleteConfirmationModal = lazy(() => import('./DeleteConfirmationModal').then(m => ({ default: m.DeleteConfirmationModal })));
+const UpcomingBills = lazy(() => import('./UpcomingBills').then(m => ({ default: m.UpcomingBills })));
+const ReportModal = lazy(() => import('./ReportModal').then(m => ({ default: m.ReportModal })));
+const SettingsModal = lazy(() => import('./SettingsModal').then(m => ({ default: m.SettingsModal })));
+const AdminPanel = lazy(() => import('./AdminPanel').then(m => ({ default: m.AdminPanel })));
+const UserManual = lazy(() => import('./UserManual').then(m => ({ default: m.UserManual })));
+const RecurringTransactions = lazy(() => import('./RecurringTransactions').then(m => ({ default: m.RecurringTransactions })));
+const GenericConfirmationModal = lazy(() => import('./GenericConfirmationModal').then(m => ({ default: m.GenericConfirmationModal })));
+const AnnualComparisonCard = lazy(() => import('./AnnualComparisonCard').then(m => ({ default: m.AnnualComparisonCard })));
 
 export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
     if (!user) return null;
@@ -589,17 +592,25 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
                         {ui.view === 'dashboard' && (
                             <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
-                                <Dashboard stats={monthlyData} density={ui.layoutDensity} userProfile={userProfile} />
+                                <LazyWidget placeholderHeight="300px">
+                                    <Dashboard stats={monthlyData} density={ui.layoutDensity} userProfile={userProfile} />
+                                </LazyWidget>
                                 
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                     <div className="lg:col-span-2">
-                                        <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
+                                        <LazyWidget placeholderHeight="400px">
+                                            <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
+                                        </LazyWidget>
                                     </div>
                                     <div className="space-y-6">
-                                        <FinancialHealth stats={monthlyData} density={ui.layoutDensity} />
+                                        <LazyWidget placeholderHeight="300px">
+                                            <FinancialHealth stats={monthlyData} density={ui.layoutDensity} />
+                                        </LazyWidget>
                                         <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                             <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
-                                            <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} density={ui.layoutDensity} />
+                                            <LazyWidget placeholderHeight="150px">
+                                                <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} density={ui.layoutDensity} />
+                                            </LazyWidget>
                                             <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all font-medium text-sm">Configurar Orçamentos</button>
                                         </div>
                                     </div>
@@ -609,13 +620,15 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
                         {ui.view === 'transactions' && (
                             <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
-                                <AnnualComparisonCard 
-                                    data={annualData} 
-                                    year={currentDate.getFullYear()} 
-                                    density={ui.layoutDensity} 
-                                    onEdit={ui.handleOpenModal}
-                                    onDrillDown={(title, transactions) => ui.setDrillDown({ isOpen: true, title, transactions })}
-                                />
+                                <LazyWidget placeholderHeight="200px">
+                                    <AnnualComparisonCard 
+                                        data={annualData} 
+                                        year={currentDate.getFullYear()} 
+                                        density={ui.layoutDensity} 
+                                        onEdit={ui.handleOpenModal}
+                                        onDrillDown={(title, transactions) => ui.setDrillDown({ isOpen: true, title, transactions })}
+                                    />
+                                </LazyWidget>
                                 
                                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                                     <CollapsibleWidget 
@@ -624,15 +637,17 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                         onToggle={() => ui.setCollapsedWidgets((prev: any) => ({ ...prev, annual: !prev.annual }))}
                                         density={ui.layoutDensity}
                                     >
-                                        <AnnualBalanceTable 
-                                            data={annualData} 
-                                            year={currentDate.getFullYear()} 
-                                            onEdit={ui.handleOpenModal} 
-                                            onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })}
-                                            onStatusChange={handleStatusChange} 
-                                            onRepeat={handleRepeatTransaction}
-                                            density={ui.layoutDensity}
-                                        />
+                                        <LazyWidget placeholderHeight="400px">
+                                            <AnnualBalanceTable 
+                                                data={annualData} 
+                                                year={currentDate.getFullYear()} 
+                                                onEdit={ui.handleOpenModal} 
+                                                onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })}
+                                                onStatusChange={handleStatusChange} 
+                                                onRepeat={handleRepeatTransaction}
+                                                density={ui.layoutDensity}
+                                            />
+                                        </LazyWidget>
                                     </CollapsibleWidget>
                                 </div>
 
@@ -644,11 +659,13 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                         density={ui.layoutDensity}
                                     >
                                         <div className={DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}>
-                                            <RecurringTransactions 
-                                                transactions={transactions} 
-                                                onDeleteRecurrence={(recurringId, description) => ui.setRecurrenceDeleteConfirmation({ isOpen: true, recurringId, description })} 
-                                                density={ui.layoutDensity} 
-                                            />
+                                            <LazyWidget placeholderHeight="150px">
+                                                <RecurringTransactions 
+                                                    transactions={transactions} 
+                                                    onDeleteRecurrence={(recurringId, description) => ui.setRecurrenceDeleteConfirmation({ isOpen: true, recurringId, description })} 
+                                                    density={ui.layoutDensity} 
+                                                />
+                                            </LazyWidget>
                                         </div>
                                     </CollapsibleWidget>
                                 </div>
@@ -669,13 +686,17 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                                 </div>
                                             </div>
-                                            <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                            <LazyWidget placeholderHeight="500px">
+                                                <TransactionList transactions={filteredMonthlyTransactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                            </LazyWidget>
                                         </div>
                                     </div>
                                     <div className={DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'}>
                                         <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                             <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><Clock className="text-cyan-500" /> Contas a Vencer</h3>
-                                            <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                            <LazyWidget placeholderHeight="300px">
+                                                <UpcomingBills bills={upcomingBills} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                                            </LazyWidget>
                                         </div>
                                         
                                         <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-lg ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'} text-white`}>
@@ -693,7 +714,9 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
                         {ui.view === 'calendar' && (
                             <div className="animate-fade-in-up">
-                                <CalendarView currentDate={currentDate} transactions={transactions} onDayClick={handleDayClick} density={ui.layoutDensity} />
+                                <LazyWidget placeholderHeight="600px">
+                                    <CalendarView currentDate={currentDate} transactions={transactions} onDayClick={handleDayClick} density={ui.layoutDensity} />
+                                </LazyWidget>
                             </div>
                         )}
                     </div>
@@ -709,24 +732,26 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             </div>
 
             {/* Modals */}
-            {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
-            {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
-            {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} />}
-            {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} />}
-            {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
-            {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
-            {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
-            <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
-            <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
-            <GenericConfirmationModal 
-                isOpen={ui.genericConfirmation.isOpen} 
-                onClose={() => ui.setGenericConfirmation({ ...ui.genericConfirmation, isOpen: false })} 
-                onConfirm={ui.genericConfirmation.onConfirm}
-                title={ui.genericConfirmation.title}
-                message={ui.genericConfirmation.message}
-                type={ui.genericConfirmation.type}
-                confirmText={ui.genericConfirmation.confirmText}
-            />
+            <Suspense fallback={null}>
+                {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
+                {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
+                {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} />}
+                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} />}
+                {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
+                {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
+                {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
+                <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
+                <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
+                <GenericConfirmationModal 
+                    isOpen={ui.genericConfirmation.isOpen} 
+                    onClose={() => ui.setGenericConfirmation({ ...ui.genericConfirmation, isOpen: false })} 
+                    onConfirm={ui.genericConfirmation.onConfirm}
+                    title={ui.genericConfirmation.title}
+                    message={ui.genericConfirmation.message}
+                    type={ui.genericConfirmation.type}
+                    confirmText={ui.genericConfirmation.confirmText}
+                />
+            </Suspense>
             
             {/* Recurrence Delete Confirmation Modal */}
             {ui.recurrenceDeleteConfirmation.isOpen && (
