@@ -487,7 +487,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
             <div className="flex-grow flex flex-col h-screen overflow-hidden relative">
                 {/* Mobile Header */}
-                <header className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center z-30">
+                <header className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4 pt-[calc(env(safe-area-inset-top)+1rem)] flex justify-between items-center z-30">
                     <div className="flex items-center gap-2">
                         <div className="bg-cyan-500 p-1.5 rounded-lg text-white">
                             <DollarSign size={20} />

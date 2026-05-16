@@ -1,7 +1,16 @@
-export const APP_VERSION = '1.2.0';
-export const LAST_UPDATE = '2026-05-06';
+export const APP_VERSION = '1.2.1';
+export const LAST_UPDATE = '2026-05-16';
 
 export const CHANGELOG = [
+  {
+    version: '1.2.1',
+    date: '2026-05-16',
+    changes: [
+      'iOS Safe Area Patch: Suporte completo para Notch e Dynamic Island',
+      'Correção de padding na Bottom Navigation Bar',
+      'Ajuste de Viewport para PWA (viewport-fit=cover)'
+    ]
+  },
   {
     version: '1.2.0',
     date: '2026-05-06',

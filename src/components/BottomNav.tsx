@@ -18,7 +18,7 @@ export const BottomNav = ({ view, setView, onOpenNewTransaction, onOpenSettings 
     ];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-700 z-50 px-2 pb-safe-area-inset-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-700 z-50 px-2 pb-safe">
             <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
                 {navItems.map((item) => {
                     if (item.special) {
