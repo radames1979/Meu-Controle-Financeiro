@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Global Safety Net (Deny everything by default)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Primitives & Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // Check for Admin status based on hardcoded email + verification
+    function isAdmin() {
+      return isSignedIn() 
+        && request.auth.token.email == 'messi@bol.com.br' 
+        && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validation Blueprints ---
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['type', 'amount', 'description', 'date', 'category', 'account', 'status'])
+        && data.keys().size() <= 15
+        && data.type in ['income', 'expense']
+        && data.amount is number && data.amount >= 0 && data.amount < 1000000000
+        && data.description is string && data.description.size() <= 300
+        && data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && data.category is string && data.category.size() <= 100
+        && data.account is string && data.account.size() <= 100
+        && data.status in ['waiting', 'confirmed', 'paid'];
+    }
+
+    function isValidUserSettings(data) {
+      return data.keys().size() <= 20
+        && (!data.keys().hasAll(['layoutDensity']) || data.layoutDensity is string)
+        && (!data.keys().hasAll(['theme']) || data.theme in ['light', 'dark']);
+    }
+
+    // --- Collection Routes ---
+    match /artifacts/meu-controle-financeiro {
+      
+      // Registry of users for admin management
+      match /users_registry/{userId} {
+        allow get: if isOwner(userId) || isAdmin();
+        allow list: if isAdmin();
+        allow create: if isOwner(userId) && incoming().uid == request.auth.uid;
+        allow update: if isAdmin() || (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['lastSeen']));
+        allow delete: if isAdmin();
+      }
+
+      // Admin configuration and whitelist
+      match /admin/{docId} {
+        allow read, write: if isAdmin();
+      }
+
+      match /users/{userId} {
+        
+        // User profile and general settings
+        match /profile/userProfile {
+           allow get: if isOwner(userId) || isAdmin();
+           allow write: if isAdmin() || (isOwner(userId) && incoming().diff(existing()).affectedKeys().hasOnly(['lastSeen', 'fcmToken', 'uiSettings']));
+        }
+
+        // Transactions History
+        match /transactions/{transactionId} {
+          allow get: if isOwner(userId) && isValidId(transactionId);
+          allow list: if isOwner(userId);
+          
+          allow create: if isOwner(userId) 
+            && isValidId(transactionId)
+            && isValidTransaction(incoming());
+
+          allow update: if isOwner(userId)
+            && isValidId(transactionId)
+            && isValidTransaction(incoming())
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'type', 'amount', 'description', 'date', 'category', 'account', 'status',
+              'paymentCodeType', 'paymentCode', 'recurringId', 'installmentNumber', 'totalInstallments'
+            ]);
+
+          allow delete: if isOwner(userId) && isValidId(transactionId);
+        }
+
+        // User specific configs (budgets, categories)
+        match /settings/userSettings {
+          allow get: if isOwner(userId);
+          allow write: if isOwner(userId) && isValidUserSettings(incoming());
+        }
+      }
+    }
+  }
+}

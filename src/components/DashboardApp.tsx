@@ -4,7 +4,10 @@ import {
     PlusCircle, Settings, LogOut, ArrowLeft, ArrowRight, PiggyBank, Table, 
     Search, Clock, Star, EyeOff, Trash2
 } from 'lucide-react';
-import { collection, doc, addDoc, updateDoc, deleteDoc, writeBatch, setDoc } from 'firebase/firestore';
+import { 
+    collection, doc, addDoc, updateDoc, deleteDoc, writeBatch, setDoc,
+    handleFirestoreError, OperationType 
+} from '../services/firebase';
 import { toast } from 'react-hot-toast';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -144,37 +147,42 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             return;
         }
 
-        if (id) {
-            await updateDoc(doc(colRef, id), payload);
-            toast.success('Transação atualizada!');
-        } else if (isRecurring) {
-            const batch = writeBatch(db);
-            const recurringId = `rec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-            const startDate = new Date(payload.date + 'T00:00:00');
+        const path = `artifacts/${appId}/users/${user.uid}/transactions`;
+        try {
+            if (id) {
+                await updateDoc(doc(colRef, id), payload);
+                toast.success('Transação atualizada!');
+            } else if (isRecurring) {
+                const batch = writeBatch(db);
+                const recurringId = `rec-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                const startDate = new Date(payload.date + 'T00:00:00');
 
-            for (let i = 0; i < recurrences; i++) {
-                const currentDate = new Date(startDate);
-                if (frequency === 'weekly') currentDate.setDate(startDate.getDate() + (i * 7));
-                else if (frequency === 'biweekly') currentDate.setDate(startDate.getDate() + (i * 14));
-                else if (frequency === 'monthly') currentDate.setMonth(startDate.getMonth() + i);
-                else if (frequency === 'quarterly') currentDate.setMonth(startDate.getMonth() + (i * 3));
-                else if (frequency === 'yearly') currentDate.setFullYear(startDate.getFullYear() + i);
+                for (let i = 0; i < recurrences; i++) {
+                    const currentDate = new Date(startDate);
+                    if (frequency === 'weekly') currentDate.setDate(startDate.getDate() + (i * 7));
+                    else if (frequency === 'biweekly') currentDate.setDate(startDate.getDate() + (i * 14));
+                    else if (frequency === 'monthly') currentDate.setMonth(startDate.getMonth() + i);
+                    else if (frequency === 'quarterly') currentDate.setMonth(startDate.getMonth() + (i * 3));
+                    else if (frequency === 'yearly') currentDate.setFullYear(startDate.getFullYear() + i);
 
-                const newDocRef = doc(colRef);
-                batch.set(newDocRef, {
-                    ...payload,
-                    date: currentDate.toISOString().split('T')[0],
-                    recurringId,
-                    installmentNumber: i + 1,
-                    totalInstallments: recurrences,
-                    status: STATUSES.WAITING
-                });
+                    const newDocRef = doc(colRef);
+                    batch.set(newDocRef, {
+                        ...payload,
+                        date: currentDate.toISOString().split('T')[0],
+                        recurringId,
+                        installmentNumber: i + 1,
+                        totalInstallments: recurrences,
+                        status: STATUSES.WAITING
+                    });
+                }
+                await batch.commit();
+                toast.success(`${recurrences} parcelas geradas com sucesso!`);
+            } else {
+                await addDoc(colRef, payload);
+                toast.success('Transação adicionada!');
             }
-            await batch.commit();
-            toast.success(`${recurrences} parcelas geradas com sucesso!`);
-        } else {
-            await addDoc(colRef, payload);
-            toast.success('Transação adicionada!');
+        } catch (error) {
+            handleFirestoreError(error, OperationType.WRITE, path);
         }
         ui.setIsModalOpen(false);
     };
@@ -192,15 +200,20 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             return;
         }
         const appId = 'meu-controle-financeiro';
-        const batch = writeBatch(db);
-        batchData.forEach(item => {
-            const { id, ...payload } = item;
-            const newDocRef = doc(collection(db, `artifacts/${appId}/users/${user.uid}/transactions`));
-            batch.set(newDocRef, { ...payload, status: STATUSES.WAITING });
-        });
-        await batch.commit();
-        ui.setIsBatchModalOpen(false);
-        toast.success(`${batchData.length} transações salvas!`);
+        const path = `artifacts/${appId}/users/${user.uid}/transactions`;
+        try {
+            const batch = writeBatch(db);
+            batchData.forEach(item => {
+                const { id, ...payload } = item;
+                const newDocRef = doc(collection(db, path));
+                batch.set(newDocRef, { ...payload, status: STATUSES.WAITING });
+            });
+            await batch.commit();
+            ui.setIsBatchModalOpen(false);
+            toast.success(`${batchData.length} transações salvas!`);
+        } catch (error) {
+            handleFirestoreError(error, OperationType.WRITE, path);
+        }
     };
 
     const handleDeleteTransaction = async (transaction: any) => {
@@ -211,9 +224,14 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             return;
         }
         const appId = 'meu-controle-financeiro';
-        await deleteDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, transaction.id));
-        ui.setDeleteConfirmation({ isOpen: false, transaction: null });
-        toast.success('Transação removida.');
+        const path = `artifacts/${appId}/users/${user.uid}/transactions/${transaction.id}`;
+        try {
+            await deleteDoc(doc(db, path));
+            ui.setDeleteConfirmation({ isOpen: false, transaction: null });
+            toast.success('Transação removida.');
+        } catch (error) {
+            handleFirestoreError(error, OperationType.DELETE, path);
+        }
     };
 
     const handleDeleteRecurrence = async (recurringId: string) => {
@@ -227,12 +245,17 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         }
 
         const appId = 'meu-controle-financeiro';
-        const batch = writeBatch(db);
-        toDelete.forEach(t => {
-            batch.delete(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, t.id));
-        });
-        await batch.commit();
-        toast.success('Recorrência completa removida.');
+        const path = `artifacts/${appId}/users/${user.uid}/transactions`;
+        try {
+            const batch = writeBatch(db);
+            toDelete.forEach(t => {
+                batch.delete(doc(db, path, t.id));
+            });
+            await batch.commit();
+            toast.success('Recorrência completa removida.');
+        } catch (error) {
+            handleFirestoreError(error, OperationType.DELETE, path);
+        }
     };
 
     const handleStatusChange = async (id: string) => {
@@ -246,8 +269,13 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 return;
             }
             const appId = 'meu-controle-financeiro';
-            await updateDoc(doc(db, `artifacts/${appId}/users/${user.uid}/transactions`, id), { status: nextStatus });
-            toast.success(`Status atualizado para ${nextStatus}!`);
+            const path = `artifacts/${appId}/users/${user.uid}/transactions/${id}`;
+            try {
+                await updateDoc(doc(db, path), { status: nextStatus });
+                toast.success(`Status atualizado para ${nextStatus}!`);
+            } catch (error) {
+                handleFirestoreError(error, OperationType.UPDATE, path);
+            }
         };
 
         if (nextStatus === STATUSES.PAID) {

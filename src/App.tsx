@@ -86,30 +86,13 @@ export default function App() {
                 async (docSnap) => {
                     let currentProfile = docSnap.exists() ? docSnap.data() : null;
                     
-                    let isPreApproved = false;
-                    try {
-                        const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
-                        const whitelistSnap = await getDoc(whitelistRef);
-                        if (whitelistSnap.exists()) {
-                            const whitelist = whitelistSnap.data().emails || [];
-                            isPreApproved = whitelist.includes(user.email?.toLowerCase() || '');
-                        }
-                    } catch (e) {}
-
                     const isAdmin = user.email === appConfig.adminEmail;
-                    const shouldBeActive = isAdmin || isPreApproved;
 
                     if (currentProfile) {
-                        if (currentProfile.licenseStatus !== 'active' && shouldBeActive) {
-                            currentProfile.licenseStatus = 'active';
-                            try {
-                                await setDoc(profileDocRef, { licenseStatus: 'active' }, { merge: true });
-                            } catch (e) {}
-                        }
                         setUserProfile(currentProfile);
                     } else {
                         const initialProfile = { 
-                            licenseStatus: shouldBeActive ? 'active' : 'pending', 
+                            licenseStatus: isAdmin ? 'active' : 'pending', 
                             tutorialCompleted: false,
                             email: user.email,
                             uid: user.uid,
@@ -118,15 +101,18 @@ export default function App() {
                         setUserProfile(initialProfile);
                         try {
                             await setDoc(profileDocRef, initialProfile);
-                        } catch (e) {}
+                        } catch (e) {
+                            console.error("Erro ao criar perfil inicial:", e);
+                        }
                     }
 
+                    // Tenta atualizar o registro de usuário para o Admin (ignore erros se as regras bloquearem)
                     try {
                         const registryRef = doc(db, `artifacts/${appId}/users_registry/${user.uid}`);
                         await setDoc(registryRef, {
                             email: user.email,
                             uid: user.uid,
-                            licenseStatus: currentProfile?.licenseStatus || (shouldBeActive ? 'active' : 'pending'),
+                            licenseStatus: currentProfile?.licenseStatus || (isAdmin ? 'active' : 'pending'),
                             lastSeen: new Date().toISOString()
                         }, { merge: true });
                     } catch (e) {}
@@ -134,7 +120,7 @@ export default function App() {
                     setIsLoading(false);
                 },
                 (error) => {
-                    console.warn("Firestore: Sem permissão para ouvir perfil do usuário.");
+                    console.error("Erro ao monitorar perfil do usuário:", error);
                     setIsLoading(false);
                 }
             );

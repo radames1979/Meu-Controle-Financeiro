@@ -1,18 +1,20 @@
-export const APP_VERSION = '1.2.1';
+export const APP_VERSION = '1.3.0';
 export const LAST_UPDATE = '2026-05-16';
 
 export const CHANGELOG = [
   {
-    version: '1.2.1',
+    version: '1.3.0',
     date: '2026-05-16',
     changes: [
-      'iOS Safe Area Patch: Suporte completo para Notch e Dynamic Island',
-      'Correção de padding na Bottom Navigation Bar',
-      'Ajuste de Viewport para PWA (viewport-fit=cover)'
+      'Pente Fino de Produção: Auditoria completa de segurança',
+      'Proteção Firestore: Implementação das 8 camadas de segurança',
+      'Tratamento de Erros: Centralização e ofuscação de erros de banco de dados',
+      'Segurança de Chaves: Migração de segredos para variáveis de ambiente',
+      'Sanitização de Dados: Validação estrita de tipos e tamanhos de campos'
     ]
   },
   {
-    version: '1.2.0',
+    version: '1.2.1',
     date: '2026-05-06',
     changes: [
       'Implementação de layout Premium Mobile-First',
