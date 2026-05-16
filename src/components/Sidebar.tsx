@@ -4,7 +4,7 @@ import {
     Settings, HelpCircle, ShieldCheck, LogOut, ChevronLeft, ChevronRight,
     PlusCircle, Layers, Printer
 } from 'lucide-react';
-import { APP_CONFIG } from '../constants';
+import { APP_VERSION } from '../version';
 
 interface SidebarProps {
     view: string;
@@ -117,8 +117,18 @@ export const Sidebar = ({
                 
                 {!isCollapsed && (
                     <div className="mt-4 px-2 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 animate-fade-in">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase">Usuário</p>
+                        <div className="flex justify-between items-center mb-1">
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">Usuário</p>
+                            <span className="text-[10px] bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 px-1.5 py-0.5 rounded font-black tracking-tighter">
+                                {APP_VERSION}
+                            </span>
+                        </div>
                         <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{user.email?.split('@')[0]}</p>
+                    </div>
+                )}
+                {isCollapsed && (
+                    <div className="mt-2 text-center">
+                        <span className="text-[8px] font-black text-slate-400 dark:text-slate-600">{APP_VERSION}</span>
                     </div>
                 )}
             </div>

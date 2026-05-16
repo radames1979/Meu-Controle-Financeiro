@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { X, Layout, Tags, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+import { APP_VERSION } from '../version';
+
 export const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensityChange }: any) => {
     const [localCategories, setLocalCategories] = useState(categories);
     const [newCategory, setNewCategory] = useState({ expense: '', income: '' });
@@ -83,6 +85,10 @@ export const SettingsModal = ({ onClose, categories, onSaveCategories, density, 
                 <div className="mt-8 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700 pt-6">
                     <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
                     <button onClick={() => { onSaveCategories(localCategories); onClose(); }} className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 hover:bg-cyan-600 transition">Salvar Alterações</button>
+                </div>
+                <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-tighter opacity-50">
+                    <span>Versão do Sistema</span>
+                    <span className="bg-slate-100 dark:bg-slate-900/40 px-2 py-0.5 rounded">{APP_VERSION}</span>
                 </div>
             </div>
         </div>

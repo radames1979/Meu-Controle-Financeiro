@@ -537,7 +537,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                     </div>
                 </header>
 
-                <main className="flex-grow overflow-y-auto custom-scrollbar pb-24 md:pb-8">
+                <main className="flex-grow overflow-y-auto overflow-x-hidden custom-scrollbar pb-24 md:pb-8 touch-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                     <div className="container mx-auto p-4 md:p-6 space-y-6 max-w-7xl">
                         {isDemo && (
                             <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm animate-fade-in">
