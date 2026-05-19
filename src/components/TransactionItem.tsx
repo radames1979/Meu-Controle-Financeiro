@@ -1,5 +1,4 @@
-import React from 'react';
-import { QrCode, Barcode, Repeat, ArrowUpDown, Edit, Copy, Trash2 } from 'lucide-react';
+import { Clock, Check, CheckCircle2, Repeat, Edit, Copy, Trash2 } from 'lucide-react';
 import { STATUSES, DENSITY_CLASSES } from '../constants';
 
 export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
@@ -16,9 +15,16 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
         return 'bg-red-500';
     };
 
+    const getStatusIconColor = (s: string, active: boolean) => {
+        if (!active) return 'text-slate-300 dark:text-slate-600 hover:text-cyan-500';
+        if (s === STATUSES.PAID) return 'text-green-500 bg-green-50 dark:bg-green-500/10';
+        if (s === STATUSES.CONFIRMED) return 'text-yellow-500 bg-yellow-50 dark:bg-yellow-500/10';
+        return 'text-red-500 bg-red-50 dark:bg-red-500/10';
+    };
+
     const PaymentIcon = ({ type }: any) => {
-        if (type?.includes('Pix')) return <QrCode size={14} className="text-slate-500 dark:text-slate-400" />;
-        if (type === 'Código de Barras') return <Barcode size={14} className="text-slate-500 dark:text-slate-400" />;
+        if (type?.includes('Pix')) return <div className="p-1 px-1.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-bold text-slate-500 dark:text-slate-400">PIX</div>;
+        if (type === 'Código de Barras') return <div className="p-1 px-1.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-bold text-slate-500 dark:text-slate-400">BOLETO</div>;
         return null;
     };
 
@@ -55,9 +61,30 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
                 </p>
                 
                 <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">
-                    <button onClick={(e) => { e.stopPropagation(); onStatusChange(id); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-lg transition-colors" title="Alterar status">
-                        <ArrowUpDown size={16} />
-                    </button>
+                    <div className="flex items-center border-r border-slate-200 dark:border-slate-700 pr-1 mr-1">
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onStatusChange(id, STATUSES.WAITING); }} 
+                            className={`p-1.5 rounded-lg transition-all ${getStatusIconColor(STATUSES.WAITING, status === STATUSES.WAITING)}`}
+                            title="Aguardando"
+                        >
+                            <Clock size={14} />
+                        </button>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onStatusChange(id, STATUSES.CONFIRMED); }} 
+                            className={`p-1.5 rounded-lg transition-all ${getStatusIconColor(STATUSES.CONFIRMED, status === STATUSES.CONFIRMED)}`}
+                            title="Confirmado"
+                        >
+                            <Check size={14} />
+                        </button>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onStatusChange(id, STATUSES.PAID); }} 
+                            className={`p-1.5 rounded-lg transition-all ${getStatusIconColor(STATUSES.PAID, status === STATUSES.PAID)}`}
+                            title={type === 'income' ? 'Recebido' : 'Pago'}
+                        >
+                            <CheckCircle2 size={14} />
+                        </button>
+                    </div>
+                    
                     <button onClick={(e) => { e.stopPropagation(); onEdit(transaction); }} className="text-slate-400 dark:text-slate-500 hover:text-cyan-500 dark:hover:text-cyan-400 p-2 rounded-lg transition-colors" title="Editar">
                         <Edit size={16} />
                     </button>

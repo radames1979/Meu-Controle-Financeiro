@@ -261,14 +261,18 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         }
     };
 
-    const handleStatusChange = async (id: string) => {
+    const handleStatusChange = async (id: string, targetStatus?: string) => {
         const t = transactions.find(t => t.id === id);
         if (!t) return;
-        const nextStatus = t.status === STATUSES.WAITING ? STATUSES.CONFIRMED : t.status === STATUSES.CONFIRMED ? STATUSES.PAID : STATUSES.WAITING;
         
+        const nextStatus = targetStatus || (t.status === STATUSES.WAITING ? STATUSES.CONFIRMED : t.status === STATUSES.CONFIRMED ? STATUSES.PAID : STATUSES.WAITING);
+        
+        if (nextStatus === t.status) return;
+
         const performChange = async () => {
             if (isDemo) {
                 setTransactions(transactions.map(item => item.id === id ? { ...item, status: nextStatus } : item));
+                toast.success(`Status atualizado para ${nextStatus} (Demo)!`);
                 return;
             }
             const appId = 'meu-controle-financeiro';
@@ -281,7 +285,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             }
         };
 
-        if (nextStatus === STATUSES.PAID) {
+        if (nextStatus === STATUSES.PAID && t.status !== STATUSES.PAID) {
             const isIncome = t.type === 'income';
             ui.setGenericConfirmation({
                 isOpen: true,
