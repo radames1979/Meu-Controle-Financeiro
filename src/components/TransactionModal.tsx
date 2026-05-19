@@ -29,6 +29,13 @@ export const TransactionModal = ({ onClose, onSave, transaction, categories }: a
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (isAddingNewCategory && !newCategoryName.trim()) {
+            setError('O nome da nova categoria não pode estar vazio.');
+            toast.error('Insira o nome da nova categoria.');
+            return;
+        }
+
         const finalCategory = isAddingNewCategory ? newCategoryName.trim() : category;
 
         if (!amount || !description || !date || !finalCategory || !account) {
@@ -93,14 +100,17 @@ export const TransactionModal = ({ onClose, onSave, transaction, categories }: a
                             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Centro de Custo</label>
                             <div className="flex gap-2">
                                 {isAddingNewCategory ? (
-                                    <input 
-                                        type="text" 
-                                        value={newCategoryName} 
-                                        onChange={e => setNewCategoryName(e.target.value)} 
-                                        placeholder="Nova categoria..."
-                                        className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3"
-                                        autoFocus
-                                    />
+                                    <div className="flex-1 relative">
+                                        <input 
+                                            type="text" 
+                                            value={newCategoryName} 
+                                            onChange={e => setNewCategoryName(e.target.value)} 
+                                            placeholder="Ex: Mercado, Lazer..."
+                                            className="block w-full rounded-xl border-cyan-300 dark:border-cyan-500/50 bg-cyan-50 dark:bg-cyan-500/10 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3"
+                                            autoFocus
+                                        />
+                                        <span className="absolute -top-2 left-3 px-1.5 py-0.5 bg-cyan-500 text-white text-[10px] font-black uppercase rounded shadow-sm">Nova</span>
+                                    </div>
                                 ) : (
                                     <select value={category} onChange={e => setCategory(e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3">
                                         {Array.from(new Set(categories[type as keyof typeof categories] as string[])).map((c: string) => <option key={c} value={c}>{c}</option>)}
@@ -108,8 +118,11 @@ export const TransactionModal = ({ onClose, onSave, transaction, categories }: a
                                 )}
                                 <button 
                                     type="button" 
-                                    onClick={() => setIsAddingNewCategory(!isAddingNewCategory)}
-                                    className={`p-3 rounded-xl border transition-all ${isAddingNewCategory ? 'border-red-200 bg-red-50 text-red-500' : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-900'}`}
+                                    onClick={() => {
+                                        setIsAddingNewCategory(!isAddingNewCategory);
+                                        if (isAddingNewCategory) setNewCategoryName('');
+                                    }}
+                                    className={`p-3 rounded-xl border transition-all ${isAddingNewCategory ? 'border-red-300 bg-red-50 text-red-500 hover:bg-red-100' : 'border-slate-200 bg-slate-50 text-slate-500 dark:border-slate-700 dark:bg-slate-900 hover:bg-slate-100'}`}
                                     title={isAddingNewCategory ? "Cancelar" : "Nova Categoria"}
                                 >
                                     {isAddingNewCategory ? <X size={20} /> : <Plus size={20} />}
