@@ -1,5 +1,5 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, CheckCircle, Clock, AlertCircle, PiggyBank, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, TrendingDown, CheckCircle, Clock, AlertCircle, PiggyBank, Shield, Eye, EyeOff } from 'lucide-react';
 import { DENSITY_CLASSES } from '../constants';
 
 export const Dashboard = ({ stats, density, userProfile }: any) => {
@@ -9,17 +9,37 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
     const dashboardPaddingClass = DENSITY_CLASSES.dashboardPadding[density as keyof typeof DENSITY_CLASSES.dashboardPadding] || 'p-8';
     const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
 
+    const [hideValues, setHideValues] = useState(() => {
+        return localStorage.getItem('hide_values_dashboard') === 'true';
+    });
+
+    const toggleHideValues = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const nextVal = !hideValues;
+        setHideValues(nextVal);
+        localStorage.setItem('hide_values_dashboard', String(nextVal));
+    };
+
     return (
         <div className={`space-y-6 ${dashboardPaddingClass}`}>
             {/* Bento Grid Layout */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 {/* Main Balance Card - Bento Large */}
-                <div className="md:col-span-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-all duration-300 hover:shadow-md">
+                <div className="balance-summary-card md:col-span-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-all duration-300 hover:shadow-md relative">
+                    <button
+                        type="button"
+                        onClick={toggleHideValues}
+                        className="absolute top-4 right-4 z-10 p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200"
+                        title={hideValues ? "Mostrar Valores" : "Ocultar Valores"}
+                    >
+                        {hideValues ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
+
                     <div className={`${heroPaddingClass} flex flex-col justify-between h-full bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50`}>
                         <div>
                             <h2 className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest mb-2">Balanço Total do Mês</h2>
                             <div className="flex items-baseline gap-2 overflow-hidden">
-                                <span className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter truncate">
+                                <span className={`text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter truncate transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
                                     {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </span>
                             </div>
@@ -42,13 +62,13 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
                             <div className="flex gap-3 w-full sm:w-auto">
                                 <div className="flex-1 sm:flex-none bg-emerald-500/10 px-4 py-2 rounded-2xl border border-emerald-500/20">
                                     <p className="text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase">Entradas</p>
-                                    <p className="text-lg font-black text-emerald-700 dark:text-emerald-400">
+                                    <p className={`text-lg font-black text-emerald-700 dark:text-emerald-400 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
                                         {income.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </p>
                                 </div>
                                 <div className="flex-1 sm:flex-none bg-rose-500/10 px-4 py-2 rounded-2xl border border-rose-500/20">
                                     <p className="text-rose-700 dark:text-rose-400 text-[10px] font-bold uppercase">Saídas</p>
-                                    <p className="text-lg font-black text-rose-700 dark:text-rose-400">
+                                    <p className={`text-lg font-black text-rose-700 dark:text-rose-400 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
                                         {expense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </p>
                                 </div>
@@ -88,7 +108,7 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
                     </div>
                     <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pago / Recebido</p>
-                        <p className="text-lg font-black text-slate-700 dark:text-slate-200">{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                     </div>
                 </div>
 
@@ -98,7 +118,7 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
                     </div>
                     <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Confirmado</p>
-                        <p className="text-lg font-black text-slate-700 dark:text-slate-200">{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                     </div>
                 </div>
 
@@ -108,7 +128,7 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
                     </div>
                     <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Aguardando</p>
-                        <p className="text-lg font-black text-slate-700 dark:text-slate-200">{waiting.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{waiting.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                     </div>
                 </div>
             </div>
