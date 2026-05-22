@@ -1,5 +1,6 @@
 import { Clock, Check, CheckCircle2, Repeat, Edit, Copy, Trash2 } from 'lucide-react';
 import { STATUSES, DENSITY_CLASSES } from '../constants';
+import { motion } from 'motion/react';
 
 export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
     const { id, type, description, date, amount, status, paymentCodeType, recurringId, installmentNumber, totalInstallments } = transaction;
@@ -29,7 +30,28 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
     };
 
     return (
-        <li className={`flex flex-col sm:flex-row sm:items-center justify-between ${itemPadding} rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all duration-200 ${status === STATUSES.WAITING ? 'bg-yellow-50/30 dark:bg-yellow-500/5' : ''}`}>
+        <motion.li
+            layout
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ 
+                opacity: 0, 
+                height: 0, 
+                marginTop: 0, 
+                marginBottom: 0, 
+                paddingTop: 0, 
+                paddingBottom: 0, 
+                borderBottomWidth: 0,
+                overflow: 'hidden' 
+            }}
+            transition={{ 
+                type: 'spring', 
+                damping: 30, 
+                stiffness: 350,
+                opacity: { duration: 0.15 } 
+            }}
+            className={`flex flex-col sm:flex-row sm:items-center justify-between ${itemPadding} rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/30 border-b border-slate-100 dark:border-slate-700 last:border-b-0 group transition-all duration-200 ${status === STATUSES.WAITING ? 'bg-yellow-50/30 dark:bg-yellow-500/5' : ''}`}
+        >
             <div className="flex flex-grow items-center cursor-pointer mb-3 sm:mb-0" onClick={() => onEdit(transaction)}>
                 <div className={`flex-shrink-0 w-1.5 ${indicatorHeight} rounded-full mr-4 bg-slate-200 dark:bg-slate-700 relative overflow-hidden`}>
                     <div className={`absolute w-full h-full rounded-full ${getStatusIndicatorClass(status)} transition-colors duration-300`} />
@@ -96,6 +118,6 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
                     </button>
                 </div>
             </div>
-        </li>
+        </motion.li>
     );
 };

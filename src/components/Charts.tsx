@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
+import { TrendingUp, PieChart as PieChartIcon, Activity } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from 'recharts';
 import { DENSITY_CLASSES, COLORS } from '../constants';
 
 export const Charts = ({ data, annualData, year, density, theme }: any) => {
@@ -14,6 +14,21 @@ export const Charts = ({ data, annualData, year, density, theme }: any) => {
             Despesas: annualData.expenseTotals[i],
             Saldo: income - annualData.expenseTotals[i]
         }));
+    }, [annualData, year]);
+
+    const cumulativeData = useMemo(() => {
+        let runningIncome = 0;
+        let runningExpense = 0;
+        return annualData.incomeTotals.map((income: number, i: number) => {
+            runningIncome += income;
+            runningExpense += annualData.expenseTotals[i];
+            return {
+                name: new Date(year, i, 1).toLocaleString('pt-BR', { month: 'short' }),
+                "Receitas Acumuladas": runningIncome,
+                "Despesas Acumuladas": runningExpense,
+                "Saldo Acumulado": runningIncome - runningExpense
+            };
+        });
     }, [annualData, year]);
 
     if (data.length === 0) return (<div className={`text-center text-slate-500 ${paddingClass} bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-700`}><h3 className="text-lg font-semibold mb-2 dark:text-slate-200">Análise de Despesas Mensal</h3><p>Nenhuma despesa registrada neste mês para exibir gráficos.</p></div>);
@@ -93,6 +108,35 @@ export const Charts = ({ data, annualData, year, density, theme }: any) => {
                                 />
                                 <Legend layout="vertical" align="right" verticalAlign="middle" />
                             </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 min-h-[400px] overflow-hidden flex flex-col justify-between">
+                    <h3 className="text-lg font-bold mb-6 text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                        <Activity size={20} className="text-cyan-500" /> Evolução Acumulada ({year})
+                    </h3>
+                    <div className="h-[300px] w-full" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={cumulativeData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#334155' : '#f1f5f9'} />
+                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$ ${value}`} />
+                                <Tooltip 
+                                    formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    contentStyle={{ 
+                                        borderRadius: '12px', 
+                                        border: 'none', 
+                                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', 
+                                        backgroundColor: theme === 'dark' ? '#1e293b' : 'rgba(255, 255, 255, 0.9)',
+                                        color: theme === 'dark' ? '#f1f5f9' : '#1e293b'
+                                    }}
+                                    itemStyle={{ color: theme === 'dark' ? '#f1f5f9' : '#1e293b' }}
+                                />
+                                <Legend iconType="circle" />
+                                <Line type="monotone" dataKey="Receitas Acumuladas" stroke="#10b981" strokeWidth={3} activeDot={{ r: 8 }} dot={{ r: 4 }} />
+                                <Line type="monotone" dataKey="Despesas Acumuladas" stroke="#f43f5e" strokeWidth={3} activeDot={{ r: 8 }} dot={{ r: 4 }} />
+                            </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </div>

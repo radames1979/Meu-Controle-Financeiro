@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { 
-    DollarSign, ShieldCheck, Sun, Moon, HelpCircle, Bell, Printer, Layers, 
+    DollarSign, ShieldCheck, Sun, Moon, HelpCircle, Bell, BellOff, Printer, Layers, 
     PlusCircle, Settings, LogOut, ArrowLeft, ArrowRight, PiggyBank, Table, 
     Search, Clock, Star, EyeOff, Trash2
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { 
     collection, doc, addDoc, updateDoc, deleteDoc, writeBatch, setDoc,
     handleFirestoreError, OperationType 
@@ -424,18 +425,11 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
     useEffect(() => {
         if ('Notification' in window) {
-            setNotificationsEnabled(Notification.permission === 'granted');
+            const isGranted = Notification.permission === 'granted';
+            const localPref = localStorage.getItem('notifications_pref') !== 'disabled';
+            setNotificationsEnabled(isGranted && localPref);
         }
     }, []);
-
-    const requestNotificationPermission = async () => {
-        if (!('Notification' in window)) return;
-        const permission = await Notification.requestPermission();
-        setNotificationsEnabled(permission === 'granted');
-        if (permission === 'granted') {
-            toast.success('Notificações ativadas!');
-        }
-    };
 
     const checkUpcomingBillsNotifications = (bills: any[]) => {
         if (Notification.permission !== 'granted') return;
@@ -458,6 +452,58 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 });
             }
         });
+    };
+
+    const toggleNotifications = async () => {
+        if (!('Notification' in window)) {
+            toast.error('Neste navegador, as notificações de sistema não são suportadas.');
+            return;
+        }
+
+        if (Notification.permission === 'denied') {
+            toast.error('Permissão de notificações negada nas configurações do navegador.');
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            const nextPref = !notificationsEnabled;
+            setNotificationsEnabled(nextPref);
+            localStorage.setItem('notifications_pref', nextPref ? 'enabled' : 'disabled');
+            if (nextPref) {
+                toast.success('Notificações de contas ativadas!');
+                const allBills = [...(upcomingBills.overdue || []), ...(upcomingBills.dueToday || []), ...(upcomingBills.dueNext7Days || [])];
+                if (allBills.length > 0) {
+                    checkUpcomingBillsNotifications(allBills);
+                } else {
+                    new Notification('Plano Raiz', {
+                        body: 'Você ativou as notificações com sucesso. Não há contas vencendo hoje ou nos próximos dias!',
+                        icon: '/favicon.ico'
+                    });
+                }
+            } else {
+                toast.success('Notificações desativadas temporariamente.');
+            }
+        } else {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                setNotificationsEnabled(true);
+                localStorage.setItem('notifications_pref', 'enabled');
+                toast.success('Notificações ativadas! Avisaremos você sobre contas a vencer.');
+                
+                const allBills = [...(upcomingBills.overdue || []), ...(upcomingBills.dueToday || []), ...(upcomingBills.dueNext7Days || [])];
+                if (allBills.length > 0) {
+                    checkUpcomingBillsNotifications(allBills);
+                } else {
+                    new Notification('Plano Raiz', {
+                        body: 'Você ativou as notificações com sucesso. Não há contas vencendo hoje ou nos próximos dias!',
+                        icon: '/favicon.ico'
+                    });
+                }
+            } else {
+                setNotificationsEnabled(false);
+                toast.error('Permissão de notificações recusada.');
+            }
+        }
     };
 
     useEffect(() => {
@@ -531,6 +577,20 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                     </div>
                     <div className="flex items-center gap-2">
                         <button 
+                            id="mobile-notification-bell-btn"
+                            onClick={toggleNotifications} 
+                            className={`p-2 rounded-lg transition-colors duration-200 ${notificationsEnabled ? 'text-cyan-500 dark:text-cyan-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                            title={notificationsEnabled ? "Notificações de Contas Ativadas" : "Ativar Notificações de Contas"}
+                        >
+                            {notificationsEnabled ? (
+                                <motion.div animate={{ rotate: [0, -10, 10, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 1.5, repeatDelay: 5 }}>
+                                    <Bell size={18} />
+                                </motion.div>
+                            ) : (
+                                <BellOff size={18} />
+                            )}
+                        </button>
+                        <button 
                             onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
                             className="p-2 text-slate-600 dark:text-slate-400"
                         >
@@ -553,6 +613,30 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                     </div>
                     
                     <div className="flex items-center gap-3">
+                        <button 
+                            id="desktop-notification-bell-btn"
+                            onClick={toggleNotifications} 
+                            className={`p-2 rounded-xl transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-700 relative ${
+                                notificationsEnabled 
+                                ? 'text-cyan-500 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300' 
+                                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                            }`}
+                            title={notificationsEnabled ? "Desativar Notificações de Contas" : "Ativar Notificações de Contas"}
+                        >
+                            {notificationsEnabled ? (
+                                <div className="relative">
+                                    <motion.div animate={{ rotate: [0, -10, 10, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 2, repeatDelay: 4 }}>
+                                        <Bell size={20} />
+                                    </motion.div>
+                                    <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                </div>
+                            ) : (
+                                <BellOff size={20} />
+                            )}
+                        </button>
                         <button 
                             onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
                             className="p-2 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
@@ -603,7 +687,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                     <div className="lg:col-span-2">
                                         <LazyWidget placeholderHeight="400px">
-                                            <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} />
+                                            <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} theme={ui.theme} />
                                         </LazyWidget>
                                     </div>
                                     <div className="space-y-6">
@@ -739,7 +823,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             <Suspense fallback={null}>
                 {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
                 {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
-                {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} />}
+                {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} monthlyExpenses={monthlyData.expenseByCategory} currentDate={currentDate} />}
                 {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} />}
                 {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
                 {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
