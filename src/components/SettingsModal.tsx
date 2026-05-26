@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { X, Layout, Tags, Plus, Trash2 } from 'lucide-react';
+import { X, Layout, Tags, Plus, Trash2, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { APP_VERSION } from '../version';
 
-export const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensityChange }: any) => {
+export const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensityChange, sessionTimeout, onSessionTimeoutChange }: any) => {
     const [localCategories, setLocalCategories] = useState(categories);
     const [newCategory, setNewCategory] = useState({ expense: '', income: '' });
 
@@ -49,6 +49,36 @@ export const SettingsModal = ({ onClose, categories, onSaveCategories, density, 
                                     {d.replace('-', ' ')}
                                 </button>
                             ))}
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 className="font-bold mb-4 text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                            <Shield size={18} className="text-cyan-500" /> Sessão e Segurança
+                        </h3>
+                        <div className="bg-slate-50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                        Encerramento de Sessão Automático
+                                    </h4>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        Desconecta sua conta automaticamente após um período de inatividade para proteger seus dados.
+                                    </p>
+                                </div>
+                                <select 
+                                    value={sessionTimeout} 
+                                    onChange={(e) => onSessionTimeoutChange(e.target.value)}
+                                    className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm p-3 transition-all min-w-[200px]"
+                                >
+                                    <option value="5">5 minutos (Máxima segurança)</option>
+                                    <option value="10">10 minutos</option>
+                                    <option value="15">15 minutos (Recomendado/Padrão)</option>
+                                    <option value="30">30 minutos</option>
+                                    <option value="60">1 Hora</option>
+                                    <option value="off">Desativado (Indeterminado)</option>
+                                </select>
+                            </div>
                         </div>
                     </section>
 

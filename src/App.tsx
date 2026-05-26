@@ -23,6 +23,9 @@ export default function App() {
     const [userProfile, setUserProfile] = useState<any>(null);
     const [isDemo, setIsDemo] = useState(false);
     const [appConfig, setAppConfig] = useState(APP_CONFIG);
+    const [sessionTimeout, setSessionTimeout] = useState(() => {
+        return localStorage.getItem('session_timeout_pref') || '15';
+    });
 
     useEffect(() => {
         const fetchConfig = async () => {
@@ -179,6 +182,70 @@ export default function App() {
         toast.success('Entrando no Modo Demo...');
     };
 
+    // Load initial sessionTimeout setting from user profile
+    useEffect(() => {
+        if (userProfile?.uiSettings?.sessionTimeout) {
+            setSessionTimeout(userProfile.uiSettings.sessionTimeout);
+            localStorage.setItem('session_timeout_pref', userProfile.uiSettings.sessionTimeout);
+        }
+    }, [userProfile]);
+
+    // Handle updating of sessionTimeout preference
+    const handleSessionTimeoutChange = (newTimeout: string) => {
+        setSessionTimeout(newTimeout);
+        localStorage.setItem('session_timeout_pref', newTimeout);
+        
+        if (user && !isDemo && db) {
+            handleUpdateProfile({
+                uiSettings: {
+                    ...userProfile?.uiSettings,
+                    sessionTimeout: newTimeout
+                }
+            });
+        }
+    };
+
+    // Activity tracking for automatic session timeout
+    useEffect(() => {
+        if (!user) return;
+        if (sessionTimeout === 'off') return;
+
+        const timeoutMs = parseInt(sessionTimeout, 10) * 60 * 1000;
+        if (isNaN(timeoutMs) || timeoutMs <= 0) return;
+
+        // Set initial activity time
+        const now = Date.now();
+        localStorage.setItem('last_activity_time', String(now));
+
+        const updateActivity = () => {
+            localStorage.setItem('last_activity_time', String(Date.now()));
+        };
+
+        // Listen for user interaction
+        const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+        events.forEach(event => {
+            window.addEventListener(event, updateActivity, { passive: true });
+        });
+
+        const checkInactivity = setInterval(() => {
+            const lastActivity = parseInt(localStorage.getItem('last_activity_time') || '0', 10);
+            if (Date.now() - lastActivity >= timeoutMs) {
+                toast.error('Sessão encerrada por inatividade. Faça login novamente.', {
+                    duration: 5000,
+                    id: 'session-timeout-toast'
+                });
+                handleLogout();
+            }
+        }, 10000); // Check every 10 seconds
+
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, updateActivity);
+            });
+            clearInterval(checkInactivity);
+        };
+    }, [user, sessionTimeout]);
+
     const handleUpdateProfile = async (dataToUpdate: any) => {
         if (isDemo) return;
         if (user && db) {
@@ -221,7 +288,16 @@ export default function App() {
     if (isApproved) {
         return (
             <>
-                <DashboardApp user={user} db={db} onLogout={handleLogout} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} isDemo={isDemo} />
+                <DashboardApp 
+                    user={user} 
+                    db={db} 
+                    onLogout={handleLogout} 
+                    userProfile={userProfile} 
+                    onUpdateProfile={handleUpdateProfile} 
+                    isDemo={isDemo} 
+                    sessionTimeout={sessionTimeout}
+                    onSessionTimeoutChange={handleSessionTimeoutChange}
+                />
                 <Toaster position="bottom-right" />
             </>
         );

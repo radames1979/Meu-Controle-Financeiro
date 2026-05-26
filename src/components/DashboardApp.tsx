@@ -43,7 +43,7 @@ const RecurringTransactions = lazy(() => import('./RecurringTransactions').then(
 const GenericConfirmationModal = lazy(() => import('./GenericConfirmationModal').then(m => ({ default: m.GenericConfirmationModal })));
 const AnnualComparisonCard = lazy(() => import('./AnnualComparisonCard').then(m => ({ default: m.AnnualComparisonCard })));
 
-export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo }: any) => {
+export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo, sessionTimeout, onSessionTimeoutChange }: any) => {
     if (!user) return null;
     const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid, isDemo);
     const ui = useUIManager(userProfile?.uiSettings);
@@ -824,7 +824,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
                 {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
                 {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} monthlyExpenses={monthlyData.expenseByCategory} currentDate={currentDate} />}
-                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} />}
+                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} />}
                 {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
                 {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
                 {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
