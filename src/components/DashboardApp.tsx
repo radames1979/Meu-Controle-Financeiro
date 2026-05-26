@@ -43,7 +43,7 @@ const RecurringTransactions = lazy(() => import('./RecurringTransactions').then(
 const GenericConfirmationModal = lazy(() => import('./GenericConfirmationModal').then(m => ({ default: m.GenericConfirmationModal })));
 const AnnualComparisonCard = lazy(() => import('./AnnualComparisonCard').then(m => ({ default: m.AnnualComparisonCard })));
 
-export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo, sessionTimeout, onSessionTimeoutChange }: any) => {
+export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
     if (!user) return null;
     const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid, isDemo);
     const ui = useUIManager(userProfile?.uiSettings);
@@ -80,6 +80,23 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         const confirmed = filtered.filter(t => t.status === STATUSES.CONFIRMED).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
         const waiting = filtered.filter(t => t.status === STATUSES.WAITING).reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0);
         return { filtered, income, expense, balance, chartData, expenseByCategory, paid, confirmed, waiting };
+    }, [transactions, currentDate]);
+
+    const prevMonthData = useMemo(() => {
+        let prevYear = currentDate.getFullYear();
+        let prevMonth = currentDate.getMonth() - 1;
+        if (prevMonth < 0) {
+            prevMonth = 11;
+            prevYear -= 1;
+        }
+        const filtered = transactions.filter(t => {
+            const d = new Date(t.date + 'T00:00:00');
+            return d.getFullYear() === prevYear && d.getMonth() === prevMonth;
+        });
+        const income = filtered.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+        const expense = filtered.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+        const balance = income - expense;
+        return { income, expense, balance };
     }, [transactions, currentDate]);
 
     const upcomingBills = useMemo(() => {
@@ -437,14 +454,15 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        const threeDaysFromNow = new Date();
-        threeDaysFromNow.setDate(today.getDate() + 3);
+        const advanceDays = parseInt(notificationAdvance || '3', 10);
+        const advanceLimitDate = new Date();
+        advanceLimitDate.setDate(today.getDate() + advanceDays);
 
         bills.forEach(bill => {
             const billDate = new Date(bill.date + 'T00:00:00');
-            if (billDate >= today && billDate <= threeDaysFromNow && bill.status !== STATUSES.PAID) {
+            if (billDate >= today && billDate <= advanceLimitDate && bill.status !== STATUSES.PAID) {
                 const daysLeft = Math.ceil((billDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                const title = daysLeft === 0 ? 'Conta vence HOJE!' : `Conta vence em ${daysLeft} dias`;
+                const title = daysLeft === 0 ? 'Conta vence HOJE!' : `Conta vence em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}`;
                 
                 new Notification(title, {
                     body: `${bill.description}: ${bill.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
@@ -518,7 +536,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 sessionStorage.setItem('last_bill_check', todayStr);
             }
         }
-    }, [upcomingBills, notificationsEnabled]);
+    }, [upcomingBills, notificationsEnabled, notificationAdvance]);
 
     const filteredMonthlyTransactions = useMemo(() => {
         return monthlyData.filtered.filter(t => 
@@ -681,7 +699,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                         {ui.view === 'dashboard' && (
                             <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
                                 <LazyWidget placeholderHeight="300px">
-                                    <Dashboard stats={monthlyData} density={ui.layoutDensity} userProfile={userProfile} />
+                                    <Dashboard stats={monthlyData} prevMonthStats={prevMonthData} density={ui.layoutDensity} userProfile={userProfile} />
                                 </LazyWidget>
                                 
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -824,7 +842,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
                 {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
                 {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} monthlyExpenses={monthlyData.expenseByCategory} currentDate={currentDate} />}
-                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} />}
+                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} notificationAdvance={notificationAdvance} onNotificationAdvanceChange={onNotificationAdvanceChange} />}
                 {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
                 {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
                 {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}

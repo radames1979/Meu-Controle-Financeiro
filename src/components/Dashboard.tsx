@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TrendingUp, TrendingDown, CheckCircle, Clock, AlertCircle, PiggyBank, Shield, Eye, EyeOff } from 'lucide-react';
 import { DENSITY_CLASSES } from '../constants';
 
-export const Dashboard = ({ stats, density, userProfile }: any) => {
+export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) => {
     const { income, balance, paid, confirmed, waiting, expense } = stats;
     const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
     const heroPaddingClass = DENSITY_CLASSES.heroPadding[density as keyof typeof DENSITY_CLASSES.heroPadding] || 'p-6 md:p-10';
@@ -18,6 +18,41 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
         const nextVal = !hideValues;
         setHideValues(nextVal);
         localStorage.setItem('hide_values_dashboard', String(nextVal));
+    };
+
+    // Calculate elegant trend indicator
+    const getTrendIndicator = (current: number, previous: number, isExpense: boolean = false) => {
+        if (previous === undefined || previous === null) return null;
+        if (previous === 0) {
+            if (current === 0) return null;
+            const isUp = current > 0;
+            const isGood = isExpense ? !isUp : isUp;
+            const textColor = isGood ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400';
+            const ArrowIcon = isUp ? TrendingUp : TrendingDown;
+            return (
+                <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold ${textColor}`}>
+                    <ArrowIcon size={12} /> Novo
+                </span>
+            );
+        }
+
+        const diff = current - previous;
+        const pct = (diff / Math.abs(previous)) * 100;
+        const isUp = diff > 0;
+        const isGood = isExpense ? !isUp : isUp;
+        const textColor = isGood ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400';
+        const ArrowIcon = isUp ? TrendingUp : TrendingDown;
+        const sign = isUp ? '+' : '';
+
+        return (
+            <span 
+                className={`inline-flex items-center gap-0.5 text-[10px] tracking-tight font-bold ${textColor}`}
+                title={`Mês anterior: ${previous.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`}
+            >
+                <ArrowIcon size={11} className="shrink-0" />
+                <span>{sign}{pct.toFixed(0)}%</span>
+            </span>
+        );
     };
 
     return (
@@ -38,10 +73,16 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
                     <div className={`${heroPaddingClass} flex flex-col justify-between h-full bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50`}>
                         <div>
                             <h2 className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest mb-2">Balanço Total do Mês</h2>
-                            <div className="flex items-baseline gap-2 overflow-hidden">
+                            <div className="flex items-center gap-3 flex-wrap overflow-hidden">
                                 <span className={`text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter truncate transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
                                     {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </span>
+                                {prevMonthStats && (
+                                    <div className="bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 rounded-full inline-flex items-center shrink-0 border border-slate-200/50 dark:border-slate-700/50">
+                                        {getTrendIndicator(balance, prevMonthStats.balance)}
+                                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium ml-1">vs mês ant.</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         
@@ -61,13 +102,19 @@ export const Dashboard = ({ stats, density, userProfile }: any) => {
                             
                             <div className="flex gap-3 w-full sm:w-auto">
                                 <div className="flex-1 sm:flex-none bg-emerald-500/10 px-4 py-2 rounded-2xl border border-emerald-500/20">
-                                    <p className="text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase">Entradas</p>
+                                    <div className="flex items-center justify-between gap-3 mb-1">
+                                        <p className="text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase">Entradas</p>
+                                        {prevMonthStats && getTrendIndicator(income, prevMonthStats.income)}
+                                    </div>
                                     <p className={`text-lg font-black text-emerald-700 dark:text-emerald-400 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
                                         {income.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </p>
                                 </div>
                                 <div className="flex-1 sm:flex-none bg-rose-500/10 px-4 py-2 rounded-2xl border border-rose-500/20">
-                                    <p className="text-rose-700 dark:text-rose-400 text-[10px] font-bold uppercase">Saídas</p>
+                                    <div className="flex items-center justify-between gap-3 mb-1">
+                                        <p className="text-rose-700 dark:text-rose-400 text-[10px] font-bold uppercase">Saídas</p>
+                                        {prevMonthStats && getTrendIndicator(expense, prevMonthStats.expense, true)}
+                                    </div>
                                     <p className={`text-lg font-black text-rose-700 dark:text-rose-400 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
                                         {expense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </p>

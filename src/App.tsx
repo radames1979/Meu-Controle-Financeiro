@@ -26,6 +26,9 @@ export default function App() {
     const [sessionTimeout, setSessionTimeout] = useState(() => {
         return localStorage.getItem('session_timeout_pref') || '15';
     });
+    const [notificationAdvance, setNotificationAdvance] = useState(() => {
+        return localStorage.getItem('notification_advance_pref') || '3';
+    });
 
     useEffect(() => {
         const fetchConfig = async () => {
@@ -188,6 +191,10 @@ export default function App() {
             setSessionTimeout(userProfile.uiSettings.sessionTimeout);
             localStorage.setItem('session_timeout_pref', userProfile.uiSettings.sessionTimeout);
         }
+        if (userProfile?.uiSettings?.notificationAdvance) {
+            setNotificationAdvance(userProfile.uiSettings.notificationAdvance);
+            localStorage.setItem('notification_advance_pref', userProfile.uiSettings.notificationAdvance);
+        }
     }, [userProfile]);
 
     // Handle updating of sessionTimeout preference
@@ -200,6 +207,21 @@ export default function App() {
                 uiSettings: {
                     ...userProfile?.uiSettings,
                     sessionTimeout: newTimeout
+                }
+            });
+        }
+    };
+
+    // Handle updating of notificationAdvance preference
+    const handleNotificationAdvanceChange = (newAdvance: string) => {
+        setNotificationAdvance(newAdvance);
+        localStorage.setItem('notification_advance_pref', newAdvance);
+        
+        if (user && !isDemo && db) {
+            handleUpdateProfile({
+                uiSettings: {
+                    ...userProfile?.uiSettings,
+                    notificationAdvance: newAdvance
                 }
             });
         }
@@ -297,6 +319,8 @@ export default function App() {
                     isDemo={isDemo} 
                     sessionTimeout={sessionTimeout}
                     onSessionTimeoutChange={handleSessionTimeoutChange}
+                    notificationAdvance={notificationAdvance}
+                    onNotificationAdvanceChange={handleNotificationAdvanceChange}
                 />
                 <Toaster position="bottom-right" />
             </>
