@@ -1,13 +1,68 @@
 import React, { useState } from 'react';
-import { X, Layout, Tags, Plus, Trash2, Shield, Bell } from 'lucide-react';
+import { X, Layout, Tags, Plus, Trash2, Shield, Bell, Copy, Key, RefreshCw, AlertTriangle, CheckCircle, Code } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+import { registerFCMToken, isPushSupported, DEFAULT_VAPID_KEY } from '../services/fcm';
 import { APP_VERSION } from '../version';
 
-export const SettingsModal = ({ onClose, categories, onSaveCategories, density, onDensityChange, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
+export const SettingsModal = ({ onClose, user, categories, onSaveCategories, density, onDensityChange, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
     const [localCategories, setLocalCategories] = useState(categories);
     const [newCategory, setNewCategory] = useState({ expense: '', income: '' });
     const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'categories'>('general');
+
+    const [fcmToken, setFcmToken] = useState(() => localStorage.getItem('fcm_token') || '');
+    const [customVapid, setCustomVapid] = useState(() => localStorage.getItem('fcm_vapid_key') || '');
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
+    const [iframeWarning, setIframeWarning] = useState(false);
+    const [payloadGuideOpen, setPayloadGuideOpen] = useState(false);
+
+    const handleRegisterFCM = async () => {
+        if (!user) {
+            toast.error("Usuário não autenticado.");
+            return;
+        }
+        setIsRegistering(true);
+        setIframeWarning(false);
+        try {
+            const result = await registerFCMToken(user.uid, customVapid || undefined);
+            if (result.success && result.token) {
+                setFcmToken(result.token || '');
+                toast.success("Dispositivo registrado na nuvem (FCM) com sucesso!");
+            } else if (result.iframeBlocked) {
+                setIframeWarning(true);
+                toast.error("Navegador bloqueou o registro do Push no Iframe.");
+            } else {
+                toast.error(result.error || "Erro desconhecido ao registrar.");
+            }
+        } catch (e: any) {
+            toast.error("Falha ao registrar para notificações push.");
+        } finally {
+            setIsRegistering(false);
+        }
+    };
+
+    const handleCopyToken = () => {
+        if (!fcmToken) return;
+        navigator.clipboard.writeText(fcmToken);
+        toast.success("Token copiado para a área de transferência!");
+    };
+
+    const handleSimulateLocalNotification = () => {
+        if (!('Notification' in window)) {
+            toast.error("Este navegador não suporta notificações.");
+            return;
+        }
+        if (Notification.permission !== 'granted') {
+            toast.error("Por favor, ative as permissões de notificação primeiro!");
+            return;
+        }
+        new Notification("Alerta de Conta (Demonstração)", {
+            body: "Conta de Energia: R$ 185,40 vence em breve (Simulação de Push FCM)",
+            icon: '/favicon.ico',
+        });
+        toast.success("Notificação local de teste enviada!");
+    };
 
     const handleAdd = (type: 'expense' | 'income') => {
         if (!newCategory[type]) return;
@@ -111,6 +166,7 @@ export const SettingsModal = ({ onClose, categories, onSaveCategories, density, 
 
                     {activeTab === 'notifications' && (
                         <section className="space-y-6 animate-fade-in-up">
+                            {/* Card 1: Local notification advance settings */}
                             <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
                                 <h3 className="font-bold mb-2 text-slate-700 dark:text-slate-200 flex items-center gap-2">
                                     <Bell size={18} className="text-cyan-500" /> Avisos de Contas a Vencer
@@ -149,6 +205,180 @@ export const SettingsModal = ({ onClose, categories, onSaveCategories, density, 
                                             </button>
                                         ))}
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Card 2: Firebase Cloud Messaging Push Configuration */}
+                            <div className="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-700">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h3 className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                                        <Shield size={18} className="text-cyan-500" /> Push Notifications (Firebase Cloud Messaging)
+                                    </h3>
+                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${isPushSupported() ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400'}`}>
+                                        {isPushSupported() ? 'Compatível' : 'Incompatível'}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+                                    Ative notificações push nativas em segundo plano para que seu dispositivo móvel ou computador receba os alertas de faturas pendentes mesmo com o aplicativo fechado.
+                                </p>
+
+                                {/* System & Client Sandbox Warnings */}
+                                {iframeWarning && (
+                                    <div className="mb-4 p-4 rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-950/30 dark:border-yellow-700/40 text-xs text-yellow-800 dark:text-yellow-200 flex flex-col gap-2">
+                                        <div className="flex items-center gap-2 font-bold">
+                                            <AlertTriangle size={16} className="text-yellow-500 shrink-0" />
+                                            <span>Restrição de Iframe Detectada</span>
+                                        </div>
+                                        <p>
+                                            O navegador bloqueou o registro do Service Worker necessário para receber notificações Push reais devido ao sandbox seguro do Iframe no ambiente de desenvolvimento do Firebase.
+                                        </p>
+                                        <p className="font-semibold underline">
+                                            Para cadastrar seu dispositivo real e herdar tokens reais, clique em "Abrir em Nova Aba" ou "Shared App URL" no topo/lateral do painel de controle e clique de lá!
+                                        </p>
+                                    </div>
+                                )}
+
+                                {!isPushSupported() && (
+                                    <div className="mb-4 p-4 rounded-xl border border-rose-300 bg-rose-50 dark:bg-rose-950/30 dark:border-rose-700/40 text-xs text-rose-800 dark:text-rose-200 flex items-center gap-2">
+                                        <AlertTriangle size={16} className="text-rose-500 shrink-0" />
+                                        <span>Este navegador não suporta Web Push Notifications ou Service Workers sob este protocolo HTTP/HTTPS seguro atual.</span>
+                                    </div>
+                                )}
+
+                                {/* Token Status & Registration Panel */}
+                                <div className="space-y-4">
+                                    {fcmToken ? (
+                                        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                                                    <CheckCircle size={14} /> Dispositivo Cadastrado
+                                                </span>
+                                                <button 
+                                                    onClick={handleRegisterFCM}
+                                                    disabled={isRegistering}
+                                                    className="text-xs font-bold text-cyan-500 hover:text-cyan-600 flex items-center gap-1 transition-all"
+                                                >
+                                                    <RefreshCw size={12} className={isRegistering ? "animate-spin" : ""} /> Recadastrar
+                                                </button>
+                                            </div>
+
+                                            {/* Read-only token scroll block */}
+                                            <div className="flex gap-2">
+                                                <textarea
+                                                    readOnly
+                                                    value={fcmToken}
+                                                    className="w-full text-[10px] font-mono p-2 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 resize-none h-16 text-slate-600 dark:text-slate-300 select-all"
+                                                />
+                                                <button 
+                                                    onClick={handleCopyToken}
+                                                    title="Copiar token"
+                                                    className="p-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300 transition-all self-center shrink-0"
+                                                >
+                                                    <Copy size={16} />
+                                                </button>
+                                            </div>
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 block">
+                                                Este Token FCM único foi transmitido e vinculado à sua conta no banco de dados Firestore para que alertas automáticos possam mirar este terminal de forma cirúrgica.
+                                            </span>
+
+                                            <div className="pt-2 flex gap-2">
+                                                <button 
+                                                    type="button" 
+                                                    onClick={handleSimulateLocalNotification}
+                                                    className="flex-1 py-2 px-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                                                >
+                                                    <Bell size={14} /> Simular Alerta Local
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center flex flex-col items-center">
+                                            <Bell className="text-slate-400 dark:text-slate-600 mb-2 animate-pulse" size={32} />
+                                            <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Nenhum Dispositivo Vinculado</p>
+                                            <p className="text-[11px] text-slate-400 dark:text-slate-500 max-w-sm mt-1 mb-4">
+                                                Gere seu Web Push Registration Token para autorizar que sua conta no Firestore receba disparos direcionados de faturas pendentes.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                disabled={isRegistering}
+                                                onClick={handleRegisterFCM}
+                                                className="py-2.5 px-6 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-bold shadow-md shadow-cyan-200 dark:shadow-cyan-900/10 transition-all flex items-center gap-2"
+                                            >
+                                                <RefreshCw size={14} className={isRegistering ? "animate-spin" : ""} />
+                                                {isRegistering ? 'Registrando...' : 'Registrar Este Dispositivo'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Collapsible Developer integration payload payloadGuideOpen */}
+                                <div className="mt-4 border-t border-slate-200/60 dark:border-slate-700/60 pt-4">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setPayloadGuideOpen(!payloadGuideOpen)}
+                                        className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center justify-between w-full hover:text-cyan-500"
+                                    >
+                                        <span className="flex items-center gap-1.5"><Code size={14} /> Integração Backend & Payloads</span>
+                                        <span className="text-[10px] text-slate-400">{payloadGuideOpen ? 'Recolher' : 'Expandir'}</span>
+                                    </button>
+                                    
+                                    {payloadGuideOpen && (
+                                        <div className="mt-3 bg-slate-900 text-slate-100 p-4 rounded-xl border border-slate-800 font-mono text-[10px] space-y-3 overflow-x-auto select-all">
+                                            <p className="text-[10px] text-slate-400 font-sans border-b border-slate-800 pb-2">
+                                                Envie um POST para <code className="text-cyan-400">https://fcm.googleapis.com/v1/projects/meu-controle-financeiro-dab61/messages:send</code> usando o cabeçalho Bearer Token OAuth2 com a seguinte carga útil JSON:
+                                            </p>
+                                            <pre className="text-slate-300 whitespace-pre-wrap">
+{`{
+  "message": {
+    "token": "${fcmToken || "INSIRA_O_FCM_TOKEN_GERADO"}",
+    "notification": {
+      "title": "Alerta de Conta - Plano Raiz",
+      "body": "A fatura 'Energia da Light' de R$ 185,40 vence amanhã!"
+    },
+    "webpush": {
+      "notification": {
+        "icon": "/favicon.ico",
+        "badge": "/favicon.ico"
+      }
+    }
+  }
+}`}
+                                            </pre>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Advanced VAPID configuration section */}
+                                <div className="mt-2 border-t border-slate-200/60 dark:border-slate-700/60 pt-2">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowAdvanced(!showAdvanced)}
+                                        className="text-[11px] font-bold text-slate-400 dark:text-slate-500 flex items-center justify-between w-full hover:text-slate-600 dark:hover:text-slate-300"
+                                    >
+                                        <span className="flex items-center gap-1.5"><Key size={12} /> Configurações de Certificação (VAPID Certificate)</span>
+                                        <span>{showAdvanced ? 'Esconder' : 'Mostrar'}</span>
+                                    </button>
+
+                                    {showAdvanced && (
+                                        <div className="mt-3 p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+                                            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                                Custom Web Push Certification VAPID (Public Key)
+                                            </label>
+                                            <input 
+                                                type="text"
+                                                value={customVapid}
+                                                onChange={(e) => {
+                                                    setCustomVapid(e.target.value);
+                                                    localStorage.setItem('fcm_vapid_key', e.target.value);
+                                                }}
+                                                placeholder={DEFAULT_VAPID_KEY}
+                                                className="w-full text-[10px] font-mono p-2 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                                            />
+                                            <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                                                Deixe em branco para usar o certificado VAPID padrão associado às chaves do projeto Firebase Cloud Messaging nativo do sistema.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </section>

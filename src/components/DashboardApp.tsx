@@ -19,6 +19,7 @@ import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { LazyWidget } from './LazyWidget';
 import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
+import { registerFCMToken } from '../services/fcm';
 
 // Lazy Loaded Components
 const Dashboard = lazy(() => import('./Dashboard').then(m => ({ default: m.Dashboard })));
@@ -538,6 +539,14 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
         }
     }, [upcomingBills, notificationsEnabled, notificationAdvance]);
 
+    useEffect(() => {
+        if (notificationsEnabled && user && !isDemo) {
+            registerFCMToken(user.uid).catch(err => {
+                console.warn("Silent background FCM registration skipped/blocked:", err);
+            });
+        }
+    }, [notificationsEnabled, user, isDemo]);
+
     const filteredMonthlyTransactions = useMemo(() => {
         return monthlyData.filtered.filter(t => 
             t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -842,7 +851,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
                 {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
                 {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} monthlyExpenses={monthlyData.expenseByCategory} currentDate={currentDate} />}
-                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} notificationAdvance={notificationAdvance} onNotificationAdvanceChange={onNotificationAdvanceChange} />}
+                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} user={user} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} notificationAdvance={notificationAdvance} onNotificationAdvanceChange={onNotificationAdvanceChange} />}
                 {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
                 {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
                 {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
