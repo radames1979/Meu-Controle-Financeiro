@@ -43,6 +43,7 @@ const UserManual = lazy(() => import('./UserManual').then(m => ({ default: m.Use
 const RecurringTransactions = lazy(() => import('./RecurringTransactions').then(m => ({ default: m.RecurringTransactions })));
 const GenericConfirmationModal = lazy(() => import('./GenericConfirmationModal').then(m => ({ default: m.GenericConfirmationModal })));
 const AnnualComparisonCard = lazy(() => import('./AnnualComparisonCard').then(m => ({ default: m.AnnualComparisonCard })));
+const BudgetAlertsWidget = lazy(() => import('./BudgetAlertsWidget').then(m => ({ default: m.BudgetAlertsWidget })));
 
 export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
     if (!user) return null;
@@ -709,6 +710,21 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                             <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
                                 <LazyWidget placeholderHeight="300px">
                                     <Dashboard stats={monthlyData} prevMonthStats={prevMonthData} density={ui.layoutDensity} userProfile={userProfile} />
+                                </LazyWidget>
+
+                                <LazyWidget placeholderHeight="100px">
+                                    <BudgetAlertsWidget 
+                                        budgets={budgets} 
+                                        monthlyExpenses={monthlyData.expenseByCategory} 
+                                        categories={categories} 
+                                        density={ui.layoutDensity} 
+                                        onDrillDown={(category) => {
+                                            const title = `Lançamentos: ${category}`;
+                                            const categoryTransactions = monthlyData.filtered.filter((t: any) => t.category === category);
+                                            ui.setDrillDown({ isOpen: true, title, transactions: categoryTransactions });
+                                        }}
+                                        onAdjustBudget={() => ui.setIsBudgetModalOpen(true)}
+                                    />
                                 </LazyWidget>
                                 
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
