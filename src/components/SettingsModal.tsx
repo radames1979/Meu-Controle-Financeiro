@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { X, Layout, Tags, Plus, Trash2, Shield, Bell, Copy, Key, RefreshCw, AlertTriangle, CheckCircle, Code } from 'lucide-react';
+import { X, Layout, Tags, Plus, Trash2, Shield, Bell, Copy, Key, RefreshCw, AlertTriangle, CheckCircle, Code, Sun, Moon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { registerFCMToken, isPushSupported, DEFAULT_VAPID_KEY } from '../services/fcm';
 import { APP_VERSION } from '../version';
 
-export const SettingsModal = ({ onClose, user, categories, onSaveCategories, density, onDensityChange, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
+export const SettingsModal = ({ onClose, user, categories, onSaveCategories, density, onDensityChange, theme, onThemeChange, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
     const [localCategories, setLocalCategories] = useState(categories);
     const [newCategory, setNewCategory] = useState({ expense: '', income: '' });
     const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'categories'>('general');
@@ -119,16 +119,39 @@ export const SettingsModal = ({ onClose, user, categories, onSaveCategories, den
                         <div className="space-y-8 animate-fade-in-up">
                             <section>
                                 <h3 className="font-bold mb-4 text-slate-700 dark:text-slate-200 flex items-center gap-2"><Layout size={18} /> Visualização</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                    {['super-compact', 'compact', 'normal', 'relaxed', 'super-relaxed'].map(d => (
-                                        <button 
-                                            key={d} 
-                                            onClick={() => onDensityChange(d)}
-                                            className={`px-2 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition ${density === d ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}
-                                        >
-                                            {d.replace('-', ' ')}
-                                        </button>
-                                    ))}
+                                <div className="space-y-4">
+                                    <div>
+                                        <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Densidade do Layout</h4>
+                                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                            {['super-compact', 'compact', 'normal', 'relaxed', 'super-relaxed'].map(d => (
+                                                <button 
+                                                    key={d} 
+                                                    onClick={() => onDensityChange(d)}
+                                                    className={`px-2 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition ${density === d ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}
+                                                >
+                                                    {d.replace('-', ' ')}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Tema de Aparência</h4>
+                                        <div className="grid grid-cols-2 gap-3 max-w-sm">
+                                            <button 
+                                                onClick={() => onThemeChange('light')}
+                                                className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${theme === 'light' ? 'bg-cyan-500 text-white border-cyan-500 shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600/50'}`}
+                                            >
+                                                <Sun size={16} /> Claro
+                                            </button>
+                                            <button 
+                                                onClick={() => onThemeChange('dark')}
+                                                className={`flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${theme === 'dark' ? 'bg-cyan-500 text-white border-cyan-500 shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600/50'}`}
+                                            >
+                                                <Moon size={16} /> Escuro
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </section>
 
