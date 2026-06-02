@@ -1,7 +1,23 @@
-export const APP_VERSION = '1.3.0';
-export const LAST_UPDATE = '2026-05-16';
+export const APP_VERSION = '1.4.1';
+export const LAST_UPDATE = '2026-06-02';
 
 export const CHANGELOG = [
+  {
+    version: '1.4.1',
+    date: '2026-06-02',
+    changes: [
+      'Refinamento do Monitor de Orçamento: Alertas agora são disparados estritamente ao exceder 100% do limite estipulado, mantendo o controle ideal sem alertas redundantes.'
+    ]
+  },
+  {
+    version: '1.4.0',
+    date: '2026-06-02',
+    changes: [
+      'Integração do Monitor de Orçamentos: Novo alerta de teto com aviso inteligente a partir de 90%, permitindo visualizar lançamentos ou ajustar limites',
+      'Configurações Aprimoradas: Integração direta de mudança de Tema (Claro/Escuro) e Densidade de Layout na central de Configurações',
+      'Painel de Desenvolvimento: Criação de linha do tempo histórica acessível interativamente ao tocar no badge de versão do aplicativo'
+    ]
+  },
   {
     version: '1.3.0',
     date: '2026-05-16',

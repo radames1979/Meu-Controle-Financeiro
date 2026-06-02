@@ -42,15 +42,15 @@ export const BudgetAlertsWidget: React.FC<BudgetAlertsWidgetProps> = ({
                     percentage,
                     remaining,
                     isCritical: percentage > 100,
-                    isWarning: percentage >= 90 && percentage <= 100
+                    isWarning: false
                 };
             })
-            .filter(item => item.percentage >= 90) // Only focus on those with >= 90%
+            .filter(item => item.percentage > 100) // Only focus on those exceeding 100%
             .sort((a, b) => b.percentage - a.percentage); // Sort critical alerts first
     }, [budgets, monthlyExpenses, categories]);
 
-    const criticalCount = alertData.filter(item => item.isCritical).length;
-    const warningCount = alertData.filter(item => item.isWarning).length;
+    const criticalCount = alertData.length;
+    const warningCount = 0;
     const totalAlerts = alertData.length;
 
     return (
@@ -100,7 +100,7 @@ export const BudgetAlertsWidget: React.FC<BudgetAlertsWidgetProps> = ({
                         </h3>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500">
                             {totalAlerts > 0 
-                                ? `${criticalCount} estourado${criticalCount === 1 ? '' : 's'} e ${warningCount} em limite de alerta.` 
+                                ? `${criticalCount} limite${criticalCount === 1 ? ' estourado' : 's estourados'}.` 
                                 : 'Excelente! Todos os limites de categorias estão seguros.'}
                         </p>
                     </div>
@@ -134,7 +134,7 @@ export const BudgetAlertsWidget: React.FC<BudgetAlertsWidgetProps> = ({
                                     <div className="text-center sm:text-left space-y-1">
                                         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">Suas finanças estão protegidas!</h4>
                                         <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                                            Nenhum centro de custo ultrapassou <span className="font-semibold text-slate-700 dark:text-slate-300">90%</span> do teto orçamentário. Você está de parabéns pela integridade financeira e contenção de saídas neste mês.
+                                            Nenhum centro de custo ultrapassou <span className="font-semibold text-slate-700 dark:text-slate-300">100%</span> do teto orçamentário. Você está de parabéns por manter seus gastos dentro do previsto para este mês.
                                         </p>
                                     </div>
                                 </motion.div>

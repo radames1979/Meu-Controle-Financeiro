@@ -44,6 +44,7 @@ const RecurringTransactions = lazy(() => import('./RecurringTransactions').then(
 const GenericConfirmationModal = lazy(() => import('./GenericConfirmationModal').then(m => ({ default: m.GenericConfirmationModal })));
 const AnnualComparisonCard = lazy(() => import('./AnnualComparisonCard').then(m => ({ default: m.AnnualComparisonCard })));
 const BudgetAlertsWidget = lazy(() => import('./BudgetAlertsWidget').then(m => ({ default: m.BudgetAlertsWidget })));
+const ChangelogModal = lazy(() => import('./ChangelogModal').then(m => ({ default: m.ChangelogModal })));
 
 export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
     if (!user) return null;
@@ -51,6 +52,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
     const ui = useUIManager(userProfile?.uiSettings);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isChangelogOpen, setIsChangelogOpen] = useState(false);
 
     // Persist UI settings to Firestore
     useEffect(() => {
@@ -592,6 +594,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 onOpenNewTransaction={() => ui.handleOpenModal()}
                 onOpenBatch={() => ui.setIsBatchModalOpen(true)}
                 onOpenReport={() => ui.setIsReportModalOpen(true)}
+                onOpenChangelog={() => setIsChangelogOpen(true)}
             />
 
             <div className="flex-grow flex flex-col h-screen overflow-hidden relative">
@@ -867,10 +870,11 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
                 {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
                 {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} monthlyExpenses={monthlyData.expenseByCategory} currentDate={currentDate} />}
-                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} user={user} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} theme={ui.theme} onThemeChange={ui.setTheme} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} notificationAdvance={notificationAdvance} onNotificationAdvanceChange={onNotificationAdvanceChange} />}
+                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} user={user} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} theme={ui.theme} onThemeChange={ui.setTheme} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} notificationAdvance={notificationAdvance} onNotificationAdvanceChange={onNotificationAdvanceChange} onOpenChangelog={() => setIsChangelogOpen(true)} />}
                 {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
                 {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
                 {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}
+                {isChangelogOpen && <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />}
                 <DrillDownModal isOpen={ui.drillDown.isOpen} onClose={() => ui.setDrillDown({ ...ui.drillDown, isOpen: false })} title={ui.drillDown.title} transactions={ui.drillDown.transactions} onEdit={ui.handleOpenModal} onDelete={(t: any) => ui.setDeleteConfirmation({ isOpen: true, transaction: t })} onStatusChange={handleStatusChange} onRepeat={handleRepeatTransaction} density={ui.layoutDensity} />
                 <DeleteConfirmationModal isOpen={ui.deleteConfirmation.isOpen} onClose={() => ui.setDeleteConfirmation({ isOpen: false, transaction: null })} onConfirm={handleDeleteTransaction} transaction={ui.deleteConfirmation.transaction} />
                 <GenericConfirmationModal 

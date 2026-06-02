@@ -20,12 +20,14 @@ interface SidebarProps {
     onOpenNewTransaction: () => void;
     onOpenBatch: () => void;
     onOpenReport: () => void;
+    onOpenChangelog?: () => void;
 }
 
 export const Sidebar = ({ 
     view, setView, isCollapsed, setIsCollapsed, user, isAdmin, 
     onLogout, onOpenSettings, onOpenHelp, onOpenAdmin,
-    onOpenNewTransaction, onOpenBatch, onOpenReport
+    onOpenNewTransaction, onOpenBatch, onOpenReport,
+    onOpenChangelog
 }: SidebarProps) => {
     const menuItems = [
         { id: 'dashboard', label: 'Painel', icon: LayoutDashboard },
@@ -119,7 +121,11 @@ export const Sidebar = ({
                     <div className="mt-4 px-2 py-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700 animate-fade-in">
                         <div className="flex justify-between items-center mb-1">
                             <p className="text-[10px] text-slate-400 font-bold uppercase">Usuário</p>
-                            <span className="text-[10px] bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 px-1.5 py-0.5 rounded font-black tracking-tighter">
+                            <span 
+                                onClick={onOpenChangelog}
+                                title="Ver histórico de versões"
+                                className="text-[10px] bg-cyan-100 hover:bg-cyan-200 dark:bg-cyan-500/20 dark:hover:bg-cyan-500/40 text-cyan-600 dark:text-cyan-400 px-1.5 py-0.5 rounded font-black tracking-tighter cursor-pointer transition-all active:scale-95"
+                            >
                                 {APP_VERSION}
                             </span>
                         </div>
@@ -128,7 +134,13 @@ export const Sidebar = ({
                 )}
                 {isCollapsed && (
                     <div className="mt-2 text-center">
-                        <span className="text-[8px] font-black text-slate-400 dark:text-slate-600">{APP_VERSION}</span>
+                        <span 
+                            onClick={onOpenChangelog}
+                            title="Ver histórico de versões"
+                            className="text-[8px] font-black text-slate-400 dark:text-slate-600 cursor-pointer hover:text-cyan-500 transition-colors"
+                        >
+                            {APP_VERSION}
+                        </span>
                     </div>
                 )}
             </div>

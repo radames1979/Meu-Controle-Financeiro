@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { registerFCMToken, isPushSupported, DEFAULT_VAPID_KEY } from '../services/fcm';
 import { APP_VERSION } from '../version';
 
-export const SettingsModal = ({ onClose, user, categories, onSaveCategories, density, onDensityChange, theme, onThemeChange, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
+export const SettingsModal = ({ onClose, user, categories, onSaveCategories, density, onDensityChange, theme, onThemeChange, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange, onOpenChangelog }: any) => {
     const [localCategories, setLocalCategories] = useState(categories);
     const [newCategory, setNewCategory] = useState({ expense: '', income: '' });
     const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'categories'>('general');
@@ -443,9 +443,16 @@ export const SettingsModal = ({ onClose, user, categories, onSaveCategories, den
                     <button onClick={onClose} className="px-6 py-2 rounded-xl text-slate-500 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
                     <button onClick={() => { onSaveCategories(localCategories); onClose(); }} className="bg-cyan-500 text-white px-6 py-2 rounded-xl font-bold shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20 hover:bg-cyan-600 transition">Salvar Alterações</button>
                 </div>
-                <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-tighter opacity-50">
-                    <span>Versão do Sistema</span>
-                    <span className="bg-slate-100 dark:bg-slate-900/40 px-2 py-0.5 rounded">{APP_VERSION}</span>
+                <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-tighter">
+                    <span className="opacity-50">Versão do Sistema</span>
+                    <button 
+                        type="button"
+                        onClick={onOpenChangelog}
+                        title="Ver histórico de versões / Linha de Tempo"
+                        className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-2 py-0.5 rounded cursor-pointer transition text-slate-600 dark:text-slate-300 font-extrabold focus:outline-none"
+                    >
+                        {APP_VERSION}
+                    </button>
                 </div>
             </div>
         </div>
