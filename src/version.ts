@@ -1,7 +1,14 @@
-export const APP_VERSION = '1.4.1';
-export const LAST_UPDATE = '2026-06-02';
+export const APP_VERSION = '1.4.2';
+export const LAST_UPDATE = '2026-07-25';
 
 export const CHANGELOG = [
+  {
+    version: '1.4.2',
+    date: '2026-07-25',
+    changes: [
+      'Detalhamento Anual: Adicionada opção de ocultar e recolher lançamentos individuais nas linhas de Receitas e Despesas, com gerenciador em tempo real para restaurar lançamentos ocultos a qualquer momento.'
+    ]
+  },
   {
     version: '1.4.1',
     date: '2026-06-02',
