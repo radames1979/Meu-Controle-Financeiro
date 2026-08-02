@@ -1,7 +1,14 @@
-export const APP_VERSION = '1.4.2';
-export const LAST_UPDATE = '2026-07-25';
+export const APP_VERSION = '1.4.3';
+export const LAST_UPDATE = '2026-08-02';
 
 export const CHANGELOG = [
+  {
+    version: '1.4.3',
+    date: '2026-08-02',
+    changes: [
+      'Atribuição no Rodapé: Inclusão oficial dos créditos do desenvolvedor & programador Radamés com links diretos para contato via WhatsApp e E-mail.'
+    ]
+  },
   {
     version: '1.4.2',
     date: '2026-07-25',

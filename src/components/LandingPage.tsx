@@ -4,6 +4,7 @@ import {
     Smartphone, Zap, Lock, Users, ArrowRight, CheckCircle2 
 } from 'lucide-react';
 import { AuthForm } from './AuthForm';
+import { DeveloperFooter } from './DeveloperFooter';
 import { YOUR_CONTACT_EMAIL } from '../constants';
 import { motion } from 'motion/react';
 
@@ -251,8 +252,9 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: 
                             <a href={`mailto:${YOUR_CONTACT_EMAIL}?subject=Presente`} className="hover:text-cyan-400 transition">Presentear</a>
                         </div>
                     </div>
-                    <div className="text-center pt-8 border-t border-slate-800/50">
-                        <p className="text-sm font-medium">&copy; {new Date().getFullYear()} Plano Raiz. Todos os direitos reservados. Feito para quem quer crescer.</p>
+                    <div className="pt-8 border-t border-slate-800/50 flex flex-col items-center gap-6">
+                        <DeveloperFooter className="bg-slate-800/40 border-slate-800 text-slate-300" />
+                        <p className="text-xs text-slate-500 font-medium">&copy; {new Date().getFullYear()} Plano Raiz. Todos os direitos reservados. Feito para quem quer crescer.</p>
                     </div>
                 </div>
             </footer>

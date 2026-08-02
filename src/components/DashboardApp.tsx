@@ -18,6 +18,7 @@ import { useUIManager } from '../hooks/useUIManager';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { LazyWidget } from './LazyWidget';
+import { DeveloperFooter } from './DeveloperFooter';
 import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
 import { registerFCMToken } from '../services/fcm';
 
@@ -853,6 +854,9 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                 </LazyWidget>
                             </div>
                         )}
+
+                        {/* Rodapé de Créditos do Desenvolvedor */}
+                        <DeveloperFooter className="mt-8 mb-16 md:mb-4" />
                     </div>
                 </main>
 
