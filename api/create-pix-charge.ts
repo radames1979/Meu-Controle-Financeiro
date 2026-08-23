@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { adminAuth, adminDb, APP_ID } from './_lib/firebaseAdmin';
-import { findCustomerByExternalReference, createCustomer, createPixCharge } from './_lib/asaas';
+import { adminAuth, adminDb, APP_ID } from './_lib/firebaseAdmin.js';
+import { findCustomerByExternalReference, createCustomer, createPixCharge } from './_lib/asaas.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== 'POST') {

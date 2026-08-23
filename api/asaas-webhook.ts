@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { adminDb, APP_ID } from './_lib/firebaseAdmin';
+import { adminDb, APP_ID } from './_lib/firebaseAdmin.js';
 
 // Eventos do Asaas que confirmam o recebimento do Pix.
 // Ver: https://docs.asaas.com/docs/webhook-events
