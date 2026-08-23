@@ -2,13 +2,25 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { initializeFirestore, doc, getDoc, getDocs, setDoc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy } from "firebase/firestore";
 
+// Sem fallback hardcoded de propósito: um fork/deploy desta aplicação sem configurar
+// suas próprias credenciais de Firebase NÃO deve gravar dados silenciosamente no
+// projeto Firebase original. Falha alto e cedo em vez disso.
+function requireEnv(name: string, value: string | undefined): string {
+    if (!value) {
+        throw new Error(
+            `Variável de ambiente ${name} não configurada. Defina as credenciais do Firebase (veja .env.example) antes de rodar ou publicar este app.`
+        );
+    }
+    return value;
+}
+
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCv_BOIvgNvF35xGkBl1URnGhzn1LILbFI",
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "meu-controle-financeiro-dab61.firebaseapp.com",
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "meu-controle-financeiro-dab61",
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "meu-controle-financeiro-dab61.appspot.com",
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "359873689601",
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:359873689601:web:a67817678fdbb18ce76800"
+    apiKey: requireEnv('VITE_FIREBASE_API_KEY', import.meta.env.VITE_FIREBASE_API_KEY),
+    authDomain: requireEnv('VITE_FIREBASE_AUTH_DOMAIN', import.meta.env.VITE_FIREBASE_AUTH_DOMAIN),
+    projectId: requireEnv('VITE_FIREBASE_PROJECT_ID', import.meta.env.VITE_FIREBASE_PROJECT_ID),
+    storageBucket: requireEnv('VITE_FIREBASE_STORAGE_BUCKET', import.meta.env.VITE_FIREBASE_STORAGE_BUCKET),
+    messagingSenderId: requireEnv('VITE_FIREBASE_MESSAGING_SENDER_ID', import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID),
+    appId: requireEnv('VITE_FIREBASE_APP_ID', import.meta.env.VITE_FIREBASE_APP_ID),
 };
 
 const app = initializeApp(firebaseConfig);
