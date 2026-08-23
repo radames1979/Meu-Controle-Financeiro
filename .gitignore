@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Segredos de service account (Firebase Admin SDK, etc.) — nunca commitar.
+*firebase-adminsdk*.json
+*serviceAccount*.json

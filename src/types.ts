@@ -28,6 +28,10 @@ export interface UserProfile {
         theme: string;
         layoutDensity: string;
     };
+    asaasCustomerId?: string;
+    lastPaymentId?: string;
+    lastPaymentStatus?: string;
+    licenseActivatedAt?: string;
 }
 
 export interface AppConfig {

@@ -282,14 +282,6 @@ export default function App() {
         }
     };
 
-    const handleSubscribe = async () => {
-        if (isDemo) {
-            toast.error("Você está no modo demo. Crie uma conta para assinar.");
-            return;
-        }
-        toast.success('Solicitação enviada! Fale com o suporte para ativar.');
-    };
-
     if (isLoading || (user && !userProfile)) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-100">
@@ -329,7 +321,7 @@ export default function App() {
     
     return (
         <>
-            <SubscriptionPage user={user} onSubscribe={handleSubscribe} onLogout={handleLogout} config={appConfig} />
+            <SubscriptionPage user={user} onLogout={handleLogout} config={appConfig} />
             <Toaster position="bottom-right" />
         </>
     );
