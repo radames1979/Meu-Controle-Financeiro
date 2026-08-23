@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, X, Trash2, Plus, Tags } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { db, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc } from '../services/firebase';
+import { auth, db, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc } from '../services/firebase';
 import { APP_CONFIG } from '../constants';
 
 export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
@@ -67,6 +67,26 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
         } catch (err) {
             console.error("Erro ao atualizar licença:", err);
             toast.error("Erro ao atualizar licença no Firebase");
+        }
+    };
+
+    const handleToggleAdmin = async (user: any) => {
+        const makeAdmin = !user.isAdmin;
+        try {
+            const idToken = await auth.currentUser?.getIdToken();
+            const res = await fetch('/api/set-admin-claim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                body: JSON.stringify({ targetEmail: user.email, makeAdmin }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Falha ao atualizar administrador.');
+
+            const userId = user.uid || user.id;
+            setUsers(users.map(u => (u.uid === userId || u.id === userId) ? { ...u, isAdmin: makeAdmin } : u));
+            toast.success(makeAdmin ? 'Usuário promovido a administrador (efetivo no próximo login dele).' : 'Acesso de administrador removido (efetivo no próximo login dele).');
+        } catch (err: any) {
+            toast.error(err.message || 'Erro ao atualizar administrador.');
         }
     };
 
@@ -191,7 +211,10 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                                             <tr key={user.uid || user.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition">
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">
-                                                        <span className="font-bold text-slate-700 dark:text-slate-200">{user.email}</span>
+                                                        <span className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                                                            {user.email}
+                                                            {user.isAdmin && <ShieldCheck size={14} className="text-cyan-500" title="Administrador" />}
+                                                        </span>
                                                         <div className="flex items-center gap-2 mt-1">
                                                             <span className="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase font-mono">ID: {(user.uid || user.id || '').substring(0, 8)}...</span>
                                                             {user.lastSeen && <span className="text-[9px] text-slate-400 dark:text-slate-500">Visto em: {new Date(user.lastSeen).toLocaleDateString()}</span>}
@@ -204,6 +227,9 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right space-x-2">
+                                                    <button onClick={() => handleToggleAdmin(user)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${user.isAdmin ? 'text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-500/10' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`}>
+                                                        {user.isAdmin ? 'Remover admin' : 'Tornar admin'}
+                                                    </button>
                                                     <button onClick={() => handleToggleLicense(user)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${user.licenseStatus === 'active' ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10' : 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'}`}>
                                                         {user.licenseStatus === 'active' ? 'Desativar' : 'Ativar'}
                                                     </button>

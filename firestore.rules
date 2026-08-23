@@ -16,11 +16,10 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
     
-    // Check for Admin status based on hardcoded email + verification
+    // Admin status vem de uma custom claim (definida server-side via Firebase Admin SDK,
+    // nunca a partir do e-mail do usuário), permitindo múltiplos administradores.
     function isAdmin() {
-      return isSignedIn() 
-        && request.auth.token.email == 'messi@bol.com.br' 
-        && request.auth.token.email_verified == true;
+      return isSignedIn() && request.auth.token.admin == true;
     }
 
     function isValidId(id) {

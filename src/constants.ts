@@ -24,7 +24,6 @@ export const MOCK_TRANSACTIONS = [
 ];
 
 export const APP_CONFIG = {
-    adminEmail: 'messi@bol.com.br',
     supportEmail: 'messi@bol.com.br',
     supportWhatsapp: '47992126402',
     pixKey: 'messi@bol.com.br',

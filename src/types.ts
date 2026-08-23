@@ -35,7 +35,6 @@ export interface UserProfile {
 }
 
 export interface AppConfig {
-    adminEmail: string;
     supportEmail: string;
     supportWhatsapp: string;
     pixKey: string;

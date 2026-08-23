@@ -19,7 +19,7 @@ import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
 import { LazyWidget } from './LazyWidget';
 import { DeveloperFooter } from './DeveloperFooter';
-import { STATUSES, APP_CONFIG, DENSITY_CLASSES } from '../constants';
+import { STATUSES, DENSITY_CLASSES } from '../constants';
 import { registerFCMToken } from '../services/fcm';
 
 // Lazy Loaded Components
@@ -47,7 +47,7 @@ const AnnualComparisonCard = lazy(() => import('./AnnualComparisonCard').then(m 
 const BudgetAlertsWidget = lazy(() => import('./BudgetAlertsWidget').then(m => ({ default: m.BudgetAlertsWidget })));
 const ChangelogModal = lazy(() => import('./ChangelogModal').then(m => ({ default: m.ChangelogModal })));
 
-export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
+export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile, isDemo, isAdmin, sessionTimeout, onSessionTimeoutChange, notificationAdvance, onNotificationAdvanceChange }: any) => {
     if (!user) return null;
     const { transactions, setTransactions, budgets, setBudgets, categories, setCategories } = useDataManagement(db, user.uid, isDemo);
     const ui = useUIManager(userProfile?.uiSettings);
@@ -587,7 +587,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 isCollapsed={isSidebarCollapsed} 
                 setIsCollapsed={setIsSidebarCollapsed}
                 user={user}
-                isAdmin={user.email === APP_CONFIG.adminEmail}
+                isAdmin={isAdmin}
                 onLogout={onLogout}
                 onOpenSettings={() => ui.setIsSettingsModalOpen(true)}
                 onOpenHelp={() => ui.setIsHelpOpen(true)}

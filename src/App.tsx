@@ -22,6 +22,7 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(true);
     const [userProfile, setUserProfile] = useState<any>(null);
     const [isDemo, setIsDemo] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [appConfig, setAppConfig] = useState(APP_CONFIG);
     const [sessionTimeout, setSessionTimeout] = useState(() => {
         return localStorage.getItem('session_timeout_pref') || '15';
@@ -64,11 +65,21 @@ export default function App() {
     }, [db]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
+                let adminClaim = false;
+                try {
+                    // Força a renovação do token para pegar uma claim de admin recém-concedida.
+                    const tokenResult = await firebaseUser.getIdTokenResult(true);
+                    adminClaim = tokenResult.claims?.admin === true;
+                } catch (e) {
+                    console.error("Erro ao verificar permissões de administrador:", e);
+                }
+                setIsAdmin(adminClaim);
                 setUser(firebaseUser);
                 setIsDemo(false);
             } else {
+                setIsAdmin(false);
                 setUser((prev: any) => {
                     if (prev?.uid === 'demo-user') return prev;
                     return null;
@@ -91,8 +102,6 @@ export default function App() {
             const unsubscribe = onSnapshot(profileDocRef, 
                 async (docSnap) => {
                     let currentProfile = docSnap.exists() ? docSnap.data() : null;
-                    
-                    const isAdmin = user.email === appConfig.adminEmail;
 
                     if (currentProfile) {
                         setUserProfile(currentProfile);
@@ -132,7 +141,7 @@ export default function App() {
             );
             return () => unsubscribe();
         }
-    }, [user, db, appConfig.adminEmail, isDemo]);
+    }, [user, db, isAdmin, isDemo]);
 
     const handleLogin = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);
 
@@ -156,7 +165,7 @@ export default function App() {
             email: user.email,
             uid: user.uid,
             createdAt: new Date().toISOString(),
-            licenseStatus: (user.email === appConfig.adminEmail || isPreApproved) ? 'active' : 'pending',
+            licenseStatus: isPreApproved ? 'active' : 'pending',
             tutorialCompleted: false
         };
 
@@ -179,6 +188,7 @@ export default function App() {
 
     const handleDemoMode = () => {
         setIsDemo(true);
+        setIsAdmin(false);
         setUser({ email: 'visitante@demo.com', uid: 'demo-user' });
         setUserProfile({ licenseStatus: 'active', tutorialCompleted: true, isDemo: true });
         setIsLoading(false);
@@ -296,19 +306,19 @@ export default function App() {
         return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} config={appConfig} />;
     }
 
-    const isAdmin = user?.email === appConfig.adminEmail;
     const isApproved = userProfile?.licenseStatus === 'active' || isAdmin;
 
     if (isApproved) {
         return (
             <>
-                <DashboardApp 
-                    user={user} 
-                    db={db} 
-                    onLogout={handleLogout} 
-                    userProfile={userProfile} 
-                    onUpdateProfile={handleUpdateProfile} 
-                    isDemo={isDemo} 
+                <DashboardApp
+                    user={user}
+                    db={db}
+                    onLogout={handleLogout}
+                    userProfile={userProfile}
+                    onUpdateProfile={handleUpdateProfile}
+                    isDemo={isDemo}
+                    isAdmin={isAdmin}
                     sessionTimeout={sessionTimeout}
                     onSessionTimeoutChange={handleSessionTimeoutChange}
                     notificationAdvance={notificationAdvance}
