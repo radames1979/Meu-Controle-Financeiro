@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { 
-    auth, 
-    db, 
-    onAuthStateChanged, 
-    doc, 
-    onSnapshot, 
-    getDoc, 
-    setDoc, 
+import {
+    auth,
+    db,
+    googleProvider,
+    onAuthStateChanged,
+    doc,
+    onSnapshot,
+    getDoc,
+    setDoc,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signOut,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult
 } from './services/firebase';
 import { APP_CONFIG } from './constants';
 import { LandingPage } from './components/LandingPage';
@@ -96,6 +100,17 @@ export default function App() {
         return () => unsubscribe();
     }, []);
 
+    // Completa o login por redirecionamento (fallback quando o popup do Google é bloqueado).
+    useEffect(() => {
+        getRedirectResult(auth).catch((err: any) => {
+            if (err.code === 'auth/account-exists-with-different-credential') {
+                toast.error('Esse e-mail já tem uma conta criada com senha. Faça login com e-mail e senha.');
+            } else if (err.code) {
+                toast.error('Não foi possível concluir o login com Google. Tente novamente.');
+            }
+        });
+    }, []);
+
     useEffect(() => {
         if (user && db && !isDemo) {
             const appId = 'meu-controle-financeiro';
@@ -107,8 +122,20 @@ export default function App() {
                     if (currentProfile) {
                         setUserProfile(currentProfile);
                     } else {
-                        const initialProfile = { 
-                            licenseStatus: isAdmin ? 'active' : 'pending', 
+                        // Cobre também quem entra pela primeira vez via Google: mesma checagem
+                        // de pré-aprovação usada no cadastro por e-mail/senha (handleRegister).
+                        let isPreApproved = false;
+                        try {
+                            const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
+                            const whitelistSnap = await getDoc(whitelistRef);
+                            if (whitelistSnap.exists() && user.email) {
+                                const whitelist = whitelistSnap.data().emails || [];
+                                isPreApproved = whitelist.includes(user.email.toLowerCase());
+                            }
+                        } catch (e) {}
+
+                        const initialProfile = {
+                            licenseStatus: (isAdmin || isPreApproved) ? 'active' : 'pending',
                             tutorialCompleted: false,
                             email: user.email,
                             uid: user.uid,
@@ -147,6 +174,25 @@ export default function App() {
     const handleLogin = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);
 
     const handleForgotPassword = (email: string) => sendPasswordResetEmail(auth, email);
+
+    const handleGoogleLogin = async () => {
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (err: any) {
+            if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+                return;
+            }
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/operation-not-supported-in-this-environment') {
+                await signInWithRedirect(auth, googleProvider);
+                return;
+            }
+            if (err.code === 'auth/account-exists-with-different-credential') {
+                toast.error('Esse e-mail já tem uma conta criada com senha. Faça login com e-mail e senha.');
+                return;
+            }
+            toast.error('Não foi possível entrar com Google. Tente novamente.');
+        }
+    };
 
     const handleRegister = async (email: string, password: string) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -306,7 +352,7 @@ export default function App() {
     }
 
     if (!user && !isDemo) {
-        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} onForgotPassword={handleForgotPassword} config={appConfig} />;
+        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} onForgotPassword={handleForgotPassword} onGoogleLogin={handleGoogleLogin} config={appConfig} />;
     }
 
     const isApproved = userProfile?.licenseStatus === 'active' || isAdmin;
