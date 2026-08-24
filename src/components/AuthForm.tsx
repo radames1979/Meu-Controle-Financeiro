@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Mail, Lock, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
-export const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegister: any, onDemo: any }) => {
+export const AuthForm = ({ onLogin, onRegister, onDemo, onForgotPassword }: { onLogin: any, onRegister: any, onDemo: any, onForgotPassword: any }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isSendingReset, setIsSendingReset] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,6 +43,28 @@ export const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegi
         }
     };
 
+    const handleForgotPassword = async () => {
+        if (!email) {
+            toast.error('Digite seu e-mail no campo acima primeiro.');
+            return;
+        }
+        setIsSendingReset(true);
+        try {
+            await onForgotPassword(email);
+            toast.success('Enviamos um link de redefinição de senha para o seu e-mail.');
+        } catch (err: any) {
+            if (err.code === 'auth/user-not-found') {
+                toast.error('Não encontramos uma conta com esse e-mail.');
+            } else if (err.code === 'auth/invalid-email') {
+                toast.error('O formato do e-mail é inválido.');
+            } else {
+                toast.error('Não foi possível enviar o e-mail de redefinição. Tente novamente.');
+            }
+        } finally {
+            setIsSendingReset(false);
+        }
+    };
+
     return (
         <div className="w-full max-w-md mx-auto">
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-100 dark:border-slate-700">
@@ -70,6 +93,16 @@ export const AuthForm = ({ onLogin, onRegister, onDemo }: { onLogin: any, onRegi
                             required
                         />
                     </div>
+                    {isLogin && (
+                        <button
+                            type="button"
+                            onClick={handleForgotPassword}
+                            disabled={isSendingReset}
+                            className="text-sm font-bold text-cyan-500 hover:text-cyan-600 transition-colors -mt-3 disabled:opacity-60"
+                        >
+                            {isSendingReset ? 'Enviando...' : 'Esqueci minha senha'}
+                        </button>
+                    )}
                     <button
                         type="submit"
                         className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-cyan-500/30 transform hover:scale-[1.02] active:scale-[0.98]"

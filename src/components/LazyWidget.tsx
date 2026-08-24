@@ -30,9 +30,11 @@ export const LazyWidget: React.FC<LazyWidgetProps> = ({
     );
 };
 
-const DefaultFallback = ({ height }: { height: string }) => (
-    <div 
-        className="w-full bg-slate-100 dark:bg-slate-800 animate-pulse rounded-3xl" 
+const DefaultFallback = ({ height }: { height: string }) => <SkeletonBlock height={height} />;
+
+export const SkeletonBlock = ({ height }: { height: string }) => (
+    <div
+        className="w-full bg-slate-100 dark:bg-slate-800 animate-pulse rounded-3xl"
         style={{ height }}
     />
 );

@@ -17,7 +17,7 @@ import { useDataManagement } from '../hooks/useDataManagement';
 import { useUIManager } from '../hooks/useUIManager';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
-import { LazyWidget } from './LazyWidget';
+import { LazyWidget, SkeletonBlock } from './LazyWidget';
 import { DeveloperFooter } from './DeveloperFooter';
 import { STATUSES, DENSITY_CLASSES } from '../constants';
 import { registerFCMToken } from '../services/fcm';
@@ -712,16 +712,16 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
 
                         {ui.view === 'dashboard' && (
                             <div className={`${DENSITY_CLASSES.spacing[ui.layoutDensity as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-6'} animate-fade-in-up`}>
-                                <LazyWidget placeholderHeight="300px">
+                                <Suspense fallback={<SkeletonBlock height="300px" />}>
                                     <Dashboard stats={monthlyData} prevMonthStats={prevMonthData} density={ui.layoutDensity} userProfile={userProfile} />
-                                </LazyWidget>
+                                </Suspense>
 
-                                <LazyWidget placeholderHeight="100px">
-                                    <BudgetAlertsWidget 
-                                        budgets={budgets} 
-                                        monthlyExpenses={monthlyData.expenseByCategory} 
-                                        categories={categories} 
-                                        density={ui.layoutDensity} 
+                                <Suspense fallback={<SkeletonBlock height="100px" />}>
+                                    <BudgetAlertsWidget
+                                        budgets={budgets}
+                                        monthlyExpenses={monthlyData.expenseByCategory}
+                                        categories={categories}
+                                        density={ui.layoutDensity}
                                         onDrillDown={(category) => {
                                             const title = `Lançamentos: ${category}`;
                                             const categoryTransactions = monthlyData.filtered.filter((t: any) => t.category === category);
@@ -729,23 +729,23 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                                         }}
                                         onAdjustBudget={() => ui.setIsBudgetModalOpen(true)}
                                     />
-                                </LazyWidget>
-                                
+                                </Suspense>
+
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                     <div className="lg:col-span-2">
-                                        <LazyWidget placeholderHeight="400px">
+                                        <Suspense fallback={<SkeletonBlock height="400px" />}>
                                             <Charts data={monthlyData.chartData} annualData={annualData} year={currentDate.getFullYear()} density={ui.layoutDensity} theme={ui.theme} />
-                                        </LazyWidget>
+                                        </Suspense>
                                     </div>
                                     <div className="space-y-6">
-                                        <LazyWidget placeholderHeight="300px">
+                                        <Suspense fallback={<SkeletonBlock height="300px" />}>
                                             <FinancialHealth stats={monthlyData} density={ui.layoutDensity} />
-                                        </LazyWidget>
+                                        </Suspense>
                                         <div className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 ${DENSITY_CLASSES.cardPadding[ui.layoutDensity as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6'}`}>
                                             <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700 dark:text-slate-200"><PiggyBank className="text-cyan-500" /> Orçamentos</h3>
-                                            <LazyWidget placeholderHeight="150px">
+                                            <Suspense fallback={<SkeletonBlock height="150px" />}>
                                                 <BudgetStatus budgets={budgets} monthlyExpenses={monthlyData.expenseByCategory} categories={categories} density={ui.layoutDensity} />
-                                            </LazyWidget>
+                                            </Suspense>
                                             <button onClick={() => ui.setIsBudgetModalOpen(true)} className="mt-6 w-full py-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 dark:text-slate-400 hover:border-cyan-500 hover:text-cyan-500 dark:hover:text-cyan-400 transition-all font-medium text-sm">Configurar Orçamentos</button>
                                         </div>
                                     </div>

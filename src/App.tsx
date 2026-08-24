@@ -8,9 +8,10 @@ import {
     onSnapshot, 
     getDoc, 
     setDoc, 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    signOut 
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail
 } from './services/firebase';
 import { APP_CONFIG } from './constants';
 import { LandingPage } from './components/LandingPage';
@@ -144,6 +145,8 @@ export default function App() {
     }, [user, db, isAdmin, isDemo]);
 
     const handleLogin = (email: string, password: string) => signInWithEmailAndPassword(auth, email, password);
+
+    const handleForgotPassword = (email: string) => sendPasswordResetEmail(auth, email);
 
     const handleRegister = async (email: string, password: string) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -303,7 +306,7 @@ export default function App() {
     }
 
     if (!user && !isDemo) {
-        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} config={appConfig} />;
+        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} onForgotPassword={handleForgotPassword} config={appConfig} />;
     }
 
     const isApproved = userProfile?.licenseStatus === 'active' || isAdmin;

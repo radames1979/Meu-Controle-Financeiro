@@ -143,7 +143,7 @@ const FAQ_ITEMS = [
 ];
 
 
-export const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: any, onRegister: any, onDemo: any, config: any }) => {
+export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, config }: { onLogin: any, onRegister: any, onDemo: any, onForgotPassword: any, config: any }) => {
     const authSectionRef = useRef<HTMLDivElement>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -474,7 +474,7 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: 
                             </div>
                         </div>
                         <div className="bg-slate-50 dark:bg-slate-950 p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800">
-                             <AuthForm onLogin={onLogin} onRegister={onRegister} onDemo={onDemo} />
+                             <AuthForm onLogin={onLogin} onRegister={onRegister} onDemo={onDemo} onForgotPassword={onForgotPassword} />
                         </div>
                     </div>
                 </div>
