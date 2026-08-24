@@ -146,7 +146,7 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: 
                             { 
                                 icon: <Lock className="text-orange-500" size={32} />, 
                                 title: "Privacidade Absoluta", 
-                                desc: "Seus dados financeiros não são produto. Criptografia total e zero compartilhamento com terceiros." 
+                                desc: "Seus dados financeiros não são produto. Cada conta só acessa os próprios dados, protegidos por regras de segurança e sem compartilhamento com terceiros."
                             },
                             { 
                                 icon: <Zap className="text-yellow-500" size={32} />, 
@@ -185,8 +185,9 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, config }: { onLogin: 
                             <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-8">Segurança de nível bancário no seu bolso.</h2>
                             <div className="space-y-6">
                                 {[
-                                    "Criptografia ponta-a-ponta em todos os dados.",
+                                    "Seus dados ficam isolados por conta, protegidos por regras de segurança no banco de dados.",
                                     "Google Firebase para autenticação segura.",
+                                    "Criptografia em trânsito (HTTPS) e em repouso, padrão Google Cloud.",
                                     "Sem venda de dados para anunciantes.",
                                     "Backup automático e em tempo real."
                                 ].map((item, i) => (
