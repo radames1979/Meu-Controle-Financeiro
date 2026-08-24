@@ -28,12 +28,9 @@ export const APP_CONFIG = {
     supportWhatsapp: '47992126402',
     pixKey: 'messi@bol.com.br',
     defaultPrice: 9.99,
-    sponsors: [
-        { name: 'Patrocinador 1', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador1' },
-        { name: 'Patrocinador 2', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador2' },
-        { name: 'Patrocinador 3', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador3' },
-        { name: 'Patrocinador 4', logo: 'https://placehold.co/150x60/e2e8f0/64748b?text=Patrocinador4' }
-    ]
+    // Vazio de propósito: logos placeholder falsos passam a impressão de produto
+    // inacabado. Só cadastre aqui patrocinadores reais (via painel Admin).
+    sponsors: [] as { name: string; logo: string }[]
 };
 
 export const ACCOUNT_TYPES = ['Carteira', 'Conta Corrente', 'Cartão de Crédito', 'Poupança'];
