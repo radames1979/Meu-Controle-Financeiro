@@ -21,8 +21,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification?.title || 'Alerta de Conta - Plano Raiz';
     const notificationOptions = {
         body: payload.notification?.body || 'Você possui contas pendentes de pagamento vencendo em breve.',
-        icon: payload.notification?.icon || '/favicon.ico',
-        badge: '/favicon.ico',
+        icon: payload.notification?.icon || '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
         tag: 'upcoming-bill-notification',
         renotify: true,
         data: payload.data || {}
