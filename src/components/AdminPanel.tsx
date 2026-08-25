@@ -165,19 +165,20 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
     return (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
-                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-800 dark:bg-slate-900 text-white">
-                    <div className="flex items-center gap-4">
+                <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-slate-800 dark:bg-slate-900 text-white">
+                    <div className="flex items-center justify-between sm:justify-start gap-4">
                         <h2 className="text-xl font-bold flex items-center gap-2"><ShieldCheck /> Admin</h2>
-                        <div className="flex bg-slate-700 dark:bg-slate-800 p-1 rounded-lg">
-                            <button onClick={() => setActiveTab('users')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'users' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Usuários</button>
-                            <button onClick={() => setActiveTab('whitelist')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'whitelist' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Pré-Aprovar</button>
-                            <button onClick={() => setActiveTab('settings')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'settings' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Configurações</button>
-                        </div>
+                        <button onClick={onClose} className="sm:hidden p-2 hover:bg-white/20 rounded-lg transition"><X /></button>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition"><X /></button>
+                    <div className="flex bg-slate-700 dark:bg-slate-800 p-1 rounded-lg overflow-x-auto">
+                        <button onClick={() => setActiveTab('users')} className={`shrink-0 px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'users' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Usuários</button>
+                        <button onClick={() => setActiveTab('whitelist')} className={`shrink-0 px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'whitelist' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Pré-Aprovar</button>
+                        <button onClick={() => setActiveTab('settings')} className={`shrink-0 px-4 py-1.5 rounded-md text-xs font-bold transition ${activeTab === 'settings' ? 'bg-white text-slate-800' : 'text-slate-300 hover:text-white'}`}>Configurações</button>
+                    </div>
+                    <button onClick={onClose} className="hidden sm:block p-2 hover:bg-white/20 rounded-lg transition"><X /></button>
                 </div>
                 
-                <div className="p-8 overflow-y-auto custom-scrollbar">
+                <div className="p-4 sm:p-8 overflow-y-auto custom-scrollbar">
                     {activeTab === 'users' ? (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -196,6 +197,7 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                             </div>
 
                             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+                                <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                                     <thead className="bg-slate-50 dark:bg-slate-900/50">
                                         <tr>
@@ -239,6 +241,7 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                                         ))}
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                         </>
                     ) : activeTab === 'whitelist' ? (
@@ -262,6 +265,7 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                             </div>
 
                             <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+                                <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                                     <thead className="bg-slate-50 dark:bg-slate-900/50">
                                         <tr>
@@ -284,6 +288,7 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                                         ))}
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                         </div>
                     ) : (

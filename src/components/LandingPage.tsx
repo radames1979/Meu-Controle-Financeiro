@@ -85,7 +85,7 @@ const HeroMockup = () => (
         </motion.div>
 
         <motion.div
-            className="hidden md:block absolute -top-6 -right-10 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-4 w-48"
+            className="hidden lg:block absolute -top-6 -right-10 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-4 w-48"
             initial={{ opacity: 0, y: -10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, delay: 1.1 }}
@@ -103,7 +103,7 @@ const HeroMockup = () => (
         </motion.div>
 
         <motion.div
-            className="hidden md:flex absolute -bottom-8 -left-10 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-4 items-center gap-3"
+            className="hidden lg:flex absolute -bottom-8 -left-10 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-4 items-center gap-3"
             initial={{ opacity: 0, y: 10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, delay: 1.3 }}
