@@ -45,7 +45,7 @@ export const Sidebar = ({
                         <div className="bg-cyan-500 p-1.5 rounded-lg text-white shadow-lg shadow-cyan-200 dark:shadow-cyan-900/20">
                             <LayoutDashboard size={18} />
                         </div>
-                        <span className="font-black text-slate-800 dark:text-white tracking-tight">Plano Raiz</span>
+                        <span className="font-display font-bold text-slate-800 dark:text-white uppercase tracking-wide">Plano Raiz</span>
                     </div>
                 )}
                 {isCollapsed && (

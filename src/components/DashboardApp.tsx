@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { 
-    DollarSign, ShieldCheck, Sun, Moon, HelpCircle, Bell, BellOff, Printer, Layers, 
+    DollarSign, ShieldCheck, HelpCircle, Bell, BellOff, Printer, Layers, 
     PlusCircle, Settings, LogOut, ArrowLeft, ArrowRight, PiggyBank, Table, 
     Search, Clock, Star, EyeOff, Trash2
 } from 'lucide-react';
@@ -605,7 +605,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                         <div className="bg-cyan-500 p-1.5 rounded-lg text-white">
                             <DollarSign size={20} />
                         </div>
-                        <h1 className="font-black text-slate-800 dark:text-white tracking-tight">Plano Raiz</h1>
+                        <h1 className="font-display font-bold text-slate-800 dark:text-white uppercase tracking-wide">Plano Raiz</h1>
                     </div>
                     <div className="flex items-center gap-2">
                         <button 
@@ -621,12 +621,6 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                             ) : (
                                 <BellOff size={18} />
                             )}
-                        </button>
-                        <button 
-                            onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
-                            className="p-2 text-slate-600 dark:text-slate-400"
-                        >
-                            {ui.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                         </button>
                         <button onClick={onLogout} className="p-2 text-red-500">
                             <LogOut size={18} />
@@ -668,12 +662,6 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                             ) : (
                                 <BellOff size={20} />
                             )}
-                        </button>
-                        <button 
-                            onClick={() => ui.setTheme(ui.theme === 'dark' ? 'light' : 'dark')} 
-                            className="p-2 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
-                        >
-                            {ui.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
                         <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
                         <div className="flex items-center gap-3 pl-2">
@@ -874,7 +862,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 {ui.isModalOpen && <TransactionModal onClose={() => ui.setIsModalOpen(false)} onSave={handleSaveTransaction} transaction={ui.editingTransaction} categories={categories} />}
                 {ui.isBatchModalOpen && <BatchTransactionModal onClose={() => ui.setIsBatchModalOpen(false)} onSaveBatch={handleSaveBatchTransactions} categories={categories} />}
                 {ui.isBudgetModalOpen && <BudgetModal onClose={() => ui.setIsBudgetModalOpen(false)} onSave={handleSaveBudgets} currentBudgets={budgets} categories={categories} monthlyExpenses={monthlyData.expenseByCategory} currentDate={currentDate} />}
-                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} user={user} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} theme={ui.theme} onThemeChange={ui.setTheme} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} notificationAdvance={notificationAdvance} onNotificationAdvanceChange={onNotificationAdvanceChange} onOpenChangelog={() => setIsChangelogOpen(true)} />}
+                {ui.isSettingsModalOpen && <SettingsModal onClose={() => ui.setIsSettingsModalOpen(false)} user={user} categories={categories} onSaveCategories={handleSaveSettings} density={ui.layoutDensity} onDensityChange={ui.setLayoutDensity} sessionTimeout={sessionTimeout} onSessionTimeoutChange={onSessionTimeoutChange} notificationAdvance={notificationAdvance} onNotificationAdvanceChange={onNotificationAdvanceChange} onOpenChangelog={() => setIsChangelogOpen(true)} />}
                 {ui.isReportModalOpen && <ReportModal onClose={() => ui.setIsReportModalOpen(false)} onGenerate={handleGenerateCustomReport} categories={categories} />}
                 {ui.isAdminOpen && <AdminPanel onClose={() => ui.setIsAdminOpen(false)} />}
                 {ui.isHelpOpen && <UserManual onClose={() => ui.setIsHelpOpen(false)} />}

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { INITIAL_WIDGET_ORDER } from '../constants';
 
 export const useUIManager = (initialSettings: any = {}) => {
-    const [theme, setTheme] = useState(initialSettings.theme || localStorage.getItem('theme') || 'light');
+    // Plano Raiz agora é uma identidade só-escura (sem alternância light/dark).
+    const [theme] = useState('dark');
     const [view, setView] = useState('dashboard');
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -46,7 +47,7 @@ export const useUIManager = (initialSettings: any = {}) => {
     const handleOpenModal = (transaction = null) => { setEditingTransaction(transaction); setIsModalOpen(true); };
 
     return {
-        theme, setTheme,
+        theme,
         view, setView, widgetOrder, setWidgetOrder, layoutDensity, setLayoutDensity, hideZeroRows, setHideZeroRows,
         collapsedWidgets, setCollapsedWidgets, isModalOpen, setIsModalOpen, isBatchModalOpen, setIsBatchModalOpen,
         isBudgetModalOpen, setIsBudgetModalOpen, isReportModalOpen, setIsReportModalOpen, isSettingsModalOpen,

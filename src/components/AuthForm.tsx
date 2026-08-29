@@ -124,7 +124,7 @@ export const AuthForm = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoog
                     )}
                     <button
                         type="submit"
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-cyan-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-4 rounded-full transition-all shadow-lg shadow-cyan-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
                     >
                         {isLogin ? 'Entrar' : 'Cadastrar'}
                     </button>
@@ -138,12 +138,12 @@ export const AuthForm = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoog
                 <button
                     onClick={handleGoogleClick}
                     disabled={isGoogleLoading}
-                    className="w-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 py-4 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-700 disabled:opacity-60"
+                    className="w-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 py-4 rounded-full font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-3 border border-slate-200 dark:border-slate-700 disabled:opacity-60"
                 >
                     <GoogleIcon /> {isGoogleLoading ? 'Conectando...' : 'Entrar com Google'}
                 </button>
 
-                <button onClick={onDemo} className="w-full mt-4 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 py-4 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700">
+                <button onClick={onDemo} className="w-full mt-4 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 py-4 rounded-full font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700">
                     <EyeOff size={18} /> Modo Demo (Visitante)
                 </button>
 

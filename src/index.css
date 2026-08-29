@@ -1,14 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Barlow+Condensed:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-display: "Barlow Condensed", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  
+
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
+
+  /* Acento único (laranja-queimado) no lugar do ciano genérico -- redefine a
+     escala "cyan" inteira, então toda classe existente que usa esse nome
+     (fundo, texto, borda) passa a usar essa cor automaticamente. */
+  --color-cyan-50: #fff1e8;
+  --color-cyan-100: #ffe0cc;
+  --color-cyan-200: #ffc199;
+  --color-cyan-300: #ffa066;
+  --color-cyan-400: #fd7a33;
+  --color-cyan-500: #fc4c02;
+  --color-cyan-600: #ff5a14;
+  --color-cyan-700: #d43f00;
+  --color-cyan-800: #a83300;
+  --color-cyan-900: #7a2500;
+  --color-cyan-950: #451300;
+
+  /* Superfícies escuras mais neutras (quase-preto), no lugar do slate
+     azulado padrão do Tailwind -- só as tonalidades usadas como fundo. */
+  --color-slate-700: #2e3036;
+  --color-slate-800: #1f2024;
+  --color-slate-900: #16171b;
+  --color-slate-950: #0b0b0e;
 }
 
 @layer base {

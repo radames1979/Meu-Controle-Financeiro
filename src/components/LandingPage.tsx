@@ -245,13 +245,13 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onG
                     >
                         <button
                             onClick={scrollToAuth}
-                            className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-10 rounded-2xl text-lg transition-all shadow-xl shadow-cyan-200 dark:shadow-cyan-900/20 flex items-center justify-center gap-2 active:scale-95"
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-10 rounded-full text-lg transition-all shadow-xl shadow-cyan-200 dark:shadow-cyan-900/20 flex items-center justify-center gap-2 active:scale-95"
                         >
                             Começar agora <ArrowRight size={20} />
                         </button>
                         <button
                             onClick={onDemo}
-                            className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold py-4 px-10 rounded-2xl text-lg transition-all hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2 active:scale-95"
+                            className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold py-4 px-10 rounded-full text-lg transition-all hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2 active:scale-95"
                         >
                             <EyeOff size={20} /> Testar Demo
                         </button>
@@ -369,7 +369,7 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onG
                         </ul>
                         <button
                             onClick={scrollToAuth}
-                            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 rounded-2xl text-lg transition-all shadow-lg shadow-cyan-500/30 active:scale-95"
+                            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 rounded-full text-lg transition-all shadow-lg shadow-cyan-500/30 active:scale-95"
                         >
                             Quero meu acesso
                         </button>
