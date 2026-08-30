@@ -32,6 +32,7 @@ export interface UserProfile {
     lastPaymentId?: string;
     lastPaymentStatus?: string;
     licenseActivatedAt?: string;
+    termsAcceptedAt?: string;
 }
 
 export interface AppConfig {

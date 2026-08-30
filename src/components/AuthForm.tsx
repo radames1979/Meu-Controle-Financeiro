@@ -18,6 +18,7 @@ export const AuthForm = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoog
     const [error, setError] = useState('');
     const [isSendingReset, setIsSendingReset] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
 
     const handleGoogleClick = async () => {
         setIsGoogleLoading(true);
@@ -31,6 +32,10 @@ export const AuthForm = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoog
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        if (!isLogin && !acceptedTerms) {
+            toast.error('Você precisa aceitar os Termos de Uso e a Política de Privacidade para criar uma conta.');
+            return;
+        }
         try {
             if (isLogin) {
                 await onLogin(email, password);
@@ -122,6 +127,22 @@ export const AuthForm = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoog
                             {isSendingReset ? 'Enviando...' : 'Esqueci minha senha'}
                         </button>
                     )}
+                    {!isLogin && (
+                        <label className="flex items-start gap-2.5 -mt-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={acceptedTerms}
+                                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                                className="mt-0.5 rounded border-slate-300 dark:border-slate-600 text-cyan-500 focus:ring-cyan-500"
+                            />
+                            <span>
+                                Li e aceito os{' '}
+                                <a href="/termos" target="_blank" rel="noopener noreferrer" className="font-bold text-cyan-500 hover:underline">Termos de Uso</a>
+                                {' '}e a{' '}
+                                <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="font-bold text-cyan-500 hover:underline">Política de Privacidade</a>.
+                            </span>
+                        </label>
+                    )}
                     <button
                         type="submit"
                         className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-4 px-4 rounded-full transition-all shadow-lg shadow-cyan-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
@@ -142,6 +163,12 @@ export const AuthForm = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoog
                 >
                     <GoogleIcon /> {isGoogleLoading ? 'Conectando...' : 'Entrar com Google'}
                 </button>
+                <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                    Ao continuar com Google, você concorda com nossos{' '}
+                    <a href="/termos" target="_blank" rel="noopener noreferrer" className="underline hover:text-cyan-500">Termos de Uso</a>
+                    {' '}e{' '}
+                    <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="underline hover:text-cyan-500">Política de Privacidade</a>.
+                </p>
 
                 <button onClick={onDemo} className="w-full mt-4 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 py-4 rounded-full font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700">
                     <EyeOff size={18} /> Modo Demo (Visitante)

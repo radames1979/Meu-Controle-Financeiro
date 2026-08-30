@@ -21,8 +21,15 @@ import { APP_CONFIG } from './constants';
 import { LandingPage } from './components/LandingPage';
 import { DashboardApp } from './components/DashboardApp';
 import { SubscriptionPage } from './components/SubscriptionPage';
+import { LegalPage } from './components/LegalPage';
+
+const LEGAL_ROUTES: Record<string, 'terms' | 'privacy'> = {
+    '/termos': 'terms',
+    '/privacidade': 'privacy',
+};
 
 export default function App() {
+    const [legalPage, setLegalPage] = useState<'terms' | 'privacy' | null>(() => LEGAL_ROUTES[window.location.pathname] || null);
     const [user, setUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [userProfile, setUserProfile] = useState<any>(null);
@@ -35,6 +42,12 @@ export default function App() {
     const [notificationAdvance, setNotificationAdvance] = useState(() => {
         return localStorage.getItem('notification_advance_pref') || '3';
     });
+
+    useEffect(() => {
+        const onPopState = () => setLegalPage(LEGAL_ROUTES[window.location.pathname] || null);
+        window.addEventListener('popstate', onPopState);
+        return () => window.removeEventListener('popstate', onPopState);
+    }, []);
 
     useEffect(() => {
         const fetchConfig = async () => {
@@ -121,46 +134,38 @@ export default function App() {
 
                     if (currentProfile) {
                         setUserProfile(currentProfile);
-                    } else {
-                        // Cobre também quem entra pela primeira vez via Google: mesma checagem
-                        // de pré-aprovação usada no cadastro por e-mail/senha (handleRegister).
-                        let isPreApproved = false;
+
+                        // Sincroniza o "visto por último" (única alteração que as regras do
+                        // Firestore permitem o próprio cliente fazer no perfil/registro).
                         try {
-                            const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
-                            const whitelistSnap = await getDoc(whitelistRef);
-                            if (whitelistSnap.exists() && user.email) {
-                                const whitelist = whitelistSnap.data().emails || [];
-                                isPreApproved = whitelist.includes(user.email.toLowerCase());
-                            }
+                            const registryRef = doc(db, `artifacts/${appId}/users_registry/${user.uid}`);
+                            await setDoc(registryRef, {
+                                email: user.email,
+                                uid: user.uid,
+                                licenseStatus: currentProfile.licenseStatus,
+                                lastSeen: new Date().toISOString()
+                            }, { merge: true });
                         } catch (e) {}
 
-                        const initialProfile = {
-                            licenseStatus: (isAdmin || isPreApproved) ? 'active' : 'pending',
-                            tutorialCompleted: false,
-                            email: user.email,
-                            uid: user.uid,
-                            createdAt: new Date().toISOString()
-                        };
-                        setUserProfile(initialProfile);
+                        setIsLoading(false);
+                    } else {
+                        // Perfil ainda não existe: criado no servidor (via Admin SDK), nunca
+                        // pelo próprio cliente -- assim ninguém consegue forjar a própria
+                        // criação de perfil com licenseStatus "active" sem pagar. O onSnapshot
+                        // acima dispara de novo assim que o documento é criado no servidor.
                         try {
-                            await setDoc(profileDocRef, initialProfile);
+                            const idToken = await user.getIdToken();
+                            const res = await fetch('/api/create-profile', {
+                                method: 'POST',
+                                headers: { Authorization: `Bearer ${idToken}` },
+                            });
+                            if (!res.ok) throw new Error('Falha ao criar perfil');
                         } catch (e) {
                             console.error("Erro ao criar perfil inicial:", e);
+                            toast.error('Não foi possível preparar sua conta. Tente novamente em instantes.');
+                            setIsLoading(false);
                         }
                     }
-
-                    // Tenta atualizar o registro de usuário para o Admin (ignore erros se as regras bloquearem)
-                    try {
-                        const registryRef = doc(db, `artifacts/${appId}/users_registry/${user.uid}`);
-                        await setDoc(registryRef, {
-                            email: user.email,
-                            uid: user.uid,
-                            licenseStatus: currentProfile?.licenseStatus || (isAdmin ? 'active' : 'pending'),
-                            lastSeen: new Date().toISOString()
-                        }, { merge: true });
-                    } catch (e) {}
-
-                    setIsLoading(false);
                 },
                 (error) => {
                     console.error("Erro ao monitorar perfil do usuário:", error);
@@ -195,31 +200,10 @@ export default function App() {
     };
 
     const handleRegister = async (email: string, password: string) => {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        const appId = 'meu-controle-financeiro';
-        const profileDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/profile/userProfile`);
-        
-        let isPreApproved = false;
-        try {
-            const whitelistRef = doc(db, `artifacts/${appId}/admin/whitelist`);
-            const whitelistSnap = await getDoc(whitelistRef);
-            if (whitelistSnap.exists()) {
-                const whitelist = whitelistSnap.data().emails || [];
-                isPreApproved = whitelist.includes(email.toLowerCase());
-            }
-        } catch (e) {}
-
-        const initialProfile = {
-            email: user.email,
-            uid: user.uid,
-            createdAt: new Date().toISOString(),
-            licenseStatus: isPreApproved ? 'active' : 'pending',
-            tutorialCompleted: false
-        };
-
-        await setDoc(profileDocRef, initialProfile);
-        return userCredential;
+        // O perfil inicial (com a checagem de pré-aprovação por whitelist) é criado
+        // no servidor pelo efeito que observa o perfil, assim que a conta loga pela
+        // primeira vez -- ver /api/create-profile.
+        return createUserWithEmailAndPassword(auth, email, password);
     };
 
     const handleLogout = () => {
@@ -341,6 +325,21 @@ export default function App() {
         }
     };
 
+    const navigateToLegal = (type: 'terms' | 'privacy') => {
+        const path = type === 'terms' ? '/termos' : '/privacidade';
+        window.history.pushState({}, '', path);
+        setLegalPage(type);
+    };
+
+    const navigateHome = () => {
+        window.history.pushState({}, '', '/');
+        setLegalPage(null);
+    };
+
+    if (legalPage) {
+        return <LegalPage type={legalPage} onBack={navigateHome} />;
+    }
+
     if (isLoading || (user && !userProfile)) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-100">
@@ -352,7 +351,7 @@ export default function App() {
     }
 
     if (!user && !isDemo) {
-        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} onForgotPassword={handleForgotPassword} onGoogleLogin={handleGoogleLogin} config={appConfig} />;
+        return <LandingPage onLogin={handleLogin} onRegister={handleRegister} onDemo={handleDemoMode} onForgotPassword={handleForgotPassword} onGoogleLogin={handleGoogleLogin} onNavigateToLegal={navigateToLegal} config={appConfig} />;
     }
 
     const isApproved = userProfile?.licenseStatus === 'active' || isAdmin;

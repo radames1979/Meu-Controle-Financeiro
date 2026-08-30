@@ -143,7 +143,7 @@ const FAQ_ITEMS = [
 ];
 
 
-export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoogleLogin, config }: { onLogin: any, onRegister: any, onDemo: any, onForgotPassword: any, onGoogleLogin: any, config: any }) => {
+export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onGoogleLogin, onNavigateToLegal, config }: { onLogin: any, onRegister: any, onDemo: any, onForgotPassword: any, onGoogleLogin: any, onNavigateToLegal: (type: 'terms' | 'privacy') => void, config: any }) => {
     const authSectionRef = useRef<HTMLDivElement>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -494,6 +494,8 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onG
                             <a href={`mailto:${YOUR_CONTACT_EMAIL}`} className="hover:text-cyan-400 transition">Contato</a>
                             <a href={`mailto:${YOUR_CONTACT_EMAIL}?subject=Quero%20ajudar`} className="hover:text-cyan-400 transition">Sugestões</a>
                             <a href={`mailto:${YOUR_CONTACT_EMAIL}?subject=Presente`} className="hover:text-cyan-400 transition">Presentear</a>
+                            <button onClick={() => onNavigateToLegal('terms')} className="hover:text-cyan-400 transition">Termos de Uso</button>
+                            <button onClick={() => onNavigateToLegal('privacy')} className="hover:text-cyan-400 transition">Privacidade</button>
                         </div>
                     </div>
                     <div className="pt-8 border-t border-slate-800/50 flex flex-col items-center gap-6">
