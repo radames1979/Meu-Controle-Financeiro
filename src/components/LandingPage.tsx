@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
     DollarSign, EyeOff, ShieldCheck, PieChart, TrendingUp, TrendingDown,
     Smartphone, Zap, Lock, Users, ArrowRight, ArrowUpRight, CheckCircle2,
@@ -149,6 +149,13 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onG
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+    // Trava o scroll da página por trás enquanto o menu mobile está aberto,
+    // como qualquer gaveta de navegação de verdade.
+    useEffect(() => {
+        document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+    }, [isMobileMenuOpen]);
+
     const scrollToAuth = () => {
         setIsMobileMenuOpen(false);
         authSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -216,6 +223,22 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onG
                     )}
                 </AnimatePresence>
             </header>
+
+            {/* Fundo sólido atrás do menu mobile aberto -- sem isso, o conteúdo da
+                página (que não sabe que o header cresceu) aparece colado embaixo do
+                menu em vez de ficar coberto por ele. */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="md:hidden fixed inset-0 z-40 bg-slate-50 dark:bg-slate-950"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* Hero Section */}
             <section className="relative pt-40 pb-20 md:pt-52 md:pb-32 overflow-hidden">
