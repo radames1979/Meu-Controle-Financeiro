@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AlertTriangle, CheckCircle, AlertCircle, ChevronDown, ChevronUp, AlertOctagon, TrendingDown, BellRing, Search, Sliders } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DENSITY_CLASSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 
 interface BudgetAlertsWidgetProps {
     budgets: Record<string, number>;
@@ -169,11 +170,11 @@ export const BudgetAlertsWidget: React.FC<BudgetAlertsWidgetProps> = ({
 
                                                 <div className="text-right text-xs">
                                                     <span className="font-bold text-slate-700 dark:text-slate-300">
-                                                        {item.spent.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                                        {formatBRL(item.spent)}
                                                     </span>
                                                     <span className="text-slate-400 dark:text-slate-500 mx-1">/</span>
                                                     <span className="text-slate-500 text-xs">
-                                                        {item.budget.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                                        {formatBRL(item.budget)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -193,11 +194,11 @@ export const BudgetAlertsWidget: React.FC<BudgetAlertsWidgetProps> = ({
                                                 <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-medium">
                                                     {item.isCritical ? (
                                                         <span className="text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-0.5">
-                                                            <TrendingDown size={12} /> Ultrapassou em {(item.percentage - 100).toFixed(0)}% (excedeu {Math.abs(item.remaining).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})
+                                                            <TrendingDown size={12} /> Ultrapassou em {(item.percentage - 100).toFixed(0)}% (excedeu {formatBRL(Math.abs(item.remaining))})
                                                         </span>
                                                     ) : (
                                                         <span>
-                                                            Resta apenas <span className="font-bold text-amber-600 dark:text-amber-400">{item.remaining.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span> disponíveis
+                                                            Resta apenas <span className="font-bold text-amber-600 dark:text-amber-400">{formatBRL(item.remaining)}</span> disponíveis
                                                         </span>
                                                     )}
                                                 </div>

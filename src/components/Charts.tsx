@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { TrendingUp, PieChart as PieChartIcon, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from 'recharts';
 import { DENSITY_CLASSES, COLORS } from '../constants';
+import { formatBRL } from '../utils/currency';
 
 export const Charts = ({ data, annualData, year, density, theme }: any) => {
     const paddingClass = DENSITY_CLASSES.cardPadding[density as keyof typeof DENSITY_CLASSES.cardPadding] || 'p-6';
@@ -55,7 +56,7 @@ export const Charts = ({ data, annualData, year, density, theme }: any) => {
                             <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                             <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$ ${value}`} />
                             <Tooltip 
-                                formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                formatter={(value: any) => formatBRL(value)}
                                 contentStyle={{ 
                                     borderRadius: '12px', 
                                     border: 'none', 
@@ -97,7 +98,7 @@ export const Charts = ({ data, annualData, year, density, theme }: any) => {
                                     ))}
                                 </Pie>
                                 <Tooltip 
-                                    formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    formatter={(value: any) => formatBRL(value)}
                                     contentStyle={{ 
                                         borderRadius: '12px', 
                                         border: 'none', 
@@ -123,7 +124,7 @@ export const Charts = ({ data, annualData, year, density, theme }: any) => {
                                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$ ${value}`} />
                                 <Tooltip 
-                                    formatter={(value: any) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    formatter={(value: any) => formatBRL(value)}
                                     contentStyle={{ 
                                         borderRadius: '12px', 
                                         border: 'none', 

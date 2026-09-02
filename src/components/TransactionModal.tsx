@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { STATUSES, ACCOUNT_TYPES } from '../constants';
+import { CurrencyInput } from './CurrencyInput';
 
 export const TransactionModal = ({ onClose, onSave, transaction, categories }: any) => {
     const [type, setType] = useState(transaction?.type || 'expense');
@@ -82,7 +83,7 @@ export const TransactionModal = ({ onClose, onSave, transaction, categories }: a
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Valor (R$)</label>
-                            <input type="number" value={amount} onChange={e => setAmount(e.target.value)} step="0.01" min="0" className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3" required />
+                            <CurrencyInput value={amount} onChange={setAmount} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-3" required />
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Data de Vencimento</label>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Repeat, Trash2, Calendar, ChevronRight } from 'lucide-react';
 import { DENSITY_CLASSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 
 interface RecurringTransactionsProps {
     transactions: any[];
@@ -79,7 +80,7 @@ export const RecurringTransactions = ({ transactions, onDeleteRecurrence, densit
                         <div className="flex items-center justify-between w-full sm:w-auto gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 dark:border-slate-700">
                             <div className="text-right">
                                 <p className={`text-lg font-black ${group.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                    {group.totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    {formatBRL(group.totalAmount)}
                                 </p>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Valor Total</p>
                             </div>

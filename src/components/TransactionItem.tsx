@@ -1,5 +1,6 @@
 import { Clock, Check, CheckCircle2, Repeat, Edit, Copy, Trash2 } from 'lucide-react';
 import { STATUSES, DENSITY_CLASSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 import { motion } from 'motion/react';
 
 export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
@@ -79,7 +80,7 @@ export const TransactionItem = ({ transaction, onEdit, onDelete, onStatusChange,
             
             <div className="flex items-center justify-between sm:justify-end gap-2">
                 <p className={`font-black text-right sm:mr-4 ${textSize} ${type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                    {type === 'income' ? '+' : '-'} {amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    {type === 'income' ? '+' : '-'} {formatBRL(amount)}
                 </p>
                 
                 <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200">

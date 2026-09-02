@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { DENSITY_CLASSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 
 export const BudgetStatus = ({ budgets, monthlyExpenses, categories, density }: any) => {
     const spacingClass = DENSITY_CLASSES.spacing[density as keyof typeof DENSITY_CLASSES.spacing] || 'space-y-5';
@@ -27,9 +28,9 @@ export const BudgetStatus = ({ budgets, monthlyExpenses, categories, density }: 
                     <div className="flex justify-between items-center text-sm mb-2">
                         <span className="font-bold text-slate-700 dark:text-slate-200">{item.category}</span>
                         <span className="text-slate-500 dark:text-slate-400 font-medium">
-                            {item.spent.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})} 
-                            <span className="mx-1 text-slate-300 dark:text-slate-600">/</span> 
-                            {item.budget.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}
+                            {formatBRL(item.spent)}
+                            <span className="mx-1 text-slate-300 dark:text-slate-600">/</span>
+                            {formatBRL(item.budget)}
                         </span>
                     </div>
                     <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">

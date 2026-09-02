@@ -7,6 +7,7 @@ import {
 import { AuthForm } from './AuthForm';
 import { DeveloperFooter } from './DeveloperFooter';
 import { YOUR_CONTACT_EMAIL } from '../constants';
+import { formatBRL } from '../utils/currency';
 import { motion, AnimatePresence } from 'motion/react';
 
 const MOCK_BARS = [38, 52, 44, 68, 58, 80, 64];
@@ -351,7 +352,7 @@ export const LandingPage = ({ onLogin, onRegister, onDemo, onForgotPassword, onG
                     >
                         <span className="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-black uppercase tracking-widest mb-6">Acesso Vitalício</span>
                         <p className="text-6xl font-display font-bold text-white mb-2">
-                            R$ {Number(config.defaultPrice ?? 9.99).toFixed(2).replace('.', ',')}
+                            {formatBRL(config.defaultPrice ?? 9.99)}
                         </p>
                         <p className="text-slate-400 font-medium mb-8">pagamento único via Pix</p>
                         <ul className="text-left space-y-4 mb-10">

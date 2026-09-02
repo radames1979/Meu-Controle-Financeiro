@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, PlusCircle, Trash2 } from 'lucide-react';
 import { ACCOUNT_TYPES } from '../constants';
+import { CurrencyInput } from './CurrencyInput';
 
 export const BatchTransactionModal = ({ onClose, onSaveBatch, categories }: any) => {
     const [baseData, setBaseData] = useState({ type: 'expense', description: '', category: categories.expense[0], account: ACCOUNT_TYPES[0] });
@@ -15,7 +16,7 @@ export const BatchTransactionModal = ({ onClose, onSaveBatch, categories }: any)
         setBaseData(newData);
     };
 
-    const handleEntryChange = (id: string, field: string, value: string) => {
+    const handleEntryChange = (id: string, field: string, value: string | number) => {
         setEntries(entries.map(entry => entry.id === id ? { ...entry, [field]: value } : entry));
     };
 
@@ -97,7 +98,7 @@ export const BatchTransactionModal = ({ onClose, onSaveBatch, categories }: any)
                                         <input type="month" value={entry.monthYear} onChange={e => handleEntryChange(entry.id, 'monthYear', e.target.value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2 text-sm" required />
                                     </div>
                                     <div className="flex-1">
-                                        <input type="number" value={entry.amount} onChange={e => handleEntryChange(entry.id, 'amount', e.target.value)} step="0.01" min="0.01" placeholder="Valor (R$)" className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2 text-sm" required />
+                                        <CurrencyInput value={entry.amount} onChange={value => handleEntryChange(entry.id, 'amount', value)} className="block w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:text-slate-200 p-2 text-sm" required />
                                     </div>
                                     <button type="button" onClick={() => handleRemoveEntry(entry.id)} className="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-2 rounded-xl transition disabled:opacity-30" disabled={entries.length <= 1}>
                                         <Trash2 size={18} />

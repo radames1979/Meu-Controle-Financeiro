@@ -3,6 +3,8 @@ import { ShieldCheck, X, Trash2, Plus, Tags } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { auth, db, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc } from '../services/firebase';
 import { APP_CONFIG } from '../constants';
+import { CurrencyInput } from './CurrencyInput';
+import { formatBRL } from '../utils/currency';
 
 export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
     const [users, setUsers] = useState<any[]>([]);
@@ -192,7 +194,7 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                                 </div>
                                 <div className="bg-cyan-50 dark:bg-cyan-500/10 p-6 rounded-2xl border border-cyan-100 dark:border-cyan-500/20">
                                     <p className="text-cyan-600 dark:text-cyan-400 text-xs uppercase font-bold mb-1">Receita Potencial</p>
-                                    <p className="text-3xl font-black text-cyan-700 dark:text-cyan-300">R$ {(appStats.activeLicenses * config.defaultPrice).toFixed(2)}</p>
+                                    <p className="text-3xl font-black text-cyan-700 dark:text-cyan-300">{formatBRL(appStats.activeLicenses * config.defaultPrice)}</p>
                                 </div>
                             </div>
 
@@ -296,11 +298,9 @@ export const AdminPanel = ({ onClose }: { onClose: () => void }) => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Preço da Licença (R$)</label>
-                                    <input 
-                                        type="number" 
-                                        step="0.01"
-                                        value={config.defaultPrice} 
-                                        onChange={e => setConfig({ ...config, defaultPrice: parseFloat(e.target.value) })}
+                                    <CurrencyInput
+                                        value={config.defaultPrice}
+                                        onChange={value => setConfig({ ...config, defaultPrice: value })}
                                         className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200"
                                     />
                                 </div>

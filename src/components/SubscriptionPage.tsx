@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DollarSign, LogOut, Star, Copy, CheckCircle, Check, QrCode, Loader2, CreditCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { formatBRL } from '../utils/currency';
 
 interface PixCharge {
     paymentId: string;
@@ -64,7 +65,7 @@ export const SubscriptionPage = ({ user, onLogout, config }: { user: any, onLogo
 
                     <div className="mt-8 bg-cyan-50 dark:bg-cyan-500/10 border-2 border-cyan-500 rounded-2xl p-6">
                         <h3 className="text-xl font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider text-sm">Acesso Vitalício</h3>
-                        <p className="text-5xl font-extrabold text-slate-800 dark:text-slate-100 my-4">R$ {config.defaultPrice.toFixed(2).replace('.', ',')}</p>
+                        <p className="text-5xl font-extrabold text-slate-800 dark:text-slate-100 my-4">{formatBRL(config.defaultPrice)}</p>
 
                         {charge ? (
                             <div className="flex flex-col items-center gap-4">

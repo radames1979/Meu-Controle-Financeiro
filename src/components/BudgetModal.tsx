@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { Sparkles, HelpCircle } from 'lucide-react';
+import { CurrencyInput } from './CurrencyInput';
+import { formatBRL } from '../utils/currency';
 
 export const BudgetModal = ({ onClose, onSave, currentBudgets, categories, monthlyExpenses = {}, currentDate = new Date() }: any) => {
     const [budgets, setBudgets] = useState(currentBudgets);
 
-    const handleBudgetChange = (category: string, value: string) => {
-        const parsedValue = parseFloat(value);
-        setBudgets((prev: any) => ({ 
-            ...prev, 
-            [category]: isNaN(parsedValue) ? 0 : parsedValue 
-        }));
+    const handleBudgetChange = (category: string, value: number) => {
+        setBudgets((prev: any) => ({ ...prev, [category]: value }));
     };
 
     // Calculate real-time totals
@@ -43,7 +41,7 @@ export const BudgetModal = ({ onClose, onSave, currentBudgets, categories, month
                             Soma dos Orçamentos
                         </span>
                         <div className="text-lg font-extrabold text-cyan-600 dark:text-cyan-400">
-                            {totalBudgets.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            {formatBRL(totalBudgets)}
                         </div>
                     </div>
                     <div>
@@ -51,7 +49,7 @@ export const BudgetModal = ({ onClose, onSave, currentBudgets, categories, month
                             Total Gasto Lançado ({capitalizedMonth})
                         </span>
                         <div className="text-lg font-extrabold text-slate-700 dark:text-slate-200">
-                            {totalSpent.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            {formatBRL(totalSpent)}
                         </div>
                     </div>
                 </div>
@@ -67,27 +65,21 @@ export const BudgetModal = ({ onClose, onSave, currentBudgets, categories, month
                                         {category}
                                     </label>
                                     <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                                        Lançado: <strong className="text-slate-600 dark:text-slate-300 font-semibold">{spent.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>
+                                        Lançado: <strong className="text-slate-600 dark:text-slate-300 font-semibold">{formatBRL(spent)}</strong>
                                     </span>
                                 </div>
                                 <div className="relative flex items-center gap-2">
                                     <div className="relative flex-grow">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm font-semibold">
-                                            R$
-                                        </span>
-                                        <input 
-                                            type="number" 
-                                            step="0.01" 
-                                            placeholder="0,00"
-                                            value={budgets[category] || ''} 
-                                            onChange={(e) => handleBudgetChange(category, e.target.value)} 
-                                            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all" 
+                                        <CurrencyInput
+                                            value={budgets[category] || 0}
+                                            onChange={(value) => handleBudgetChange(category, value)}
+                                            className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:ring-cyan-500 focus:border-cyan-500 dark:text-slate-200 shadow-sm transition-all"
                                         />
                                     </div>
                                     {spent > 0 && (
-                                        <button 
+                                        <button
                                             type="button"
-                                            onClick={() => handleBudgetChange(category, spent.toFixed(2))} 
+                                            onClick={() => handleBudgetChange(category, spent)}
                                             className="px-2 py-1.5 text-[11px] font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 hover:bg-cyan-100 dark:hover:bg-cyan-950/80 rounded-lg transition-all border border-cyan-100 dark:border-cyan-900/50 flex items-center gap-1 shrink-0"
                                             title="Usar o valor total lançado neste mês para esta categoria"
                                         >

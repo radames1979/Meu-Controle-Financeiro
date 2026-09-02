@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, X, TrendingUp, TrendingDown } from 'lucide-react';
 import { TransactionList } from './TransactionList';
 import { DENSITY_CLASSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 
 export const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChange, onRepeat, density }: any) => {
     const { incomeTotals, expenseTotals, grandTotalIncome, grandTotalExpense, monthlyTransactions } = data;
@@ -52,22 +53,22 @@ export const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChang
                             <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-800 z-10`}>Receitas</td>
                             {incomeTotals.map((total: any, i: number) => (
                                 <td key={i} className={`${cellPadding} text-right text-green-600 dark:text-green-400 ${expandedMonth === i ? 'bg-cyan-50/30 dark:bg-cyan-500/5' : ''}`}>
-                                    {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    {formatBRL(total)}
                                 </td>
                             ))}
                             <td className={`${cellPadding} text-right font-bold text-green-700 dark:text-green-500`}>
-                                {grandTotalIncome.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                {formatBRL(grandTotalIncome)}
                             </td>
                         </tr>
                         <tr>
                             <td className={`${cellPadding} whitespace-nowrap font-medium text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-800 z-10`}>Despesas</td>
                             {expenseTotals.map((total: any, i: number) => (
                                 <td key={i} className={`${cellPadding} text-right text-red-600 dark:text-red-400 ${expandedMonth === i ? 'bg-cyan-50/30 dark:bg-cyan-500/5' : ''}`}>
-                                    {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    {formatBRL(total)}
                                 </td>
                             ))}
                             <td className={`${cellPadding} text-right font-bold text-red-700 dark:text-red-500`}>
-                                {grandTotalExpense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                {formatBRL(grandTotalExpense)}
                             </td>
                         </tr>
                     </tbody>
@@ -78,12 +79,12 @@ export const AnnualBalanceTable = ({ data, year, onEdit, onDelete, onStatusChang
                                 const balance = inc - expenseTotals[i]; 
                                 return (
                                     <td key={i} className={`${cellPadding} text-right font-bold ${expandedMonth === i ? 'bg-cyan-50/50 dark:bg-cyan-500/10' : ''} ${balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                                        {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        {formatBRL(balance)}
                                     </td>
                                 ); 
                             })}
                             <td className={`${cellPadding} text-right font-bold ${(grandTotalIncome - grandTotalExpense) >= 0 ? 'text-blue-700 dark:text-blue-500' : 'text-orange-700 dark:text-orange-500'}`}>
-                                {(grandTotalIncome - grandTotalExpense).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                {formatBRL(grandTotalIncome - grandTotalExpense)}
                             </td>
                         </tr>
                     </tfoot>

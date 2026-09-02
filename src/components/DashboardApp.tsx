@@ -20,6 +20,7 @@ import { BottomNav } from './BottomNav';
 import { LazyWidget, SkeletonBlock } from './LazyWidget';
 import { DeveloperFooter } from './DeveloperFooter';
 import { STATUSES, DENSITY_CLASSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 import { registerFCMToken } from '../services/fcm';
 
 // Lazy Loaded Components
@@ -425,7 +426,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
             t.type === 'income' ? 'Receita' : 'Despesa',
             t.description,
             t.category,
-            t.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+            formatBRL(t.amount),
             t.status || '-'
         ]);
 
@@ -470,7 +471,7 @@ export const DashboardApp = ({ user, db, onLogout, userProfile, onUpdateProfile,
                 const title = daysLeft === 0 ? 'Conta vence HOJE!' : `Conta vence em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}`;
                 
                 new Notification(title, {
-                    body: `${bill.description}: ${bill.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+                    body: `${bill.description}: ${formatBRL(bill.amount)}`,
                     icon: '/favicon.ico'
                 });
             }

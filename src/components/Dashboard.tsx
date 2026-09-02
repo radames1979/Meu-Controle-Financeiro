@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TrendingUp, TrendingDown, CheckCircle, Clock, AlertCircle, PiggyBank, Shield, Eye, EyeOff } from 'lucide-react';
 import { DENSITY_CLASSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 
 export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) => {
     const { income, balance, paid, confirmed, waiting, expense } = stats;
@@ -47,7 +48,7 @@ export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) 
         return (
             <span 
                 className={`inline-flex items-center gap-0.5 text-[10px] tracking-tight font-bold ${textColor}`}
-                title={`Mês anterior: ${previous.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`}
+                title={`Mês anterior: ${formatBRL(previous)}`}
             >
                 <ArrowIcon size={11} className="shrink-0" />
                 <span>{sign}{pct.toFixed(0)}%</span>
@@ -75,7 +76,7 @@ export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) 
                             <h2 className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-widest mb-2">Balanço Total do Mês</h2>
                             <div className="flex items-center gap-3 flex-wrap overflow-hidden">
                                 <span className={`text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter truncate transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
-                                    {balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    {formatBRL(balance)}
                                 </span>
                                 {prevMonthStats && (
                                     <div className="bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 rounded-full inline-flex items-center shrink-0 border border-slate-200/50 dark:border-slate-700/50">
@@ -107,7 +108,7 @@ export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) 
                                         {prevMonthStats && getTrendIndicator(income, prevMonthStats.income)}
                                     </div>
                                     <p className={`text-lg font-black text-emerald-700 dark:text-emerald-400 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
-                                        {income.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        {formatBRL(income)}
                                     </p>
                                 </div>
                                 <div className="flex-1 sm:flex-none bg-rose-500/10 px-4 py-2 rounded-2xl border border-rose-500/20">
@@ -116,7 +117,7 @@ export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) 
                                         {prevMonthStats && getTrendIndicator(expense, prevMonthStats.expense, true)}
                                     </div>
                                     <p className={`text-lg font-black text-rose-700 dark:text-rose-400 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>
-                                        {expense.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        {formatBRL(expense)}
                                     </p>
                                 </div>
                             </div>
@@ -155,7 +156,7 @@ export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) 
                     </div>
                     <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Pago / Recebido</p>
-                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{formatBRL(paid)}</p>
                     </div>
                 </div>
 
@@ -165,7 +166,7 @@ export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) 
                     </div>
                     <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Confirmado</p>
-                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{confirmed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{formatBRL(confirmed)}</p>
                     </div>
                 </div>
 
@@ -175,7 +176,7 @@ export const Dashboard = ({ stats, prevMonthStats, density, userProfile }: any) 
                     </div>
                     <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Aguardando</p>
-                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{waiting.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                        <p className={`text-lg font-black text-slate-700 dark:text-slate-200 transition-all duration-200 ${hideValues ? 'blur-md select-none pointer-events-none' : ''}`}>{formatBRL(waiting)}</p>
                     </div>
                 </div>
             </div>

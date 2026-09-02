@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Scale, ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { STATUSES } from '../constants';
+import { formatBRL } from '../utils/currency';
 
 interface AnnualComparisonCardProps {
     data: {
@@ -285,7 +286,7 @@ export const AnnualComparisonCard = ({ data, year, density, onEdit, onDrillDown 
                                                 >
                                                     {data ? (
                                                         <span className={`px-2 py-1 rounded-md ${getStatusColorClass(data.status, data.type)} ${getStatusBgClass(data.status, data.type)}`}>
-                                                            {data.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                                            {formatBRL(data.amount)}
                                                         </span>
                                                     ) : (
                                                         <span className="text-slate-300 dark:text-slate-700">-</span>
@@ -349,7 +350,7 @@ export const AnnualComparisonCard = ({ data, year, density, onEdit, onDrillDown 
                                                 >
                                                     {data ? (
                                                         <span className={`px-2 py-1 rounded-md ${getStatusColorClass(data.status, data.type)} ${getStatusBgClass(data.status, data.type)}`}>
-                                                            {data.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                                            {formatBRL(data.amount)}
                                                         </span>
                                                     ) : (
                                                         <span className="text-slate-300 dark:text-slate-700">-</span>
